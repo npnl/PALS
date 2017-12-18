@@ -77,19 +77,21 @@ for SUBJ in $SUBJECTS; do
 		
 	if [ "$RunWM" == 1 ]; then
 		
-		# perform WM segmentation 
+		# perform WM/CSF segmentation 
 		fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}" "${BET_Brain}";
 		WM_MASK="${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_seg_2.nii.gz;
+		CSF_MASK="${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_seg_0.nii.gz;
 		fsleyes render --hideCursor -of "$WORKINGDIR"/QC_WM/"${SUBJ}"_WM.png "$ANATOMICAL" "$WM_MASK" -cm blue -a 50;
 		
 	else
 		
 		WM_MASK=$(ls ./*"${WM_ID}"*.nii*);
+		CSF_MASK=$(ls ./*"${CSF_ID}"*.nii*);
 	fi
 	
 	fslmaths "${SUBJ}"*"${LESION_MASK}".nii* -bin "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin;	
 	
-	
+	#remove lesioned area from white matter mask
 	if $(fslmaths "${WM_MASK}" -sub "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin.nii.gz "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM); then
 		:
 	else
@@ -109,7 +111,12 @@ for SUBJ in $SUBJECTS; do
 	# multiply WM mask by intensity normalized T1
 	fslmaths "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_"${ANATOMICAL_ID}"_int_scaled -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
 	
+	# multiply CSF mask by intensity normalized T1
+	fslmaths "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_"${ANATOMICAL_ID}"_int_scaled -mul "${CSF_MASK}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeCSF;
+	
+	
 	WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -M);
+	CSF_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeCSF -M);
 
 	# updating number of max lesions	
 	NumLesionFiles=$(find -d "${SUBJ}"*"${LESION_MASK}"*.nii* | wc -l);
@@ -144,6 +151,7 @@ for SUBJ in $SUBJECTS; do
 		OrigLesionVol=$(fslstats "$Lesion" -V | awk '{print $2;}');
 		
 		CorrLesionVol=$( wmCorrection );
+		csfCorrLesionVol=$( csfCorrection );
 		
 		VolRemoved=$(awk "BEGIN {printf \"%.9f\",${OrigLesionVol}-${CorrLesionVol}}");
 		

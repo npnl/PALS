@@ -31,6 +31,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 source "$DIR"/setup.sh;
 source "$DIR"/wmCorrection.sh;
+source "$DIR"/csfCorrection.sh;
 source "$DIR"/makeQCPage.sh;
 source "$DIR"/intnormalizeT1.sh;
 
@@ -89,10 +90,12 @@ for SUBJ in $SUBJECTS; do
 		CSF_MASK=$(ls ./*"${CSF_ID}"*.nii*);
 	fi
 	
-	fslmaths "${SUBJ}"*"${LESION_MASK}".nii* -bin "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin;	
 	
+	fslmaths "$INPUTDIR"/"${SUBJ}"/"${SUBJ}"*"${LESION_MASK}".nii* -bin "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin &>/dev/null;	
+	
+
 	#remove lesioned area from white matter mask
-	if $(fslmaths "${WM_MASK}" -sub "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin.nii.gz "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM); then
+	if $(fslmaths "${WM_MASK}" -sub "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_LesionMask1_bin.nii.gz "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM &>/dev/null); then
 		:
 	else
 		echo "

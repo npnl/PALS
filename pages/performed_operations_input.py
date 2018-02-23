@@ -53,38 +53,31 @@ class PerformedOperationsInputPage(tk.Frame):
 		print_btn.grid(row=7, column=1, columnspan=2)
 
 	def setEntryState(self, entry, flag):
-		# entry.set('')
 		if entry['state'] == 'disabled':
 			entry.config(state='normal')
-			flag.set(True)
+			flag.set(False)
 		else:
 			entry.config(state='disabled')
-			flag.set(False)
+			flag.set(True)
 
 	def setStatus(self, message):
 		self.status.set(message)
 
 	def moveToNextPage(self):
-		if self.controller.run_bet.get():
+		if not self.controller.run_bet.get():
 			if not self.controller.sv_bet_id.get().strip():
 				self.setStatus("Please specify skull stripped brain identifier")
 				return
-		if self.controller.run_wm.get():
+		if not self.controller.run_wm.get():
 			if not self.controller.sv_wm_id.get().strip():
 				self.setStatus("Please specify identifier for white matter mask")
 				return
-		print "Moving to next page"
+		self.setStatus('')
 		self.controller.show_frame(self.frame_number+1)
-		# input_dir = controller.sv_input_dir.get()
-		# if not input_dir.strip():
-		# 	self.status.set("Please select an input dir")
 
 	def moveToPrevPage(self):
 		print "Moving to prev page"
 		self.controller.show_frame(self.frame_number-1)
-		# input_dir = controller.sv_input_dir.get()
-		# if not input_dir.strip():
-		# 	self.status.set("Please select an input dir")
 
 	def checkValues(self, controller):
 		print controller.run_bet.get()

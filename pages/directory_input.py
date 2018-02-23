@@ -8,6 +8,7 @@ except ImportError:
 import tkFileDialog
 import os
 
+from utils.paths import isValidPath
 
 class DirectoryInputPage(tk.Frame):
 	def __init__(self, parent, controller, frame_number):
@@ -24,7 +25,7 @@ class DirectoryInputPage(tk.Frame):
 		en_output_dir = Entry(self, textvariable=controller.sv_output_dir)
 		en_output_dir.grid(row=1, column=1)
 
-		Label(self, text="3. Is your data(T1 and Lesion masks) in registered to stereotaxic space ?").grid(row=2, sticky=W)
+		Label(self, text="3. Is your data(T1 and Lesion masks) in registered to stereotaxic space ?").grid(row=2, padx=(0, 40),sticky=W)
 		chk_run_normalize = tk.Checkbutton(self, variable=controller.run_normalize_status)
 		chk_run_normalize.grid(row=2, column=1, sticky=W)
 
@@ -57,10 +58,13 @@ class DirectoryInputPage(tk.Frame):
 		output_dir = controller.sv_output_dir.get()
 		anatomical_id = controller.sv_anatomical_id.get()
 		lesion_mask = controller.sv_lesion_mask.get()
-		if not input_dir.strip() or not output_dir.strip() or not anatomical_id.strip() or not lesion_mask.strip():
-			self.status.set("Please provide input in all the above fields")
+		if not isValidPath(input_dir.strip())\
+			 or not isValidPath(output_dir.strip())\
+			 or not anatomical_id.strip() or not lesion_mask.strip():
+			self.status.set("Please provide correct input in all the above fields")
 		else:
 			controller.show_frame(self.frame_number + 1)
+			self.status.set('')
 
 	def chooseDir(self, parent, controller, place_holder):
 		current_dir = os.getcwd()

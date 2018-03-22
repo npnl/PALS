@@ -8,42 +8,41 @@ except ImportError:
 import tkFileDialog
 import os
 
+from base_input import BaseInputPage
 
-class PauseOptionsInputPage(tk.Frame):
+class PauseOptionsInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
-		tk.Frame.__init__(self, parent)
-		self.bind("<<ShowFrame>>", self.onShowFrame)
-
-		self.controller = controller
-
-		self.status = StringVar(self)
-		self.frame_number = frame_number
-
-		Label(self, text='', textvariable=self.status, font=("Helvetica", 23)).grid(row=0, columnspan=2, sticky=W+E+N+S)
+		BaseInputPage.__init__(self, parent, controller, frame_number)
 
 		Label(self, text="1. Continue after brain extraction and/or segmentation without any pause").grid(row=1, sticky=W)
 		self.chk_no_pause = tk.Checkbutton(self, variable=self.controller.no_pause)
 		self.chk_no_pause.grid(row=1, column=1)
 		
+		# btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
+		# btn_prev.grid(row=3, column=0)
 
-		btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
-		btn_prev.grid(row=2, column=0)
+		# btn_next2 = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
+		# btn_next2.grid(row=3, column=1)
 
-		btn_next2 = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
-		btn_next2.grid(row=2, column=1)
-
-		print_btn = tk.Button(self, text='Print values', command=lambda : self.checkValues(controller))
-		print_btn.grid(row=3, column=1, padx=2)
+		# print_btn = tk.Button(self, text='Print values', command=lambda : self.checkValues(controller))
+		# print_btn.grid(row=3, column=1, padx=2)
 
 	def onShowFrame(self, event):
-		self.getFrameMessage()
+		super(PauseOptionsInputPage, self).onShowFrame(event)
+		self.prepareStatusMessage()
 
-	def getFrameMessage(self):
+	# def setFrameTitle(self):
+	# 	self.title.set('Page Title')
+
+	# def setStatusMessage(self, message):
+	# 	self.status.set(message)
+
+	def prepareStatusMessage(self):
 		if self.controller.run_bet.get() == True and self.controller.run_wm.get() == True:
-			self.status.set('SRQL will run brain extraction and white matter segmentation')
+			self.setStatusMessage('SRQL will run brain extraction and white matter segmentation')
 			self.setCheckBoxState(True)
 		else:
-			self.status.set('No input needed')
+			self.setStatusMessage('No input needed')
 			self.setCheckBoxState(False)
 
 	def setCheckBoxState(self, state):
@@ -52,23 +51,9 @@ class PauseOptionsInputPage(tk.Frame):
 		else:
 			self.chk_no_pause.config(state='disabled')
 
-	def moveToNextPage(self):
-		print "Moving to next page"
-		self.controller.show_frame(self.frame_number+1)
-		# input_dir = controller.sv_input_dir.get()
-		# if not input_dir.strip():
-		# 	self.status.set("Please select an input dir")
-
-	def moveToPrevPage(self):
-		print "Moving to prev page"
-		self.controller.show_frame(self.frame_number-1)
-		# input_dir = controller.sv_input_dir.get()
-		# if not input_dir.strip():
-		# 	self.status.set("Please select an input dir")
-
-	def checkValues(self, controller):
-		print controller.run_bet.get()
-		print controller.run_wm.get()
-		print controller.no_pause.get()
+	# def checkValues(self, controller):
+	# 	print controller.run_bet.get()
+	# 	print controller.run_wm.get()
+	# 	print controller.no_pause.get()
 
 

@@ -8,8 +8,12 @@ except ImportError:
 import tkFileDialog
 import os
 
+from threading import Thread
+import subprocess
+
 from utils.paths import isValidPath
 from base_input import BaseInputPage
+from executor import Worker
 
 class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -49,9 +53,14 @@ class WelcomePage(BaseInputPage, object):
 		chk_run_load_calculation = tk.Checkbutton(self, variable=controller.run_load_calculation)
 		chk_run_load_calculation.grid(row=7, column=1, sticky=W)
 
+		btn_cal = tk.Button(self, text='Calculate', command=lambda : self.executeCommand())
+		btn_cal.grid(row=23, column=1, padx=2)
 
-		# print_btn = tk.Button(self, text='Print values', command=lambda : self.checkValues(controller))
-		# print_btn.grid(row=6, column=1, padx=2)
+		btn_stop = tk.Button(self, text='Stop', command=lambda : self.stopCommand())
+		btn_stop.grid(row=24, column=1, padx=2)
+
+		self.output = tk.Text(self, height=15, width=90)
+		self.output.grid(row=25, column=1)
 
 	def setFrameTitle(self):
 		self.title.set('Welcome')
@@ -80,3 +89,11 @@ class WelcomePage(BaseInputPage, object):
 		print controller.sv_input_dir.get()
 		print controller.sv_output_dir.get()
 		print controller.run_normalize_status.get()
+
+	def executeCommand(self):
+		self.worker = Worker()
+		self.thread_name = self.worker.execute('python testScript.py', self.output, self)
+		print self.thread_name
+
+	def stopCommand(self):
+		self.worker.stop(self.thread_name)

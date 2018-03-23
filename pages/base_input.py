@@ -63,3 +63,6 @@ class BaseInputPage(tk.Frame):
 		print controller.sv_output_dir.get()
 		print controller.run_normalize_status.get()
 
+	
+
+

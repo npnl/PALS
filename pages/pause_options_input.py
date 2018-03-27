@@ -31,8 +31,8 @@ class PauseOptionsInputPage(BaseInputPage, object):
 		super(PauseOptionsInputPage, self).onShowFrame(event)
 		self.prepareStatusMessage()
 
-	# def setFrameTitle(self):
-	# 	self.title.set('Page Title')
+	def setFrameTitle(self):
+		self.title.set('Page Title')
 
 	# def setStatusMessage(self, message):
 	# 	self.status.set(message)

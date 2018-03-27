@@ -6,6 +6,7 @@ except ImportError:
 	from tkinter import *
 
 import os
+import tkFileDialog
 
 class BaseInputPage(tk.Frame):
 	def __init__(self, parent, controller, frame_number):
@@ -17,22 +18,21 @@ class BaseInputPage(tk.Frame):
 		self.frame_number = frame_number
 		self.controller = controller
 		self.parent = parent
+		self.starting_row = 2
 
 		self.empty_status = ' '*80
 
-		Label(self, text='', textvariable=self.title, font=("Helvetica", 23)).grid(row=0, columnspan=2, sticky=W+E+N+S)
+		Label(self, text='', textvariable=self.title, font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=20, sticky=W+E+N+S)
 
 		last_row = 1000
-		Label(self, text='', textvariable=self.status, fg="red").grid(row=last_row, padx=2)
+		Label(self, text='', textvariable=self.status, fg="red").grid(row=last_row, column=0, columnspan=100, sticky='nwes',)
 
 		btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
-		btn_prev.grid(row=last_row+1, column=0)
+		btn_prev.grid(row=last_row+1, column=0, columnspan=50)
 
 		btn_next = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
-		btn_next.grid(row=last_row+1, column=1, padx=2)
+		btn_next.grid(row=last_row+1, column=51, columnspan=50)
 
-		# print_btn = tk.Button(self, text='Print values', command=lambda : self.checkValues(controller))
-		# print_btn.grid(row=6, column=1, padx=2)
 
 		self.setFrameTitle()
 		self.setStatusMessage(self.empty_status)
@@ -47,8 +47,10 @@ class BaseInputPage(tk.Frame):
 	def setStatusMessage(self, message):
 		self.status.set(message)
 
-	def setRequiredInputError(self):
-		self.setStatusMessage('Please provide correct input in all the above fields')
+	def setRequiredInputError(self, error_msg=None):
+		if error_msg == None:
+			error_msg = 'Please provide correct input in all the above fields'
+		self.setStatusMessage(error_msg)
 
 	def moveToNextPage(self):
 		self.controller.show_frame(self.frame_number + 1)
@@ -57,6 +59,18 @@ class BaseInputPage(tk.Frame):
 	def moveToPrevPage(self):
 		self.controller.show_frame(self.frame_number-1)
 		self.setStatusMessage(self.empty_status)
+
+	def chooseDir(self, parent, controller, place_holder, message):
+		current_dir = os.getcwd()
+		parent.update()
+		chosen_dir =  tkFileDialog.askdirectory(parent=self, initialdir = current_dir, title='Select the location of ' + message)
+		place_holder.set(chosen_dir)
+
+	def setEntryState(self, entry, flag):
+		if flag.get():
+			entry.config(state='normal')
+		else:
+			entry.config(state='disabled')
 
 	def checkValues(self, controller):
 		print controller.sv_input_dir.get()

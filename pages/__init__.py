@@ -3,4 +3,4 @@ from directory_input import DirectoryInputPage
 from performed_operations_input import PerformedOperationsInputPage
 from pause_options_input import PauseOptionsInputPage
 from quality_control_input import QualityControlInputPage
-from dummy_input import DummyInputPage
+from white_matter_input import WhiteMatterInputPage

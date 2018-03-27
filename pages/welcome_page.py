@@ -19,64 +19,66 @@ class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
-		Label(self, text="1. White Matter Correction").grid(row=1, sticky=W)
+		lb_main = Label(self, text="Please check which modules you would like to perform", font='Helvetica 14 bold')
+		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky=W)
 
-		button1 = tk.Button(self, text='Select', command=lambda : self.chooseDir(self, controller, controller.sv_input_dir))
-		button1.grid(row=1, column=2)
+		lb_radiological_convention = Label(self, text="1. Reorient to Radiological convention)", padx=20)
+		lb_radiological_convention.grid(row=self.starting_row+1, column=0, columnspan=96, sticky="W", pady=(3, 15))
 
-		en_input_dir = Entry(self, textvariable=controller.sv_input_dir)
-		en_input_dir.grid(row=1, column=1)
+		chk_radiological_convention = Checkbutton(self, variable=controller.b_radiological_convention)
+		chk_radiological_convention.grid(row=self.starting_row+1, column=97, sticky='W', pady=(3, 15))
+
+
+		lf_operations = LabelFrame(self, text='Operations', padx=15, font='Helvetica 14 bold')
+		lf_operations.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='W', padx=5, pady=5, ipadx=5, ipady=5)
+		lf_operations.grid_rowconfigure(0, weight=1)
+		lf_operations.grid_columnconfigure(0, weight=1)
+
+
+		lb_wm_correction = Label(lf_operations, text="2. White Matter Intensity Correction")
+		lb_wm_correction.grid(row=0, column=0, sticky="W", pady=3)
+
+		chk_wm_correction = Checkbutton(lf_operations, variable=controller.b_wm_correction)
+		chk_wm_correction.grid(row=0, column=1, sticky='W', pady=3)
+
+
+		lb_lesion_load = Label(lf_operations, text="3. Lesion Load Calculation")
+		lb_lesion_load.grid(row=1, column=0,  sticky="W", pady=(3, 10))
+
+		chk_ll_calculation = Checkbutton(lf_operations, variable=controller.b_ll_correction)
+		chk_ll_calculation.grid(row=1, column=1, sticky='W', pady=(3, 10))
+
 
 		
-		Label(self, text="2. Lesion Load Calculation").grid(row=2, sticky=W)
+
+		lb_opt_sout = Label(lf_operations, text="SRQL will pause to allow for visual QC after each processing step. Uncheck to opt out of pausing.", padx=10)
+		lb_opt_sout.grid(row=2, column=0, sticky="W", pady=(20, 10))
 		
-		button2 = tk.Button(self, text='Select', command=lambda : self.chooseDir(self, controller, controller.sv_output_dir))
-		button2.grid(row=2, column=2)
-
-		en_output_dir = Entry(self, textvariable=controller.sv_output_dir)
-		en_output_dir.grid(row=2, column=1)
-
-		Label(self, text="3. Only Do Quality Check").grid(row=4, sticky=W)
-		en_anatomical_id = Entry(self, textvariable=controller.sv_anatomical_id)
-		en_anatomical_id.grid(row=4, column=1)
+		chk_out_out = Checkbutton(lf_operations, variable=controller.b_visual_qc)
+		chk_out_out.grid(row=2, column=1, sticky='W', pady=(20, 10))
 
 
-		Label(self, text="4. Lesion Mask Identifier/Wildcard").grid(row=5, sticky=W)
-		en_lesion_mask = Entry(self, textvariable=controller.sv_lesion_mask)
-		en_lesion_mask.grid(row=5, column=1)
 
-		Label(self, text="5. Run WM Correction").grid(row=6, padx=(0, 40),sticky=W)
-		chk_run_wm_correction = tk.Checkbutton(self, variable=controller.run_wm_correction)
-		chk_run_wm_correction.grid(row=6, column=1, sticky=W)
+		lb_visual_qc = Label(self, text="4. Perform visual Quality Control")
+		lb_visual_qc.grid(row=self.starting_row+3, column=0, columnspan=96, sticky="W", padx=20, pady=(20, 10))
+		
+		chk_visual_qc = Checkbutton(self, variable=controller.b_quality_control)
+		chk_visual_qc.grid(row=self.starting_row+3, column=97, sticky='W', pady=(20, 10))
 
-		Label(self, text="6. Run Lesion Load Calculation").grid(row=7, padx=(0, 40),sticky=W)
-		chk_run_load_calculation = tk.Checkbutton(self, variable=controller.run_load_calculation)
-		chk_run_load_calculation.grid(row=7, column=1, sticky=W)
-
-		btn_cal = tk.Button(self, text='Calculate', command=lambda : self.executeCommand())
-		btn_cal.grid(row=23, column=1, padx=2)
-
-		btn_stop = tk.Button(self, text='Stop', command=lambda : self.stopCommand())
-		btn_stop.grid(row=24, column=1, padx=2)
-
-		self.output = tk.Text(self, height=15, width=90)
-		self.output.grid(row=25, column=1)
 
 	def setFrameTitle(self):
-		self.title.set('Welcome')
+		self.title.set('Welcome to SRQL')
 
 
 	def moveToNextPage(self):
-		input_dir = self.controller.sv_input_dir.get()
-		output_dir = self.controller.sv_output_dir.get()
-		anatomical_id = self.controller.sv_anatomical_id.get()
-		lesion_mask = self.controller.sv_lesion_mask.get()
-		if not isValidPath(input_dir.strip())\
-			 or not isValidPath(output_dir.strip())\
-			 or not anatomical_id.strip() or not lesion_mask.strip():
-			self.setRequiredInputError()
-		else:
+		if self.controller.b_radiological_convention.get() \
+			or self.controller.b_wm_correction.get() \
+			or self.controller.b_ll_correction.get() \
+			or self.controller.b_quality_control.get():
 			super(WelcomePage, self).moveToNextPage()
+		else:
+			self.setRequiredInputError('Select atleast one operation')
+
 
 	def chooseDir(self, parent, controller, place_holder):
 		current_dir = os.getcwd()

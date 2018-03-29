@@ -1,5 +1,5 @@
-# Pipeline for Analyzing Lesions after Stroke (PALS)#
-======
+# Pipeline for Analyzing Lesions after Stroke (PALS) #
+
 
 Welcome to our github page!
 

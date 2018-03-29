@@ -12,6 +12,6 @@ function intnormalizeT1 {
 	scaling=`echo "scale=5; 255.0 / ( $max - $min )" | bc`;
 
 	fslmaths $1 -sub $min -mul $scaling ${3}/${2}_scaled;
-	fslmaths ${3}/${2}_scaled ${3}/${2}_int_scaled;
+	fslmaths ${3}/${2}_scaled ${3}/${2}_intNorm.nii.gz -odt char;
 
 }

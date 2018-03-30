@@ -7,6 +7,7 @@ except ImportError:
 
 from base_input import BaseInputPage
 from popups import DefaultROIInputPopup
+from popups import OwnROIInputPopup
 
 class LesionLoadCalculationInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -50,13 +51,13 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lb_subject_specific= Label(lf_lesion_load, text="Use subject specific Freesurfer segmentation") #.grid(row=self.starting_row+2, sticky=W)
 		lb_subject_specific.grid(row=1, column=0, columnspan=40, sticky="W", pady=3)
 
-		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_subject_specific)
+		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_subject_specific, command=lambda: self.subjectSpecificPopup())
 		chk_subject_specific.grid(row=1, column=41, sticky='W', pady=3)
 
 		lb_own_rois= Label(lf_lesion_load, text="Use my own ROIs") #.grid(row=self.starting_row+2, sticky=W)
 		lb_own_rois.grid(row=2, column=0, columnspan=40, sticky="W", pady=(3, 20))
 
-		chk_own_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_own_rois)
+		chk_own_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_own_rois, command=lambda: self.showOwnROIPopup())
 		chk_own_rois.grid(row=2, column=41, sticky='W', pady=(3, 20))
 
 
@@ -78,4 +79,16 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
+
+	def showOwnROIPopup(self):
+		if self.controller.b_own_rois.get():
+			roi_popup = OwnROIInputPopup(self.controller)
+			roi_popup.grab_set()
+			self.chk_default_rois["state"] = "disabled" 
+			self.controller.wait_window(roi_popup)
+			self.chk_default_rois["state"] = "normal"
+			roi_popup.grab_release()
+
+	def subjectSpecificPopup(self):
+		print self.controller.user_rois
 

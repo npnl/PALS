@@ -10,7 +10,7 @@ class CheckboxList(object):
 		self.options = options
 		self.select_all_selected = BooleanVar()
 
-		lf_options = tk.LabelFrame(parent, text=title, padx=15, font='Helvetica 14 bold')
+		lf_options = LabelFrame(parent, text=title, padx=15, font='Helvetica 14 bold')
 		lf_options.grid(row=row+1, column=column, columnspan=columnspan, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		lf_options.grid_rowconfigure(0, weight=1)
 		lf_options.grid_columnconfigure(0, weight=1)
@@ -26,26 +26,29 @@ class CheckboxList(object):
 		row += 1
 
 		self.canvas = Canvas(lf_options)
-		self.canvas.grid(row=row, column=0, sticky='nwes')
+		self.canvas.grid(row=row, column=0, columnspan=2, sticky='nwes')
 
 		vsbar = Scrollbar(lf_options, orient="vertical", command=self.canvas.yview)
-		vsbar.grid(row=row, column=1, sticky='ns')
+		vsbar.grid(row=row, column=2, sticky='ns')
 		self.canvas.configure(yscrollcommand=vsbar.set)
 
-		self.frame_buttons = tk.Frame(self.canvas, relief=GROOVE)
+		self.frame_buttons = Frame(self.canvas, relief=GROOVE)
 		self.frame_buttons.grid(row=0, column=0, sticky='nwes')
 		self.canvas_frame = self.canvas.create_window((0,0), window=self.frame_buttons, anchor='nw')
 		self.canvas.bind('<Configure>', self.frameWidth)
 		self.frame_buttons.bind("<Configure>", self.resize)
 
+		self.frame_buttons.grid_rowconfigure(0, weight=1)
+		self.frame_buttons.grid_columnconfigure(0, weight=1)
+
 
 		row += 1
 		for option in options:
-			lb_option = Label(self.frame_buttons, text=option.name.ljust(45))
+			lb_option = Label(self.frame_buttons, text=option.name)
 			lb_option.grid(row=row, column=0, sticky='w', pady=3)
 
 			chk_option = Checkbutton(self.frame_buttons, variable=option.value)
-			chk_option.grid(row=row, column=1, sticky='e', pady=3)
+			chk_option.grid(row=row, column=1, sticky='e', pady=3, padx=(0, 10))
 			row += 1
 
 	def frameWidth(self, event):
@@ -53,7 +56,7 @@ class CheckboxList(object):
 		self.canvas.itemconfig(self.canvas_frame, width = canvas_width)
 
 	def resize(self, event):
-		self.canvas.configure(scrollregion=self.canvas.bbox("all"), width=235, height=190)
+		self.canvas.configure(scrollregion=self.canvas.bbox("all"), width=300, height=190)
 
 	def selectAllOptions(self):
 		flag = self.select_all_selected.get()

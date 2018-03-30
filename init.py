@@ -15,6 +15,7 @@ from pages import PauseOptionsInputPage
 from pages import QualityControlInputPage
 from pages import WhiteMatterInputPage
 from pages import LesionLoadCalculationInputPage
+from pages import rois
 
 LARGE_FONT = ("Verdana", 12)
  
@@ -69,6 +70,19 @@ class MainWindow(tk.Tk):
 		self.b_default_rois.set(False)
 		self.b_subject_specific.set(False)
 		self.b_own_rois.set(False)
+
+
+
+		#Default ROI Popup
+		all_rois = rois.getROIs(self)
+
+		self.corticospinal_tract_roi = all_rois[0]
+		self.freesurfer_cortical_roi = all_rois[1]
+		self.freesurfer_subcortical_roi =  all_rois[2]
+
+
+		#User ROIs
+		self.user_rois = []
 
 
 		self.sv_anatomical_id = StringVar(self)

@@ -65,10 +65,10 @@ class MainWindow(tk.Tk):
 
 		#Lesion Load Calculation Page
 		self.b_default_rois = BooleanVar(self)
-		self.b_subject_specific = BooleanVar(self)
+		self.b_freesurfer_rois = BooleanVar(self)
 		self.b_own_rois = BooleanVar(self)
 		self.b_default_rois.set(False)
-		self.b_subject_specific.set(False)
+		self.b_freesurfer_rois.set(False)
 		self.b_own_rois.set(False)
 
 
@@ -139,6 +139,26 @@ class MainWindow(tk.Tk):
 			frame.grid(row=0, column=0, sticky="nsew", padx=25, pady=25)
  
 		self.show_frame(0)
+
+		self.bind_class("Text","<Control-a>", self.selectAll)
+		self.bind_class("Text","<Command-a>", self.selectAll)
+		self.bind_class("Text","<Command-v>", self.pasteAll)
+
+	def selectAll(self, event):
+		event.widget.tag_add("sel","1.0","end")
+
+	def pasteAll(self, event):
+		clipboard = self.clipboard_get()
+		clipboard = clipboard.replace("\n", "\\n")
+
+		try:
+			start = event.widget.index("sel.first")
+			end = event.widget.index("sel.last")
+			event.widget.delete(start, end)
+		except TclError, e:
+			pass
+
+		event.widget.insert("insert", clipboard)
  
 	def show_frame(self, frame_number):
 		if frame_number >= len(self.frames) or frame_number < 0:

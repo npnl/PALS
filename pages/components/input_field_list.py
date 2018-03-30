@@ -45,10 +45,13 @@ class InputFieldList(object):
 		self.canvas.bind('<Configure>', self.frameWidth)
 		self.frame_inputs.bind("<Configure>", self.resize)
 
+		lb_text_area = Label(lf_options, text='Or paste paths(one per line) in text area give below', font='Helvetica 13 bold')
+		lb_text_area.grid(row=row, column=0, sticky="W", pady=3)
+
 		self.sv_bulk_input = StringVar()
 		self.sv_bulk_input.trace("w", lambda: self.bulkInputUpdate())
-		self.text_area = Text(lf_options, height=15, bd=1)
-		self.text_area.grid(row=row, column=0, columnspan=3, sticky='nwes')
+		self.text_area = Text(lf_options, height=15, bd=1, bg='gray86')
+		self.text_area.grid(row=row+1, column=0, columnspan=3, sticky='nwes', padx=(0, 30))
 
 		self.text_area.bind('<KeyRelease>', self.bulkInputUpdate)
 

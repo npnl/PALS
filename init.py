@@ -14,6 +14,7 @@ from pages import PerformedOperationsInputPage
 from pages import PauseOptionsInputPage
 from pages import QualityControlInputPage
 from pages import WhiteMatterInputPage
+from pages import LesionLoadCalculationInputPage
 
 LARGE_FONT = ("Verdana", 12)
  
@@ -24,17 +25,17 @@ class MainWindow(tk.Tk):
 		# self.geometry("1200x800")
 
 		#Welcome page
-  		self.b_radiological_convention = BooleanVar(self)
-  		self.b_wm_correction = BooleanVar(self)
-  		self.b_ll_correction = BooleanVar(self)
-  		self.b_visual_qc = BooleanVar(self)
-  		self.b_quality_control = BooleanVar(self)
-  		
-  		self.b_data_scrubbing.set(False)
-  		self.b_wm_correction.set(False)
-  		self.b_ll_correction.set(False)
-  		self.b_visual_qc.set(True)
-  		self.b_quality_control.set(False)
+		self.b_radiological_convention = BooleanVar(self)
+		self.b_wm_correction = BooleanVar(self)
+		self.b_ll_correction = BooleanVar(self)
+		self.b_visual_qc = BooleanVar(self)
+		self.b_quality_control = BooleanVar(self)
+		
+		self.b_radiological_convention.set(False)
+		self.b_wm_correction.set(False)
+		self.b_ll_correction.set(False)
+		self.b_visual_qc.set(True)
+		self.b_quality_control.set(False)
 
 
 		#Directory Input Page
@@ -42,67 +43,72 @@ class MainWindow(tk.Tk):
 		self.sv_output_dir = StringVar(self)
 		self.sv_t1_id = StringVar(self)
 		self.sv_lesion_mask_id = StringVar(self)
-  		self.b_same_anatomical_space = BooleanVar(self)
+		self.b_same_anatomical_space = BooleanVar(self)
 
-  		self.sv_t1_id.set('')
-  		self.sv_lesion_mask_id.set('')
-  		self.b_same_anatomical_space.set(False)
+		self.sv_t1_id.set('')
+		self.sv_lesion_mask_id.set('')
+		self.b_same_anatomical_space.set(False)
 
 
-  		#White Matter Correction Page
+		#White Matter Correction Page
 		self.sv_bet_id = StringVar(self)
 		self.sv_wm_id = StringVar(self)
 		self.sv_percent = StringVar(self)
-  		self.b_brain_extraction = BooleanVar(self)
-  		self.b_wm_segmentation = BooleanVar(self)
+		self.b_brain_extraction = BooleanVar(self)
+		self.b_wm_segmentation = BooleanVar(self)
 		self.sv_bet_id.set('')
 		self.sv_wm_id.set('')
-  		self.b_brain_extraction.set(False)
-  		self.b_wm_segmentation.set(False)
-  		self.sv_percent.set('5.0')
+		self.b_brain_extraction.set(False)
+		self.b_wm_segmentation.set(False)
+		self.sv_percent.set('5.0')
+
+		#Lesion Load Calculation Page
+		self.b_default_rois = BooleanVar(self)
+		self.b_subject_specific = BooleanVar(self)
+		self.b_own_rois = BooleanVar(self)
+		self.b_default_rois.set(False)
+		self.b_subject_specific.set(False)
+		self.b_own_rois.set(False)
 
 
-  		self.sv_anatomical_id = StringVar(self)
-  		self.sv_lesion_mask = StringVar(self)
-
-  		
+		self.sv_anatomical_id = StringVar(self)
+		self.sv_lesion_mask = StringVar(self)
 
 
+		self.run_wm_correction = BooleanVar(self)
+		self.run_load_calculation = BooleanVar(self)
 
-  		self.run_wm_correction = BooleanVar(self)
-  		self.run_load_calculation = BooleanVar(self)
+		self.run_normalize_status =BooleanVar(self)
 
-  		self.run_normalize_status =BooleanVar(self)
+		self.sv_bet_id = StringVar(self)
+		self.sv_wm_id = StringVar(self)
 
-  		self.sv_bet_id = StringVar(self)
-  		self.sv_wm_id = StringVar(self)
+		self.run_bet = BooleanVar(self)
+		self.run_wm = BooleanVar(self)
 
-  		self.run_bet = BooleanVar(self)
-  		self.run_wm = BooleanVar(self)
+		self.no_pause = BooleanVar(self)
 
-  		self.no_pause = BooleanVar(self)
+		self.sv_intensity_percent = StringVar(self)
 
-  		self.sv_intensity_percent = StringVar(self)
-
-  		self.sv_input_dir.set('')
-  		self.sv_output_dir.set('')
-
-
-  		self.run_wm_correction.set(False)
-  		self.run_load_calculation.set(False)
-
-  		self.run_normalize_status.set(False)
-
-  		self.run_bet.set(True)
-  		self.run_wm.set(True)
-  		self.no_pause.set(False)
+		self.sv_input_dir.set('')
+		self.sv_output_dir.set('')
 
 
-  		self.sv_anatomical_id.set('')
-  		self.sv_lesion_mask.set('')
-  		self.sv_bet_id.set('')
-  		self.sv_wm_id.set('')
-  		self.sv_intensity_percent.set('5.0')
+		self.run_wm_correction.set(False)
+		self.run_load_calculation.set(False)
+
+		self.run_normalize_status.set(False)
+
+		self.run_bet.set(True)
+		self.run_wm.set(True)
+		self.no_pause.set(False)
+
+
+		self.sv_anatomical_id.set('')
+		self.sv_lesion_mask.set('')
+		self.sv_bet_id.set('')
+		self.sv_wm_id.set('')
+		self.sv_intensity_percent.set('5.0')
  
 		# this container contains all the pages
 		container = tk.Frame(self)
@@ -110,8 +116,8 @@ class MainWindow(tk.Tk):
 		container.grid_rowconfigure(0, weight=1)
 		container.grid_columnconfigure(0, weight=1)
 		self.frames = {}
- 		
- 		frame_number = 0
+		
+		frame_number = 0
 		for PageType in self.getApplicationPages():
 			frame = PageType(container, self, frame_number)
 			self.frames[frame_number] = frame
@@ -128,7 +134,7 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 	
 	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage] 
+		pages = [LesionLoadCalculationInputPage, WelcomePage, DirectoryInputPage, WhiteMatterInputPage] 
 		return pages
 
 if __name__ == '__main__':

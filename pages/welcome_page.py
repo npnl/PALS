@@ -80,13 +80,6 @@ class WelcomePage(BaseInputPage, object):
 			self.setRequiredInputError('Select atleast one operation')
 
 
-	def chooseDir(self, parent, controller, place_holder):
-		current_dir = os.getcwd()
-		parent.update()
-		chosen_dir =  tkFileDialog.askdirectory(parent=self, initialdir = current_dir, title='Select the location of your input directory')
-		place_holder.set(chosen_dir)
-
-
 	def checkValues(self, controller):
 		print controller.sv_input_dir.get()
 		print controller.sv_output_dir.get()

@@ -4,3 +4,4 @@ from performed_operations_input import PerformedOperationsInputPage
 from pause_options_input import PauseOptionsInputPage
 from quality_control_input import QualityControlInputPage
 from white_matter_input import WhiteMatterInputPage
+from lesion_load_input import LesionLoadCalculationInputPage

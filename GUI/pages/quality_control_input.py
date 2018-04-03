@@ -18,9 +18,6 @@ class QualityControlInputPage(BaseInputPage, object):
 		en_intensity_percent = Entry(self, textvariable=self.controller.sv_intensity_percent)
 		en_intensity_percent.grid(row=1, column=1)
 
-		# print_btn = tk.Button(self, text='Print values', command=lambda : self.checkValues(controller))
-		# print_btn.grid(row=5, column=1, padx=2)
-
 
 	def setFrameTitle(self):
 		self.title.set('Quality Control Options')
@@ -33,10 +30,4 @@ class QualityControlInputPage(BaseInputPage, object):
 			self.setStatusMessage('Percent must be a valid number')
 			return
 		super(QualityControlInputPage, self).moveToNextPage()
-
-	def checkValues(self, controller):
-		print controller.run_bet.get()
-		print controller.run_wm.get()
-		print controller.no_pause.get()
-
 

@@ -70,7 +70,6 @@ class WhiteMatterInputPage(BaseInputPage, object):
 	def setFrameTitle(self):
 		self.title.set('White Matter Correction')
 
-
 	def moveToNextPage(self):
 
 		if self.controller.b_brain_extraction.get() and len(self.controller.sv_bet_id.get().strip()) == 0:
@@ -89,12 +88,6 @@ class WhiteMatterInputPage(BaseInputPage, object):
 			return
 		else:
 			super(WhiteMatterInputPage, self).moveToNextPage()
-
-
-	def checkValues(self, controller):
-		print controller.sv_input_dir.get()
-		print controller.sv_output_dir.get()
-		print controller.run_normalize_status.get()
 
 	def executeCommand(self):
 		self.worker = Worker()

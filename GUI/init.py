@@ -38,7 +38,6 @@ class MainWindow(tk.Tk):
 		self.b_visual_qc.set(True)
 		self.b_quality_control.set(False)
 
-
 		#Directory Input Page
 		self.sv_input_dir = StringVar(self)
 		self.sv_output_dir = StringVar(self)
@@ -49,7 +48,6 @@ class MainWindow(tk.Tk):
 		self.sv_t1_id.set('')
 		self.sv_lesion_mask_id.set('')
 		self.b_same_anatomical_space.set(False)
-
 
 		#White Matter Correction Page
 		self.sv_bet_id = StringVar(self)
@@ -72,14 +70,11 @@ class MainWindow(tk.Tk):
 		self.b_freesurfer_rois.set(False)
 		self.b_own_rois.set(False)
 
-
-
 		#Default ROI Popup
 		all_rois = rois.getROIs(self)
 		self.default_corticospinal_tract_roi = all_rois[0]
 		self.default_freesurfer_cortical_roi = all_rois[1]
 		self.default_freesurfer_subcortical_roi =  all_rois[2]
-
 
 		#FreeSurfer Rois
 		all_rois = rois.getROIs(self)
@@ -91,47 +86,6 @@ class MainWindow(tk.Tk):
 		self.user_agreed = BooleanVar(self)
 		self.user_agreed.set(False)
 
-
-
-		self.sv_anatomical_id = StringVar(self)
-		self.sv_lesion_mask = StringVar(self)
-
-
-		self.run_wm_correction = BooleanVar(self)
-		self.run_load_calculation = BooleanVar(self)
-
-		self.run_normalize_status =BooleanVar(self)
-
-		self.sv_bet_id = StringVar(self)
-		self.sv_wm_id = StringVar(self)
-
-		self.run_bet = BooleanVar(self)
-		self.run_wm = BooleanVar(self)
-
-		self.no_pause = BooleanVar(self)
-
-		self.sv_intensity_percent = StringVar(self)
-
-		self.sv_input_dir.set('')
-		self.sv_output_dir.set('')
-
-
-		self.run_wm_correction.set(False)
-		self.run_load_calculation.set(False)
-
-		self.run_normalize_status.set(False)
-
-		self.run_bet.set(True)
-		self.run_wm.set(True)
-		self.no_pause.set(False)
-
-
-		self.sv_anatomical_id.set('')
-		self.sv_lesion_mask.set('')
-		self.sv_bet_id.set('')
-		self.sv_wm_id.set('')
-		self.sv_intensity_percent.set('5.0')
- 
 		# this container contains all the pages
 		container = tk.Frame(self)
 		container.pack(side="top", fill="both", expand=True)

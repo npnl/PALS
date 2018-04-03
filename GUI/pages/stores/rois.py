@@ -41,7 +41,7 @@ FreesurferSubcorticalROINames = [
 def createObjectArrays(controller, names):
 	output = []
 	for name in names:
-		output.append(NameVarStore(controller, name, dtype='bool'))
+		output.append(NameVarStore(controller, name))
 	return output
 
 def getROIs(controller):

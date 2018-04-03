@@ -36,6 +36,6 @@ class OwnROIInputPopup(Toplevel, object):
 			else:
 				print "Yes valid path"
 
-		self.controller.user_rois = [sv.get().strip() for sv in self.inputs]
+		self.controller.user_rois = [NameVarStore(self.controller, index, default_value=sv.get().strip()) for index, sv in enumerate(self.inputs)]
 		self.destroy()
 

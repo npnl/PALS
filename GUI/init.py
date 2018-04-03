@@ -22,7 +22,7 @@ LARGE_FONT = ("Verdana", 12)
 class MainWindow(tk.Tk):
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
-		self.title("SRQL")
+		self.title("PALS")
 		# self.geometry("1200x800")
 
 		#Welcome page
@@ -62,6 +62,7 @@ class MainWindow(tk.Tk):
 		self.b_brain_extraction.set(False)
 		self.b_wm_segmentation.set(False)
 		self.sv_percent.set('5.0')
+		self.percent_intensity = 5.0
 
 		#Lesion Load Calculation Page
 		self.b_default_rois = BooleanVar(self)
@@ -75,14 +76,21 @@ class MainWindow(tk.Tk):
 
 		#Default ROI Popup
 		all_rois = rois.getROIs(self)
+		self.default_corticospinal_tract_roi = all_rois[0]
+		self.default_freesurfer_cortical_roi = all_rois[1]
+		self.default_freesurfer_subcortical_roi =  all_rois[2]
 
-		self.corticospinal_tract_roi = all_rois[0]
+
+		#FreeSurfer Rois
+		all_rois = rois.getROIs(self)
 		self.freesurfer_cortical_roi = all_rois[1]
 		self.freesurfer_subcortical_roi =  all_rois[2]
 
-
 		#User ROIs
 		self.user_rois = []
+		self.user_agreed = BooleanVar(self)
+		self.user_agreed.set(False)
+
 
 
 		self.sv_anatomical_id = StringVar(self)
@@ -168,7 +176,7 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 	
 	def getApplicationPages(self):
-		pages = [LesionLoadCalculationInputPage, WelcomePage, DirectoryInputPage, WhiteMatterInputPage] 
+		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
 		return pages
 
 if __name__ == '__main__':

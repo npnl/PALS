@@ -67,7 +67,7 @@ class WelcomePage(BaseInputPage, object):
 
 
 	def setFrameTitle(self):
-		self.title.set('Welcome to SRQL')
+		self.title.set('Welcome to PALS')
 
 
 	def moveToNextPage(self):

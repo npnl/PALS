@@ -72,16 +72,21 @@ class WhiteMatterInputPage(BaseInputPage, object):
 
 
 	def moveToNextPage(self):
-		super(WhiteMatterInputPage, self).moveToNextPage()
-		return
-		input_dir = self.controller.sv_input_dir.get()
-		output_dir = self.controller.sv_output_dir.get()
-		anatomical_id = self.controller.sv_anatomical_id.get()
-		lesion_mask = self.controller.sv_lesion_mask.get()
-		if not isValidPath(input_dir.strip())\
-			 or not isValidPath(output_dir.strip())\
-			 or not anatomical_id.strip() or not lesion_mask.strip():
-			self.setRequiredInputError()
+
+		if self.controller.b_brain_extraction.get() and len(self.controller.sv_bet_id.get().strip()) == 0:
+			self.setRequiredInputError('Provide the BET Identifier')
+			return
+		if self.controller.b_wm_segmentation.get() and len(self.controller.sv_wm_id.get().strip()) == 0:
+			self.setRequiredInputError('Provide the White Matter ID')
+			return
+		try:
+			val = float(self.controller.sv_percent.get().strip())
+			if val > 100 or val < 0:
+				raise ValueError("Percent is not valid")
+			self.controller.percent_intensity = val
+		except Exception as e:
+			self.setRequiredInputError('Percent must be a valid number')
+			return
 		else:
 			super(WhiteMatterInputPage, self).moveToNextPage()
 

@@ -6,17 +6,26 @@ except ImportError:
 	from tkinter import *
 
 class NameVarStore(object):
-	def __init__(self, controller, name, dtype='var', default_value=False):
+	def __init__(self, controller, name, default_value=False):
 		self.name = name
-		self.value = None
+		self.holder = None
 		self.controller = controller
-		self.assignVariable(dtype, default_value)
+		self.assignVariable(default_value)
 
-	def assignVariable(self, dtype, default_value):
-		if dtype == 'bool':
-			value = BooleanVar(self.controller)
-			value.set(False)
+	def assignVariable(self, default_value):
+		if type(default_value) == type(True):
+			holder = BooleanVar(self.controller)
+			holder.set(default_value)
+		elif type(default_value) == type('string'):
+			holder = StringVar(self.controller)
+			holder.set(default_value)
 		else:
-			value = Variable(self.controller)
-			value.set(default_value)
-		self.value = value
+			holder = Variable(self.controller)
+			holder.set(default_value)
+		self.holder = holder
+
+	def get(self):
+		return self.holder.get()
+
+	def set(self, value):
+		self.holder.set(value)

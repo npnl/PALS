@@ -12,7 +12,7 @@ class FSROIInputPopup(Toplevel, object):
 	def __init__(self, controller):
 		Toplevel.__init__(self, controller, padx=25, pady=25)
 
-		self.user_agreed = BooleanVar()
+		self.user_agreed = controller.user_agreed
 
 		Label(self, text='Select all that apply', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
 

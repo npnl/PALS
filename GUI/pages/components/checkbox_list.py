@@ -31,6 +31,7 @@ class CheckboxList(object):
 		vsbar = Scrollbar(self.lf_options, orient="vertical", command=self.canvas.yview)
 		vsbar.grid(row=row, column=2, sticky='ns')
 		self.canvas.configure(yscrollcommand=vsbar.set)
+		# self.canvas.bind_all("<MouseWheel>", self.mouseWheel)
 
 		self.frame_buttons = Frame(self.canvas, relief=GROOVE)
 		self.frame_buttons.grid(row=0, column=0, sticky='nwes')
@@ -47,7 +48,7 @@ class CheckboxList(object):
 			lb_option = Label(self.frame_buttons, text=option.name)
 			lb_option.grid(row=row, column=0, sticky='w', pady=3)
 
-			chk_option = Checkbutton(self.frame_buttons, variable=option.value)
+			chk_option = Checkbutton(self.frame_buttons, variable=option.holder)
 			chk_option.grid(row=row, column=1, sticky='e', pady=3, padx=(0, 10))
 			row += 1
 
@@ -56,15 +57,21 @@ class CheckboxList(object):
 			self.user_agreed.trace('w', self.userAgreementChange)
 			self.toggleChildren()
 
+	# def mouseWheel(self, event):
+	# 	self.canvas.yview_scroll(-1*(event.delta/120), "units")
+
 	def userAgreementChange(self, *args):
 		self.toggleChildren()
 
 	def toggleChildren(self):
-		if self.user_agreed.get():
-			# self.children_enabled = False
-			self.enableChildren(self.lf_options.winfo_children())
-		else:
-			self.disableChildren(self.lf_options.winfo_children())
+		try:
+			if self.user_agreed.get():
+				# self.children_enabled = False
+				self.enableChildren(self.lf_options.winfo_children())
+			else:
+				self.disableChildren(self.lf_options.winfo_children())
+		except:
+			pass
 
 	def disableChildren(self, childList):
 		for child in childList:
@@ -99,6 +106,6 @@ class CheckboxList(object):
 	def selectAllOptions(self):
 		flag = self.select_all_selected.get()
 		for option in self.options:
-			option.value.set(flag)
+			option.set(flag)
 
 

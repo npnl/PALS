@@ -72,8 +72,14 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		else:
 			self.setRequiredInputError('Select atleast one operation')
 
-	def checkIfAtleastOneSelected(self):
-		pass
+	def checkIfAtleastOneSelected(self, options_list):
+		for option in options_list:
+			if option.get():
+				return True
+		return False
+
+	def updateCheckBoxState(self, chk_box_var, options_list):
+		chk_box_var.set(self.checkIfAtleastOneSelected(options_list))
 
 	def showDefaultROIPopup(self):
 		if self.controller.b_default_rois.get():
@@ -83,6 +89,10 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
+			self.updateCheckBoxState(self.controller.b_default_rois,\
+										self.controller.default_corticospinal_tract_roi\
+										+ self.controller.default_freesurfer_cortical_roi\
+										+ self.controller.default_freesurfer_subcortical_roi)
 
 	def showOwnROIPopup(self):
 		if self.controller.b_own_rois.get():
@@ -92,6 +102,8 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
+			self.updateCheckBoxState(self.controller.b_own_rois,\
+										self.controller.user_rois)
 
 	def freesurferROIPopup(self):
 		if self.controller.b_freesurfer_rois.get():
@@ -101,4 +113,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
+			self.updateCheckBoxState(self.controller.b_freesurfer_rois,\
+										self.controller.freesurfer_cortical_roi\
+										+ self.controller.freesurfer_subcortical_roi)
 

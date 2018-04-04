@@ -12,7 +12,7 @@ from pages import WelcomePage
 from pages import DirectoryInputPage
 from pages import PerformedOperationsInputPage
 from pages import PauseOptionsInputPage
-from pages import QualityControlInputPage
+from pages import RunningOperationsPage
 from pages import WhiteMatterInputPage
 from pages import LesionLoadCalculationInputPage
 from pages import rois
@@ -130,7 +130,7 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 	
 	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
+		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage] 
 		return pages
 
 if __name__ == '__main__':

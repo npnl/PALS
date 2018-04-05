@@ -44,24 +44,22 @@ class Operations(object):
 	def _normaliseSubject(self, arg1, arg2, arg3):
 		minimum, maximum = com.runFslStat(arg1)
 		scaling = 255.0/(maximum - minimum)
-
 		com.runFslMath(arg1, minimum, scalling, os.path.join(arg_3, arg2))
 
-		cmd_1 = 'fslmaths %s -sub %f -mul %f %s_scaled;'%(arg1, minimum, scalling, arg2)
-		cmd_2 = 'fslmaths %s_scaled %s_intNorm.nii.gz -odt char;'%(arg2, arg2)
+	def processLesionFiles(self):
+		# LesionFiles=`ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/$1*${LESION_MASK}*.nii.gz`;
+
+		#   count=1;
+		#   for lesion in $LesionFiles; do
+		#       fslmaths $lesion -bin ${SUBJECTOPDIR}/Intermediate_Files/${SUBJ}_${LESION_MASK}${count}_bin.nii.gz;
+		#       count=$((count+1));
+		#   done
 
 	def normaliseT1Intensity(self, t1_identifier):
 		for subject in self.subjects:
 			arg_1 = os.path.join(self.output_directory, self.ORIGINAL_FILES, subject + '*' + t1_identifier + '*.nii.gz')
 			arg_2 = subject + '_' + t1_identifier
 			arg_3 = os.path.join(self.output_directory, subject, self.INTERMEDIATE_FILES)
-
-		  scaling=`echo "scale=5; 255.0 / ( $max - $min )" | bc`;
-
-		  fslmaths $1 -sub $min -mul $scaling ${3}/${2}_scaled;
-		  fslmaths ${3}/${2}_scaled ${3}/${2}_intNorm.nii.gz -odt char;
-
-		intnormalizeT1 ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/"${SUBJ}"*"${ANATOMICAL_ID}"*.nii.gz "${SUBJ}"_"${ANATOMICAL_ID}" "$SUBJECTOPDIR"/Intermediate_Files;
 
 	def createOutputSubjectDirectories(base_input_directory, base_output_directory, identifier):
 		all_input_directories = os.listdir(base_input_directory)

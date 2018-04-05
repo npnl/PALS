@@ -103,7 +103,6 @@ class MainWindow(tk.Tk):
 		self.show_frame(0)
 
 		self.bind_class("Text","<Control-a>", self.selectAll)
-		self.bind_class("Text","<Command-a>", self.selectAll)
 		self.bind_class("Text","<Command-v>", self.pasteAll)
 
 	def selectAll(self, event):

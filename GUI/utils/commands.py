@@ -38,8 +38,10 @@ class Commands(object):
 		output = self.startExecution(cmd_2)
 		print output
 
-		# fslmaths $1 -sub $min -mul $scaling ${3}/${2}_scaled;
-		# fslmaths ${3}/${2}_scaled ${3}/${2}_intNorm.nii.gz -odt char;
+	def runFslmathsOnLesionFile(self, lesion_file_path, output_bin_path):
+		cmd = 'fslmaths %s -bin %s;'%(lesion_file_path, output_bin_path)
+		output = self.startExecution(cmd_1)
+		print output
 
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)

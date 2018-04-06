@@ -10,7 +10,8 @@ except ImportError:
 from base_input import BaseInputPage
 from executor import Worker
 
-from utils.paths import *
+from utils import Operations
+
 
 class RunningOperationsPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -33,15 +34,14 @@ class RunningOperationsPage(BaseInputPage, object):
 
 
 	def testCommands(self):
-		createOutputSubjectDirectories(self.controller.sv_input_dir.get(), self.controller.sv_output_dir.get(), 'subj')
+		operation = Operations(self.controller)
+		operation.initialise()
 
 	def setFrameTitle(self):
 		self.title.set('Please wait')
 
-
 	def moveToNextPage(self):
 		super(RunningOperationsPage, self).moveToNextPage()
-
 
 	def executeCommand(self):
 		main_py.stop()

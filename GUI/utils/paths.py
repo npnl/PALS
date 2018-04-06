@@ -2,11 +2,11 @@ import os
 from shutil import copyfile, rmtree
 
 from commands import Commands
-com = Commands()
 
 class Operations(object):
 	def __init__(self, controller):
 		self.controller = controller
+		self.com = Commands(controller.logger)
 
 		self.initialiseConstants()
 
@@ -48,7 +48,7 @@ class Operations(object):
 	def _runGzip(self):
 		for subject in self.subjects:
 			directory = self.originalPath(subject)
-			com.runGzip(directory)
+			self.com.runGzip(directory)
 
 
 	def _fslmathsOnLesionFile(self):
@@ -69,7 +69,7 @@ class Operations(object):
 			if lesion_mask_id in item:
 				lesion_file_path = os.path.join(subject_dir, item)
 				output_bin_path = os.path.join(self.intermediatePath(subject), subject + '_' + lesion_mask_id + str(counter) + '_bin.nii.gz')
-				com.runFslmathsOnLesionFile(lesion_file_path, output_bin_path)
+				self.com.runFslmathsOnLesionFile(lesion_file_path, output_bin_path)
 				counter += 1
 
 	def processLesionFilesForAll(self):
@@ -77,9 +77,9 @@ class Operations(object):
 			self.processLesionFilesForSubject(subject)
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
-		minimum, maximum = com.runFslStat(arg_1)
+		minimum, maximum = self.com.runFslStat(arg_1)
 		scaling = 255.0/(maximum - minimum)
-		com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
+		self.com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 
 	def normaliseT1Intensity(self, t1_identifier):
 		for subject in self.subjects:

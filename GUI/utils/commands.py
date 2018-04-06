@@ -2,11 +2,11 @@ import os
 import subprocess
 
 class Commands(object):
-	def __init__(self):
-		pass
+	def __init__(self, logger):
+		self.logger = logger
 
 	def startExecution(self, cmd):
-		print "Running [%s]"%cmd
+		self.logger.debug("Running [%s]"%cmd)
 		self.running_process = subprocess.Popen('exec ' + cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 		return_code = self.running_process.wait()
 		output = ''
@@ -15,7 +15,7 @@ class Commands(object):
 		self.running_process.stdout.close()
 		# if return_code:
 		# 	raise subprocess.CalledProcessError(return_code, cmd)
-		print output
+		self.logger.debug(output)
 		return output
 
 	def runGzip(self, input_directory):

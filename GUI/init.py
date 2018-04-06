@@ -7,6 +7,7 @@ except ImportError:
 
 import tkFileDialog
 import os
+import logging
 
 from pages import WelcomePage
 from pages import DirectoryInputPage
@@ -24,6 +25,9 @@ class MainWindow(tk.Tk):
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.title("PALS")
 		# self.geometry("1200x800")
+
+		logging.basicConfig(level=logging.DEBUG)
+		self.logger = logging.getLogger(__name__)
 
 		#Welcome page
 		self.b_radiological_convention = BooleanVar(self)

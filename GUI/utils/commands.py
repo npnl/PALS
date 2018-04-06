@@ -6,15 +6,16 @@ class Commands(object):
 		pass
 
 	def startExecution(self, cmd):
+		print "Running [%s]"%cmd
 		self.running_process = subprocess.Popen('exec ' + cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 		return_code = self.running_process.wait()
 		output = ''
 		for stdout_line in iter(self.running_process.stdout.readline, ""):
 			output += stdout_line
 		self.running_process.stdout.close()
-		print return_code
 		# if return_code:
 		# 	raise subprocess.CalledProcessError(return_code, cmd)
+		print output
 		return output
 
 	def runGzip(self, input_directory):
@@ -34,13 +35,11 @@ class Commands(object):
 		cmd_2 = 'fslmaths %s_scaled %s_intNorm.nii.gz -odt char;'%(arg2, arg2)
 
 		output = self.startExecution(cmd_1)
-		print output
 		output = self.startExecution(cmd_2)
-		print output
 
 	def runFslmathsOnLesionFile(self, lesion_file_path, output_bin_path):
 		cmd = 'fslmaths %s -bin %s;'%(lesion_file_path, output_bin_path)
-		output = self.startExecution(cmd_1)
+		output = self.startExecution(cmd)
 		print output
 
 	def runPlayer(self, input_directory):

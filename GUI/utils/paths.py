@@ -17,11 +17,14 @@ class Operations(object):
 		self.output_directories = []
 
 		self.INTERMEDIATE_FILES = 'Intermediate_Files'
-		self.ORIGINAL_FILES = os.path.join(self.INTERMEDIATE_FILES,'Original_Files')
+		self.ORIGINAL_FILES = 'Original_Files'
 
 
 	def initialise(self):
-		self.createOutputSubjectDirectories(self.input_directory, self.output_directory, self.controller.sv_t1_id.get())
+		self.createOutputSubjectDirectories(self.input_directory, self.output_directory)
+		self._runGzip()
+		self.normaliseT1Intensity(self.controller.sv_t1_id.get())
+		self.processLesionFilesForAll()
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -32,28 +35,26 @@ class Operations(object):
 				copyfile(os.path.join(source_dir, item), os.path.join(dest_dir, item))
 
 	def _createOriginalFiles(self, source_dir, target_dir):
-		target_dir = os.path.join(target_dir, self.ORIGINAL_FILES)
+		target_dir = os.path.join(target_dir, self.INTERMEDIATE_FILES, self.ORIGINAL_FILES)
 		os.makedirs(target_dir)
 		self._copyDirectories(source_dir, target_dir)
 
 	def intermediatePath(self, subject):
-		return os.path.join(self.base_output_directory, subject, self.INTERMEDIATE_FILES)
+		return os.path.join(self.output_directory, subject, self.INTERMEDIATE_FILES)
 
 	def originalPath(self, subject):
 		return os.path.join(self.intermediatePath(subject), self.ORIGINAL_FILES)
 
-	def _runGzip(self, directory):
-		com.runGzip(directory)
+	def _runGzip(self):
+		for subject in self.subjects:
+			directory = self.originalPath(subject)
+			com.runGzip(directory)
 
-	def _normaliseSubject(self, arg1, arg2, arg3):
-		minimum, maximum = com.runFslStat(arg1)
-		scaling = 255.0/(maximum - minimum)
-		com.runFslMath(arg1, minimum, scalling, os.path.join(arg_3, arg2))
 
 	def _fslmathsOnLesionFile(self):
 		pass
 
-	def processLesionFiles(self, subject):
+	def processLesionFilesForSubject(self, subject):
 		# LesionFiles=`ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/$1*${LESION_MASK}*.nii.gz`;
 
 		#   count=1;
@@ -63,7 +64,7 @@ class Operations(object):
 		#   done
 		subject_dir = self.originalPath(subject)
 		counter = 1
-		lesion_mask_id = controller.sv_lesion_mask_id.get()
+		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 		for item in os.listdir(subject_dir):
 			if lesion_mask_id in item:
 				lesion_file_path = os.path.join(subject_dir, item)
@@ -71,19 +72,26 @@ class Operations(object):
 				com.runFslmathsOnLesionFile(lesion_file_path, output_bin_path)
 				counter += 1
 
+	def processLesionFilesForAll(self):
+		for subject in self.subjects:
+			self.processLesionFilesForSubject(subject)
 
+	def _normaliseSubject(self, arg_1, arg_2, arg_3):
+		minimum, maximum = com.runFslStat(arg_1)
+		scaling = 255.0/(maximum - minimum)
+		com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 
 	def normaliseT1Intensity(self, t1_identifier):
 		for subject in self.subjects:
-			arg_1 = os.path.join(self.output_directory, self.ORIGINAL_FILES, subject + '*' + t1_identifier + '*.nii.gz')
+			arg_1 = os.path.join(self.originalPath(subject), subject + '*' + t1_identifier + '*.nii.gz')
 			arg_2 = subject + '_' + t1_identifier
-			arg_3 = os.path.join(self.output_directory, subject, self.INTERMEDIATE_FILES)
+			arg_3 = os.path.join(self.intermediatePath(subject))
+			self._normaliseSubject(arg_1, arg_2, arg_3)
 
-	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory, identifier):
+	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory):
 		all_input_directories = os.listdir(base_input_directory)
 		for directory in all_input_directories:
-			print directory
-			if os.path.isdir(os.path.join(base_input_directory, directory)) and directory.startswith(identifier):
+			if os.path.isdir(os.path.join(base_input_directory, directory)):
 				self.subjects.append(directory)
 				output_directory = os.path.join(base_output_directory, directory)
 				if os.path.exists(output_directory):
@@ -112,5 +120,5 @@ def isValidPath(filePath):
 	return True
 
 if __name__ == '__main__':
-	directory = raw_input("Enter directory")
-	_runGzip(directory)
+	pass
+

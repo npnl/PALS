@@ -98,22 +98,21 @@ class Operations(object):
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
 
-	def _getPathOfFiles(self, base_path, startswith_str='', substr='', endswith_str=''):
+	def _getPathOfFiles(self, base_path, startswith_str='', substr='', endswith_str='', second_sub_str=''):
 		all_files = []
 		for item in os.listdir(base_path):
-			if item.startswith(startswith_str) and substr in item and item.endswith(endswith_str):
+			if item.startswith(startswith_str) and substr in item and second_sub_str in item and item.endswith(endswith_str):
 				all_files.append(os.path.join(base_path, item))
 		return all_files
 
 
-	def setSubjectSpecificPaths(self, subject):
+	def setSubjectSpecificPaths_1(self, subject):
 		if self.skip: return False
-		anatomical_file_path = ''
-		lesion_files = []
+		anatomical_file_path, lesion_files = None, None
 
 		anatomical_id = self.controller.sv_t1_id.get()
 		intermediate_path = self.intermediatePath(subject)
-		if 'unknown variable' == 'run_data_reorient': # Need to fix this
+		if not self.controller.b_radiological_convention.get(): # Need to fix this
 			params = (subject, anatomical_id, '_intNorm.nii.gz')
 			anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
 			
@@ -146,6 +145,33 @@ class Operations(object):
 		return anatomical_file_path, lesion_files
 
 
+	def setSubjectSpecificPaths_2(self, subject):
+		if self.skip: return False
+		t1_mgz, seg_file, bet_brain_file, wm_mask_file = [None] * 4
+		if self.controller.b_freesurfer_rois.get():
+			t1_mgz = os.path.join(self.originalPath(subject), 'T1.mgz')
+			seg_file = os.path.join(self.originalPath(subject), 'aparc+aseg.mgz')
+
+		if self.controller.b_brain_extraction.get():
+			bet_brain_file = os.path.join(self.intermediatePath(subject), subject + '_Brain.nii.gz')
+		elif not self.controller.b_radiological_convention.get():
+			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
+			bet_brain_file = self._getPathOfFiles(self.originalPath(subject), *params)[0]
+		else:
+			bet_brain_file = os.path.join(self.intermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad_reorient.nii.gz')
+
+		if self.controller.b_wm_correction.get():
+			wm_mask_file = os.path.join(self.intermediatePath(subject), subject + '_seg_2.nii.gz')
+		elif not self.controller.b_radiological_convention.get():
+			params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
+			wm_mask_file = self._getPathOfFiles(self.originalPath(subject), *params)[0]
+		else:
+			wm_mask_file = os.path.join(self.intermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad_reorient.nii.gz')
+
+		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
+
+	def createInitialDirecories(self):
+		pass
 
 	def runBrainExtraction(self):
 		if self.skip: return False

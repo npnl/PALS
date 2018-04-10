@@ -42,6 +42,22 @@ class Commands(object):
 		output = self.startExecution(cmd)
 		print output
 
+	def runFslOrient(self, original_t1_files, args=''):
+		# origOrientation=$(fslorient $origT1 | awk '{print $1;}');
+		cmd = 'fslorient %s %s'%(args, original_t1_files)
+		# Hard coded the value, need to be changed later
+		return 'NEUROLOGICAL'
+
+	def runFslOrient2Std(self, rad_ti_file, output_file):
+		cmd = 'fslreorient2std %s %s;'
+		self.startExecution(cmd)
+
+	def runFslSwapDim(self, original_t1_files, output_bin_path):
+		# fslswapdim $origT1 -x y z ${SUBJECTOPDIR}/Intermediate_Files/"${SUBJ}"_"${ANATOMICAL_ID}"_rad;
+		cmd = "fslswapdim %s -x y z %s;"%(original_t1_files, output_bin_path)
+		output = self.startExecution(cmd)
+
+
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)
 		self.startExecution(cmd)

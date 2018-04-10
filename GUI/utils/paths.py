@@ -1,4 +1,5 @@
 import os
+import ntpath
 from shutil import copyfile, rmtree
 
 from commands import Commands
@@ -24,6 +25,7 @@ class Operations(object):
 	def initialise(self):
 		self.skip = False
 		self.createOutputSubjectDirectories(self.input_directory, self.output_directory)
+		self.createROIDirectories()
 		self.runGzip()
 		self.normaliseT1Intensity(self.controller.sv_t1_id.get())
 		self.processLesionFilesForAll()
@@ -170,8 +172,80 @@ class Operations(object):
 
 		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
 
-	def createInitialDirecories(self):
+	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
+		parent = os.path.join(*parent)
+		path = os.path.join(parent, path)
+		if relative:
+			path = os.path.join(self.output_directory, path)
+		if drop_existing and os.path.exists(path):
+			rmtree(path)
+		os.makedirs(path)
+
+	def _extractFileName(self, path, remove_extension=True):
+		head, tail = ntpath.split(path)
+		filename =  tail or ntpath.basename(head)
+		if remove_extension:
+			filename, file_extension = os.path.splitext(filename)
+		return filename
+
+	def _createROIsHelper(self):
 		pass
+
+	def _getDefaultROIsPaths(self):
+		return []
+
+	def _getFSROIsPaths(self):
+		return []
+
+	def _getUserROIsPaths(self):
+		return []
+
+	def createROIDirectories(self):
+		if self.skip: return False
+		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
+		if self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
+		if self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
+		if self.controller.b_ll_correction.get():
+			self._createDirectory('QC_LL')
+			self._createDirectory('QC_Registrations')
+
+			if self.controller.b_own_rois.get():
+				self._createDirectory('custom', parent=['QC_LL'])
+				self._createDirectory('ROI_binarized')
+				for user_roi_path in self._getUserROIsPaths():
+					roi_name = self._extractFileName(user_roi_path)
+					roi_output_path = os.path.join(self.output_directory, 'ROI_binarized', roi_name + '_bin')
+					self.com.runFslmathsOnLesionFile(user_roi_path, roi_output_path)
+
+				roi_output_directory = os.path.join(self.output_directory, ROI_binarized)
+				params = ('', '', '_bin.nii.gz')
+				user_rois_output_paths = self._getPathOfFiles(roi_output_directory, *params)
+
+				for user_roi_output_path in user_rois_output_paths:
+					roi_name = self._extractFileName(user_roi_output_path)
+					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
+
+				self._createDirectory('custom', parent=['QC_Registrations'])
+
+			elif self.controller.b_default_rois.get():
+				self._createDirectory('MNI152', parent=['QC_LL'])
+				for default_roi_path in self._getDefaultROIsPaths():
+					roi_name = self._extractFileName(default_roi_path)
+					self._createDirectory(roi_name, parent=['QC_LL', 'MNI152'])
+				self._createDirectory('MNI152', parent=['QC_Registrations'])
+
+			elif self.controller.b_freesurfer_rois.get():
+				self._createDirectory('FS', parent=['QC_LL'])
+				for fs_roi_path in self._getFSROIsPaths():
+					roi_name = self._extractFileName(fs_roi_path)
+					self._createDirectory(roi_name, parent=['QC_LL', 'FS'])
+				self._createDirectory('FS', parent=['QC_Registrations'])
+			else:
+				self.logger.info('None of the ROI options selected')
+
+			# Add code here to make directories for the ROIs
+
+
 
 	def runBrainExtraction(self):
 		if self.skip: return False

@@ -2,6 +2,7 @@ import os
 import ntpath
 from shutil import copyfile, rmtree
 
+from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
 from commands import Commands
 
 class Operations(object):
@@ -27,8 +28,9 @@ class Operations(object):
 		self.createOutputSubjectDirectories(self.input_directory, self.output_directory)
 		self.createROIDirectories()
 		self.runGzip()
-		self.normaliseT1Intensity(self.controller.sv_t1_id.get())
+		self.normaliseT1Intensity()
 		self.processLesionFilesForAll()
+		self.reOrientToRadForAllSubjects()
 
 	def getSubjectPath(self, subject):
 		return os.path.join(self.output_directory, subject)
@@ -57,6 +59,7 @@ class Operations(object):
 		for subject in self.subjects:
 			directory = self.getOriginalPath(subject)
 			self.com.runGzip(directory)
+		self.logger.info('Gzip operation completed for all subjects')
 
 	def _processLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
@@ -73,19 +76,22 @@ class Operations(object):
 		if self.skip: return False
 		for subject in self.subjects:
 			self._processLesionFilesForSubject(subject)
+		self.logger.info('Lesion files processed for all subjects')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
 		minimum, maximum = self.com.runFslStat(arg_1)
 		scaling = 255.0/(maximum - minimum)
 		self.com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 
-	def normaliseT1Intensity(self, t1_identifier):
+	def normaliseT1Intensity(self):
 		if self.skip: return False
+		t1_identifier = self.controller.sv_t1_id.get()
 		for subject in self.subjects:
 			arg_1 = os.path.join(self.getOriginalPath(subject), subject + '*' + t1_identifier + '*.nii.gz')
 			arg_2 = subject + '_' + t1_identifier
 			arg_3 = os.path.join(self.getIntermediatePath(subject))
 			self._normaliseSubject(arg_1, arg_2, arg_3)
+		self.logger.debug('Normalization completed for all subjects')
 
 	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory):
 		if self.skip: return False
@@ -195,7 +201,11 @@ class Operations(object):
 		return []
 
 	def _getFSROIsPaths(self):
-		return []
+		fs_roi_paths = []
+		for obj in self.controller.freesurfer_cortical_roi:
+			if obj.get():
+				fs_roi_paths.append(FS_Map[obj.name])
+		return fs_roi_paths
 
 	def _getUserROIsPaths(self):
 		return []
@@ -245,8 +255,17 @@ class Operations(object):
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:
 				self.logger.info('None of the ROI options selected')
+		self.logger.debug('ROIs direcotory created successfully')
 
-	def reOrientToRadForSubject(self, subject):
+	def reOrientToRadForAllSubjects(self):
+		if self.skip: return False
+		for subject in self.subjects:
+			keepSubject = self._reOrientToRadForSubject(subject)
+			if not keepSubject:
+				self.logger.info('The subject contains error. Check subject [%s]', subject)
+		self.logger.info('ReOrientToRad completed for all subjects')
+
+	def _reOrientToRadForSubject(self, subject):
 		if self.skip: return False
 		subject_dir = self.getIntermediatePath(subject)
 
@@ -258,12 +277,12 @@ class Operations(object):
 		rad_t1_file = original_t1_file
 
 		params = (subject, self.controller.sv_lesion_mask_id.get(), '.nii.gz')
-		original_lesion_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-		rad_lesion_files = original_lesion_file
+		original_lesion_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
+		rad_lesion_files = original_lesion_files
 
 		if self.controller.b_brain_extraction.get():
 			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
-			rad_bet_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
+			rad_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 
 		original_t1_orientation = self.com.runFslOrient(original_t1_file)
 
@@ -274,18 +293,18 @@ class Operations(object):
 
 			rad_t1_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad.nii.gz')
 
-			for index, original_lesion_file in enumerate(original_lesion_file):
+			for index, original_lesion_file in enumerate(original_lesion_files):
 				original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
 				if original_lesion_orientation == 'RADIOLOGICAL':
 					#Don't keep the subject
-					pass
+					return False
 				else:
-					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(count+1) +'_rad')
+					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index+1) +'_rad')
 					self.com.runFslSwapDim(original_lesion_file, output_file_path)
 					self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
 
 			params = (subject, self.controller.sv_lesion_mask_id.get(), 'rad.nii.gz')
-			rad_lesion_file = self._getPathOfFiles(self.getIntermediatePath(subject), *params)[0]
+			rad_lesion_files = self._getPathOfFiles(self.getIntermediatePath(subject), *params)
 
 			# if user has already run BET or WMSeg, and they're in NEUROLOGICAL, then convert to RADIOLOGICAl
 			if not self.controller.b_brain_extraction.get():
@@ -298,7 +317,8 @@ class Operations(object):
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
 					self.com.runFslSwapDim(original_bet_file, output_file_path)
-					self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
+					rad_bet_file = output_file_path + '.nii.gz'
+					self.com.runFslOrient(rad_bet_file, args='-swaporient')
 
 			if not self.controller.b_wm_correction.get():
 				# origWM=$(ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/${1}*"${WM_ID}"*.nii*);
@@ -311,9 +331,26 @@ class Operations(object):
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
 					self.com.runFslSwapDim(original_wm_file, output_file_path)
-					self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
+					rad_wm_file = output_file_path + '.nii.gz'
+					self.com.runFslOrient(rad_wm_file, args='-swaporient')
 
 		self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))
+		
+		if not self.controller.b_brain_extraction.get():
+			self.com.runFslOrient2Std(rad_bet_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_bet_id.get() + '_rad_reorient'))
+		
+		if not self.controller.b_wm_segmentation.get():
+			self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
+
+
+		for index, lesion_file in enumerate(rad_lesion_files):
+			if self.controller.b_wm_correction.get() or self.controller.b_ll_correction.get():
+				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			else:
+				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			self.com.runFslOrient2Std(lesion_file, output_path)
+
+		return True
 
 
 	def runBrainExtraction(self):

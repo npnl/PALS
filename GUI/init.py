@@ -26,7 +26,8 @@ class MainWindow(tk.Tk):
 		self.title("PALS")
 		# self.geometry("1200x800")
 
-		logging.basicConfig(level=logging.DEBUG)
+		logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: '
+                                '%(message)s')
 		self.logger = logging.getLogger(__name__)
 
 		#Welcome page

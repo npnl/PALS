@@ -15,7 +15,8 @@ class Commands(object):
 		self.running_process.stdout.close()
 		# if return_code:
 		# 	raise subprocess.CalledProcessError(return_code, cmd)
-		self.logger.debug(output)
+		if len(output.strip()) > 0:
+			self.logger.debug(output)
 		return output
 
 	def runGzip(self, input_directory):
@@ -43,13 +44,12 @@ class Commands(object):
 		print output
 
 	def runFslOrient(self, original_t1_files, args=''):
-		# origOrientation=$(fslorient $origT1 | awk '{print $1;}');
 		cmd = 'fslorient %s %s'%(args, original_t1_files)
-		# Hard coded the value, need to be changed later
-		return 'NEUROLOGICAL'
+		output = self.startExecution(cmd)
+		return output.strip()
 
 	def runFslOrient2Std(self, rad_ti_file, output_file):
-		cmd = 'fslreorient2std %s %s;'
+		cmd = 'fslreorient2std %s %s;'%(rad_ti_file, output_file)
 		self.startExecution(cmd)
 
 	def runFslSwapDim(self, original_t1_files, output_bin_path):

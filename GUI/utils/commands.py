@@ -54,9 +54,18 @@ class Commands(object):
 
 	def runFslSwapDim(self, original_t1_files, output_bin_path):
 		# fslswapdim $origT1 -x y z ${SUBJECTOPDIR}/Intermediate_Files/"${SUBJ}"_"${ANATOMICAL_ID}"_rad;
-		cmd = "fslswapdim %s -x y z %s;"%(original_t1_files, output_bin_path)
+		cmd = 'fslswapdim %s -x y z %s;'%(original_t1_files, output_bin_path)
 		output = self.startExecution(cmd)
 
+	def runBet(self, anatomical_file_path, output_file):
+		# bet "${ANATOMICAL}" "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_Brain -R -f 0.5 -g 0;
+		cmd = 'bet %s %s -R -f 0.5 -g 0;'%(anatomical_file_path, output_file)
+		self.startExecution(cmd)
+
+	def runFslEyes(self, anatomical_file_path, bet_brain_file, output_image_path):
+		# fsleyes render --hideCursor -of "$WORKINGDIR"/QC_BrainExtractions/"${SUBJ}"_BET.png "$ANATOMICAL" "$BET_Brain" -cm blue -a 50;
+		cmd = 'fsleyes render --hideCursor -of %s %s %s -cm blue -a 50;'%(output_image_path, anatomical_file_path, bet_brain_file)
+		self.startExecution(cmd)
 
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)

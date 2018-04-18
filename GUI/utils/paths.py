@@ -5,6 +5,8 @@ from shutil import copyfile, rmtree
 from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
 from commands import Commands
 
+from qc_page import generateQCPage
+
 class Operations(object):
 	def __init__(self, controller):
 		self.controller = controller
@@ -15,6 +17,7 @@ class Operations(object):
 
 	def initialiseConstants(self):
 		self.subjects = []
+		self.new_subjects = []
 		self.input_directory = self.controller.sv_input_dir.get()
 		self.output_directory = self.controller.sv_output_dir.get()
 		self.output_directories = []
@@ -25,12 +28,15 @@ class Operations(object):
 
 	def initialise(self):
 		self.skip = False
+		self.initialiseConstants()
 		self.createOutputSubjectDirectories(self.input_directory, self.output_directory)
 		self.createROIDirectories()
 		self.runGzip()
 		self.normaliseT1Intensity()
 		self.processLesionFilesForAll()
 		self.reOrientToRadForAllSubjects()
+		self.runBrainExtraction()
+		self.runWMSegmentation()
 
 	def getSubjectPath(self, subject):
 		return os.path.join(self.output_directory, subject)
@@ -114,7 +120,7 @@ class Operations(object):
 		return all_files
 
 
-	def setSubjectSpecificPaths_1(self, subject):
+	def _setSubjectSpecificPaths_1(self, subject):
 		if self.skip: return False
 		anatomical_file_path, lesion_files = None, None
 
@@ -153,14 +159,15 @@ class Operations(object):
 		return anatomical_file_path, lesion_files
 
 
-	def setSubjectSpecificPaths_2(self, subject):
+	def _setSubjectSpecificPaths_2(self, subject):
 		if self.skip: return False
 		t1_mgz, seg_file, bet_brain_file, wm_mask_file = [None] * 4
 		if self.controller.b_freesurfer_rois.get():
 			t1_mgz = os.path.join(self.getOriginalPath(subject), 'T1.mgz')
 			seg_file = os.path.join(self.getOriginalPath(subject), 'aparc+aseg.mgz')
 
-		if self.controller.b_brain_extraction.get():
+		# Run brain extraction only if user has not run it
+		if not self.controller.b_brain_extraction.get():
 			bet_brain_file = os.path.join(self.getIntermediatePath(subject), subject + '_Brain.nii.gz')
 		elif not self.controller.b_radiological_convention.get():
 			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
@@ -168,15 +175,23 @@ class Operations(object):
 		else:
 			bet_brain_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad_reorient.nii.gz')
 
-		if self.controller.b_wm_correction.get():
+		# Run white matter segmentation only if user has not run it
+		if not self.controller.b_wm_segmentation.get():
 			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_seg_2.nii.gz')
 		elif not self.controller.b_radiological_convention.get():
 			params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
 			wm_mask_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 		else:
-			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad_reorient.nii.gz')
+			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad_reorient.nii.gz')
 
 		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
+
+	def performWMSegmentation(self):
+		if self.skip: return False
+		self.logger.info('Performing white matter segmentation...[long process]')
+		for subject in self.new_subjects:
+			pass
+		self.logger.info('White Matter segmentation completed for all subjects') 
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
 		parent = os.path.join(*parent)
@@ -213,8 +228,8 @@ class Operations(object):
 	def createROIDirectories(self):
 		if self.skip: return False
 		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
-		if self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
-		if self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
+		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
+		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
 		if self.controller.b_ll_correction.get():
 			self._createDirectory('QC_LL')
 			self._createDirectory('QC_Registrations')
@@ -263,6 +278,8 @@ class Operations(object):
 			keepSubject = self._reOrientToRadForSubject(subject)
 			if not keepSubject:
 				self.logger.info('The subject contains error. Check subject [%s]', subject)
+			else:
+				self.new_subjects.append(subject)
 		self.logger.info('ReOrientToRad completed for all subjects')
 
 	def _reOrientToRadForSubject(self, subject):
@@ -307,27 +324,27 @@ class Operations(object):
 			rad_lesion_files = self._getPathOfFiles(self.getIntermediatePath(subject), *params)
 
 			# if user has already run BET or WMSeg, and they're in NEUROLOGICAL, then convert to RADIOLOGICAl
-			if not self.controller.b_brain_extraction.get():
+			if self.controller.b_brain_extraction.get():
 				params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
 				original_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 				original_bet_orientation = self.com.runFslOrient(original_bet_file)
 
 				if original_bet_orientation == 'RADIOLOGICAl':
-					self.controller.b_brain_extraction.set(True)
+					self.controller.b_brain_extraction.set(False)
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
 					self.com.runFslSwapDim(original_bet_file, output_file_path)
 					rad_bet_file = output_file_path + '.nii.gz'
 					self.com.runFslOrient(rad_bet_file, args='-swaporient')
 
-			if not self.controller.b_wm_correction.get():
+			if self.controller.b_wm_segmentation.get():
 				# origWM=$(ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/${1}*"${WM_ID}"*.nii*);
 				params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
 				original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 				original_wm_orientation =self.com.runFslOrient(original_wm_file)
 
 				if original_wm_orientation == 'RADIOLOGICAl':
-					self.controller.b_wm_correction.set(True)
+					self.controller.b_wm_segmentation.set(False)
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
 					self.com.runFslSwapDim(original_wm_file, output_file_path)
@@ -336,10 +353,10 @@ class Operations(object):
 
 		self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))
 		
-		if not self.controller.b_brain_extraction.get():
+		if self.controller.b_brain_extraction.get():
 			self.com.runFslOrient2Std(rad_bet_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_bet_id.get() + '_rad_reorient'))
 		
-		if not self.controller.b_wm_segmentation.get():
+		if self.controller.b_wm_segmentation.get():
 			self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
 
 
@@ -354,10 +371,24 @@ class Operations(object):
 
 
 	def runBrainExtraction(self):
-		if self.skip: return False
-		if self.controller.b_brain_extraction.get() == False or self.skip: return False
+		# Skip this step if user has already performed brain extraction
+		if self.controller.b_brain_extraction.get() == True or self.skip: return False
 		for subject in self.subjects:
-			pass
+			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
+			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
+			
+			self.com.runBet(anatomical_file_path, os.path.join(self.getIntermediatePath(subject), subject + '_Brain'))
+
+			image_files_base = os.path.join(self.output_directory, 'QC_BrainExtractions')
+			image_path = os.path.join(image_files_base, subject + '_BET.png')
+			self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
+		generateQCPage('bet', image_files_base)
+		self.logger.info('Brain extraction completed for all subjects')
+
+
+	def runWMSegmentation(self):
+		pass
+
 
 	def getTemplateBrainROIS(self):
 		parent_dir =  os.path.abspath(os.path.join(os.getcwd(), os.pardir))

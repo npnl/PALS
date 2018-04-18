@@ -67,6 +67,11 @@ class Commands(object):
 		cmd = 'fsleyes render --hideCursor -of %s %s %s -cm blue -a 50;'%(output_image_path, anatomical_file_path, bet_brain_file)
 		self.startExecution(cmd)
 
+	def runFast(self, subject_dir, brain_file):
+		# fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}" "${BET_Brain}";
+		cmd = 'fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o %s %s;'%(subject_dir, brain_file)
+		self.startExecution(cmd)
+
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)
 		self.startExecution(cmd)

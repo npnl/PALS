@@ -72,6 +72,21 @@ class Commands(object):
 		cmd = 'fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o %s %s;'%(subject_dir, brain_file)
 		self.startExecution(cmd)
 
+	def runFslMathToCheckInSameSpace(self, wm_mask_file, lesion_file, output_file):
+		# fslmaths "${WM_MASK}" -sub ${LesionFiles[0]} "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM
+		cmd = 'fslmaths %s -sub %s %s'%(wm_mask_file, lesion_file, output_file)
+		return self.startExecution(cmd)
+
+	def runFslMultiply(self, anatomical_file_path, corrected_wm_file, output_file):
+		# fslmaths $ANATOMICAL -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
+		cmd = 'fslmaths %s -mul %s %s;'%(anatomical_file_path, corrected_wm_file, output_file)
+		self.startExecution(cmd)
+
+	def runFslMean(self, input_file):
+		# WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -M);
+		cmd = 'fslstats %s -M'%input_file
+		self.startExecution(cmd)
+
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)
 		self.startExecution(cmd)

@@ -8,8 +8,9 @@ from commands import Commands
 from qc_page import generateQCPage
 
 from sub_operation import SubOperation
+from base_operation import BaseOperation
 
-class Operations(object, SubOperation):
+class Operations(object, BaseOperation, SubOperation):
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
@@ -39,15 +40,6 @@ class Operations(object, SubOperation):
 		self.reOrientToRadForAllSubjects()
 		self.runBrainExtraction()
 		self.runWMSegmentation()
-
-	def getSubjectPath(self, subject):
-		return os.path.join(self.output_directory, subject)
-
-	def getIntermediatePath(self, subject):
-		return os.path.join(self.getSubjectPath(subject), self.INTERMEDIATE_FILES)
-
-	def getOriginalPath(self, subject):
-		return os.path.join(self.getIntermediatePath(subject), self.ORIGINAL_FILES)
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -113,13 +105,6 @@ class Operations(object, SubOperation):
 				os.makedirs(output_directory)
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
-
-	def _getPathOfFiles(self, base_path, startswith_str='', substr='', endswith_str='', second_sub_str=''):
-		all_files = []
-		for item in os.listdir(base_path):
-			if item.startswith(startswith_str) and substr in item and second_sub_str in item and item.endswith(endswith_str):
-				all_files.append(os.path.join(base_path, item))
-		return all_files
 
 
 	def _setSubjectSpecificPaths_1(self, subject):

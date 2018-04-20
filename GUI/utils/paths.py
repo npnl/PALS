@@ -32,7 +32,7 @@ class Operations(object, BaseOperation, SubOperation):
 	def initialise(self):
 		self.skip = False
 		self.initialiseConstants()
-		self.createOutputSubjectDirectories(self.input_directory, self.output_directory)
+		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
 		self.createROIDirectories()
 		self.runGzip()
 		self.normaliseT1Intensity()
@@ -184,7 +184,7 @@ class Operations(object, BaseOperation, SubOperation):
 		parent = os.path.join(*parent)
 		path = os.path.join(parent, path)
 		if relative:
-			path = os.path.join(self.output_directory, path)
+			path = os.path.join(self.getBaseDirectory(), path)
 		if drop_existing and os.path.exists(path):
 			rmtree(path)
 		os.makedirs(path)
@@ -227,10 +227,10 @@ class Operations(object, BaseOperation, SubOperation):
 				self._createDirectory('ROI_binarized')
 				for user_roi_path in self._getUserROIsPaths():
 					roi_name = self._extractFileName(user_roi_path)
-					roi_output_path = os.path.join(self.output_directory, 'ROI_binarized', roi_name + '_bin')
+					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
 					self.com.runFslmathsOnLesionFile(user_roi_path, roi_output_path)
 
-				roi_output_directory = os.path.join(self.output_directory, ROI_binarized)
+				roi_output_directory = os.path.join(self.getBaseDirectory(), ROI_binarized)
 				params = ('', '', '_bin.nii.gz')
 				user_rois_output_paths = self._getPathOfFiles(roi_output_directory, *params)
 
@@ -366,7 +366,7 @@ class Operations(object, BaseOperation, SubOperation):
 			
 			self.com.runBet(anatomical_file_path, os.path.join(self.getIntermediatePath(subject), subject + '_Brain'))
 
-			image_files_base = os.path.join(self.output_directory, 'QC_BrainExtractions')
+			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_BrainExtractions')
 			image_path = os.path.join(image_files_base, subject + '_BET.png')
 			self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
 		generateQCPage('bet', image_files_base)

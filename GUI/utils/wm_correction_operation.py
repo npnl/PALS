@@ -7,6 +7,7 @@ class WMCorrectionOperation(BaseOperation):
 		# Skip this step if user has not selected to perform wm correction
 		if self.controller.b_wm_correction.get() == False or self.skip: return False
 
+		max_lesions = 0
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
@@ -22,118 +23,93 @@ class WMCorrectionOperation(BaseOperation):
 			output_file = os.path.join(self.getIntermediatePath(subject), subject + '_NormRangeWM')
 			# set values for healthy WM removal
 			# multiply WM mask by intensity normalized T1
-			self.com.runFslMultiply(anatomical_file_path, corrected_wm_file, output_file)
-			self.com.runFslMean(output_file)
+			self.com.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul')
+			wm_mean = self.com.runFslStats(output_file, '-M')
+
+			lesion_files_count = len(self._getPathOfFiles(self, self.getSubjectPath(subject), startswith_str=subject, substr=self.controller.sv_lesion_mask_id.get(), endswith_str='', second_sub_str='.nii'))
+
+			if max_lesions < lesion_files_count:
+				max_lesions = lesion_files_count
+				self.logger.debug('Updated num of max lesions : ' + str(max_lesions))
+
+			subject_info_list = {}
+			total_native_brain_volume = self.com.runBrainVolume(bet_brain_file)
+			subject_info_list[subject] = [total_native_brain_volume, wm_mean]
+
+			for counter, lesion_file in enumerate(lesion_files):
+				# calculate original and white matter adjusted lesion volumes
+				original_lesion_vol = self.com.runBrainVolume(lesion_file)
+				corrected_lesion_volume, wm_adjusted_lesion = self.wmCorrection(subject, counter+1, wm_mean, anatomical_file_path, lesion_file)
+				volume_removed = original_lesion_vol - corrected_lesion_volume
+				percent_removed = volume_removed*1.0/total_native_brain_volume
+
+				#determine side of lesion
+				#this gets the center of gravity of the lesion using the mni coord and then extracts the first char of the X coordinate
+				lesion_cog = self.com.runFslStats(lesion, '-c')
+				lesion_side = 'L' if lesion_cog.startswith('-') else 'R'
+
+				subject_info_list[subject].append(lesion_side)
+				subject_info_list[subject].append(original_lesion_vol)
+				subject_info_list[subject].append(corrected_lesion_volume)
+				subject_info_list[subject].append(volume_removed)
+				subject_info_list[subject].append(percent_removed)
+
+				# Need to fix this
+				cog = self.com.runFslStats(lesion, '-C')
+
+				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
+				data = ','.join(map(str, subject_info_list[subject]))
+				self.com.runAppendToCSV(data, os.path.join(self.getBaseDirectory(), 'lesion_data.csv'))
 
 
+	def wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
 
-	for SUBJ in $SUBJECTS; do
+		lower = wm_mean - self.controller.voxal_range
+		upper = wm_mean + self.controller.voxal_range
 
-		cd $INPUTDIR/$SUBJ || exit;
+		corrected_lesion_volume = 0.0
 
-		# this assigns subject specific file paths for dependent files (e.g., BET)
-		subj_set_path $SUBJ;
+		output_file = os.path.join(self.getIntermediatePath(subject), '%s_Lesion%d_NormRange'%(subject, lesion_counter))
+		if self.com.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul'):
 
-		# this step removes the lesion mask from the white matter segmentation so we don't calculate values from the lesion mask in getting the wm seg mean.
-		# fslmaths checks that the lesion mask and the wm seg are in the same space. If not, the subject is skipped, and noted in CSV file.
-		if $(fslmaths "${WM_MASK}" -sub ${LesionFiles[0]} "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM); then
-			:
-		else
-			printf "\nCheck Image Orientations for T1 and Lesion Mask. Skipping Subject: ${SUBJ}.";
-			printf "${SUBJ} Skipped" >> "$WORKINGDIR"/lesion_data.csv;
-			printf '\n' >> "$WORKINGDIR"/lesion_data.csv;
-			cd "$INPUTDIR" || exit;
-			continue;
-		fi
+			lower_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_lower'%(subject, lesion_counter))
+			upper_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_upper'%(subject, lesion_counter))
 
-		corrWM=$SUBJECTOPDIR/Intermediate_Files/"${SUBJ}"_corrWM.nii.gz;
+			final_output_file = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d'%(subject, lesion_counter))
 
-		fslmaths $ANATOMICAL -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
+			self.com.runFslWithArgs(output_file, lower, lower_lesion, '-uthr')
+			self.com.runFslWithArgs(output_file, upper, upper_lesion, '-thr')
+			self.com.runFslWithArgs(upper_lesion, lower_lesion, final_output_file, '-add')
+			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_Lesion%d_bin'%(subject, counter))
+			self.com.runFslmathsOnLesionFile(final_output_file, output_bin_file)
+			corrected_lesion_volume = self.com.runBrainVolume(output_bin_file)
+			self.logger.info('The Corrected lesion volume is [%f]'%corrected_lesion_volume)
 
-		WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -M);
-
-		# accounting for potential multiple lesions for this subject
-
-		# updating number of max lesions (we need this to create the csv later)
-		NumLesionFiles=$(find -d "${SUBJ}"*"${LESION_MASK}"*.nii* | wc -l);
-
-		if (( maxlesions < NumLesionFiles )); then
-			maxlesions=$NumLesionFiles;
-
-			echo "updated num of max lesions: " "$maxlesions";
-		fi
-
-		counter=1;
-
-		#create subject info array
-
-		declare -a SubjInfoArray;
-
-		TotalNativeBrainVol=$(fslstats "${BET_Brain}" -V | awk '{print $2;}');
-
-		SubjInfoArray=($SUBJ $TotalNativeBrainVol ${WM_Mean});
-
-		for Lesion in ${LesionFiles[@]}; do
-
-			#calculate original and white matter adjusted lesion volumes
-			OrigLesionVol=$(fslstats "$Lesion" -V | awk '{print $2;}');
-
-			CorrLesionVol=$( wmCorrection );
-
-			VolRemoved=$(awk "BEGIN {printf \"%.9f\",${OrigLesionVol}-${CorrLesionVol}}");
-
-			PercentRemoved=$(awk "BEGIN {printf \"%.9f\",${VolRemoved}/${TotalNativeBrainVol}}");
-
-			#determine side of lesion
-			#this gets the center of gravity of the lesion using the mni coord and then extracts the first char of the X coordinate
-			LesionCOG=$(fslstats ${Lesion} -c | awk '{print substr($0,0,1)}');
-
-			if [ $LesionCOG == '-' ]; then
-				LesionSide='L';
-			else
-				LesionSide='R';
-			fi
-
-			#concatenate onto array with all lesion volumes and percentage:
-			SubjInfoArray+=(${LesionSide});
-			SubjInfoArray+=(${OrigLesionVol});
-			SubjInfoArray+=(${CorrLesionVol});
-			SubjInfoArray+=(${VolRemoved});
-			SubjInfoArray+=(${PercentRemoved});
+		else:
+			self.logger.info('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: %s'%subject)
+			# Need to add equivivalent code
+			# printf "${SUBJ} Skipped\n" >> "$WORKINGDIR"/lesion_data.csv;
+		return corrected_lesion_volume, output_bin_file
 
 
-			COG=$(fslstats $Lesion -C);
-			COG=$( printf "%.0f\n" $COG );
+# This part is still pending
+# #################################[ ADD HEADER TO DATAFILE ]###############################
 
-			fsleyes render -vl $COG --hideCursor -of "$WORKINGDIR"/QC_Lesions/"${SUBJ}"_Lesion"${counter}".png "$ANATOMICAL" $Lesion -a 40 "$SUBJECTOPDIR"/"${SUBJ}"_WMAdjusted_Lesion"${counter}"_bin -cm blue -a 50;
+# 	cd $WORKINGDIR;
+# 	declare -a HeaderArray;
+# 	HeaderArray=(Subject "Total_Native_Brain_Volume" "Mean_White_Matter_Intensity");
 
-			counter=$((counter+1));
+# 	for i in $(seq 1 $maxlesions); do
+# 		HeaderArray+=(Lesion${i}_Hemisphere);
+# 		HeaderArray+=(Lesion${i}_Original_Lesion_Volume);
+# 		HeaderArray+=(Lesion${i}_Corrected_Lesion_Volume);
+# 		HeaderArray+=(Lesion${i}_Volume_Removed);
+# 		HeaderArray+=(Lesion${i}_Percent_Removed);
+# 	done
 
-		done
+# 	StringArray=$(IFS=, ; echo "${HeaderArray[*]}")
 
-		printf '%s,' ${SubjInfoArray[@]} >> "$WORKINGDIR"/lesion_data.csv;
-		printf '\n' >> "$WORKINGDIR"/lesion_data.csv;
+# 	awk -v env_var="${StringArray}" 'BEGIN{print env_var }{print}' lesion_data.csv > lesion_database.csv;
 
-		cd "$INPUTDIR" || exit;
+# 	rm $WORKINGDIR/lesion_data.csv;
 
-	done
-
-#################################[ ADD HEADER TO DATAFILE ]###############################
-
-	cd $WORKINGDIR;
-	declare -a HeaderArray;
-	HeaderArray=(Subject "Total_Native_Brain_Volume" "Mean_White_Matter_Intensity");
-
-	for i in $(seq 1 $maxlesions); do
-		HeaderArray+=(Lesion${i}_Hemisphere);
-		HeaderArray+=(Lesion${i}_Original_Lesion_Volume);
-		HeaderArray+=(Lesion${i}_Corrected_Lesion_Volume);
-		HeaderArray+=(Lesion${i}_Volume_Removed);
-		HeaderArray+=(Lesion${i}_Percent_Removed);
-	done
-
-	StringArray=$(IFS=, ; echo "${HeaderArray[*]}")
-
-	awk -v env_var="${StringArray}" 'BEGIN{print env_var }{print}' lesion_data.csv > lesion_database.csv;
-
-	rm $WORKINGDIR/lesion_data.csv;

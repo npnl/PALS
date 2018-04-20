@@ -67,6 +67,11 @@ class Commands(object):
 		cmd = 'fsleyes render --hideCursor -of %s %s %s -cm blue -a 50;'%(output_image_path, anatomical_file_path, bet_brain_file)
 		self.startExecution(cmd)
 
+	def runFslEyes2(self, anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
+		# fsleyes render -vl $COG --hideCursor -of "$WORKINGDIR"/QC_Lesions/"${SUBJ}"_Lesion"${counter}".png "$ANATOMICAL" $Lesion -a 40 "$SUBJECTOPDIR"/"${SUBJ}"_WMAdjusted_Lesion"${counter}"_bin -cm blue -a 50;
+		cmd = 'fsleyes render -vl $f --hideCursor -of %s %s %s -a 40 %s -cm blue -a 50;'%(cog, output_image_path, anatomical_file_path, lesion_file, wm_adjusted_lesion)
+		self.startExecution(cmd)
+
 	def runFast(self, subject_dir, brain_file):
 		# fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}" "${BET_Brain}";
 		cmd = 'fast -t 1 -n 3 -H 0.1 -I 4 -l 20.0 -g --nopve -o %s %s;'%(subject_dir, brain_file)
@@ -74,18 +79,36 @@ class Commands(object):
 
 	def runFslMathToCheckInSameSpace(self, wm_mask_file, lesion_file, output_file):
 		# fslmaths "${WM_MASK}" -sub ${LesionFiles[0]} "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM
-		cmd = 'fslmaths %s -sub %s %s'%(wm_mask_file, lesion_file, output_file)
-		return self.startExecution(cmd)
+		# cmd = 'fslmaths %s -sub %s %s'%(wm_mask_file, lesion_file, output_file)
+		# return self.startExecution(cmd)
+		return self.runFslWithArgs(wm_mask_file, lesion_file, output_file, '-sub')
 
 	def runFslMultiply(self, anatomical_file_path, corrected_wm_file, output_file):
 		# fslmaths $ANATOMICAL -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
-		cmd = 'fslmaths %s -mul %s %s;'%(anatomical_file_path, corrected_wm_file, output_file)
+		# cmd = 'fslmaths %s -mul %s %s;'%(anatomical_file_path, corrected_wm_file, output_file)
+		# self.startExecution(cmd)
+		self.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul')
+
+	def runFslWithArgs(self, arg_1, arg_2, arg_3, option):
+		# fslmaths arg_1 option arg_2 arg_3;
+		cmd = 'fslmaths %s %s %s %s;'%(arg_1, option, arg_2, arg_3)
+		return self.startExecution(cmd)
+
+	def runFslStats(self, input_file, options):
+		# WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -options);
+		cmd = 'fslstats %s %s'%(input_file, options)
+		return self.startExecution(cmd)
+
+	def runBrainVolume(self, bet_brain_file):
+		# fslstats "${BET_Brain}" -V | awk '{print $2;}'
+		cmd = 'fslstats %s -V'%(bet_brain_file)
+		output = self.startExecution(cmd)
+		return float(output_file.strip.split()[1])
+
+	def runAppendToCSV(self, text, csv_location):
+		cmd = 'echo "%s\n" >> %s'%(text, csv_location)
 		self.startExecution(cmd)
 
-	def runFslMean(self, input_file):
-		# WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -M);
-		cmd = 'fslstats %s -M'%input_file
-		self.startExecution(cmd)
 
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)

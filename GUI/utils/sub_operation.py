@@ -13,7 +13,7 @@ class SubOperation(BaseOperation):
 			
 			self.com.runFast(os.path.join(self.getIntermediatePath(subject), subject), bet_brain_file)
 
-			image_files_base = os.path.join(self.output_directory, 'QC_WM')
+			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_WM')
 			image_path = os.path.join(image_files_base, subject + '_WM.png')
 			self.com.runFslEyes(anatomical_file_path, wm_mask_file, image_path)
 		generateQCPage('WM', image_files_base)

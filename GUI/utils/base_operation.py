@@ -1,5 +1,8 @@
 class BaseOperation():
-	
+
+	def getBaseDirectory(self):
+		return self.output_directory
+
 	def getSubjectPath(self, subject):
 		return os.path.join(self.output_directory, subject)
 

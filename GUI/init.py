@@ -33,13 +33,13 @@ class MainWindow(tk.Tk):
 		#Welcome page
 		self.b_radiological_convention = BooleanVar(self)
 		self.b_wm_correction = BooleanVar(self)
-		self.b_ll_correction = BooleanVar(self)
+		self.b_ll_calculation = BooleanVar(self)
 		self.b_visual_qc = BooleanVar(self)
 		self.b_quality_control = BooleanVar(self)
 		
 		self.b_radiological_convention.set(False)
 		self.b_wm_correction.set(False)
-		self.b_ll_correction.set(False)
+		self.b_ll_calculation.set(False)
 		self.b_visual_qc.set(True)
 		self.b_quality_control.set(False)
 

@@ -10,8 +10,9 @@ from qc_page import generateQCPage
 from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
+from lesion_load_calculation_operation import LesionLoadCalculationOperation
 
-class Operations(object, BaseOperation, WMSegmentationOperation, ):
+class Operations(object, WMSegmentationOperation, WMCorrectionOperation, LesionLoadCalculationOperation):
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
@@ -41,7 +42,13 @@ class Operations(object, BaseOperation, WMSegmentationOperation, ):
 		self.reOrientToRadForAllSubjects()
 		self.runBrainExtraction()
 		self.runWMSegmentation()
+		self._runWMCorrectionHelper()
+
+	def _runWMCorrectionHelper(self):
+		# Skip this step if user has not selected to perform wm correction
+		if self.controller.b_wm_correction.get() == False or self.skip: return False
 		self.runWMCorrection()
+		sef.controller.sv_lesion_mask_id.set('WMAdjusted')
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -108,73 +115,6 @@ class Operations(object, BaseOperation, WMSegmentationOperation, ):
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
 
-
-	def _setSubjectSpecificPaths_1(self, subject):
-		if self.skip: return False
-		anatomical_file_path, lesion_files = None, None
-
-		anatomical_id = self.controller.sv_t1_id.get()
-		intermediate_path = self.getIntermediatePath(subject)
-		if not self.controller.b_radiological_convention.get(): # Need to fix this
-			params = (subject, anatomical_id, '_intNorm.nii.gz')
-			anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
-			
-			if anatomical_id == 'WMAdjusted':
-				params = (subject, anatomical_id, 'bin.nii.gz')
-				lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
-			else:
-				params = (subject, anatomical_id, 'bin.nii.gz')
-				lesion_files = self._getPathOfFiles(intermediate_path, *params)
-
-		else:
-			anatomical_file_path=os.path.join(self.getSubjectPath(subject), subject + '_' + anatomical_id + '_rad_reorient.nii.gz')
-			if self.controller.b_wm_correction.get() or self.controller.b_ll_correction.get():
-				if lesion_mask_id == 'WMAdjusted':
-					params = (subject, anatomical_id, 'bin.nii.gz')
-					lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
-				else:
-					params = (subject, anatomical_id, 'rad_reorient.nii.gz')
-					lesion_files = self._getPathOfFiles(intermediate_path, *params)
-			else:
-				params = (subject, anatomical_id, 'rad_reorient.nii.gz')
-				lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
-
-		
-		# if anatomical_file_path == '':
-		# 	self.logger.info('Anatomical file not present. \
-		# 						Make sure a with name like [%s*%s*_%s] \
-		# 						is present in %s'%(params[0], params[1], params[2], intermediate_path))
-
-		return anatomical_file_path, lesion_files
-
-
-	def _setSubjectSpecificPaths_2(self, subject):
-		if self.skip: return False
-		t1_mgz, seg_file, bet_brain_file, wm_mask_file = [None] * 4
-		if self.controller.b_freesurfer_rois.get():
-			t1_mgz = os.path.join(self.getOriginalPath(subject), 'T1.mgz')
-			seg_file = os.path.join(self.getOriginalPath(subject), 'aparc+aseg.mgz')
-
-		# Run brain extraction only if user has not run it
-		if not self.controller.b_brain_extraction.get():
-			bet_brain_file = os.path.join(self.getIntermediatePath(subject), subject + '_Brain.nii.gz')
-		elif not self.controller.b_radiological_convention.get():
-			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
-			bet_brain_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-		else:
-			bet_brain_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad_reorient.nii.gz')
-
-		# Run white matter segmentation only if user has not run it
-		if not self.controller.b_wm_segmentation.get():
-			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_seg_2.nii.gz')
-		elif not self.controller.b_radiological_convention.get():
-			params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
-			wm_mask_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-		else:
-			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad_reorient.nii.gz')
-
-		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
-
 	def performWMSegmentation(self):
 		if self.skip: return False
 		self.logger.info('Performing white matter segmentation...[long process]')
@@ -190,13 +130,6 @@ class Operations(object, BaseOperation, WMSegmentationOperation, ):
 		if drop_existing and os.path.exists(path):
 			rmtree(path)
 		os.makedirs(path)
-
-	def _extractFileName(self, path, remove_extension=True):
-		head, tail = ntpath.split(path)
-		filename =  tail or ntpath.basename(head)
-		if remove_extension:
-			filename, file_extension = os.path.splitext(filename)
-		return filename
 
 	def _createROIsHelper(self):
 		pass
@@ -219,7 +152,7 @@ class Operations(object, BaseOperation, WMSegmentationOperation, ):
 		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
 		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
 		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
-		if self.controller.b_ll_correction.get():
+		if self.controller.b_ll_calculation.get():
 			self._createDirectory('QC_LL')
 			self._createDirectory('QC_Registrations')
 
@@ -350,7 +283,7 @@ class Operations(object, BaseOperation, WMSegmentationOperation, ):
 
 
 		for index, lesion_file in enumerate(rad_lesion_files):
-			if self.controller.b_wm_correction.get() or self.controller.b_ll_correction.get():
+			if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
 				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
 			else:
 				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')

@@ -45,7 +45,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_lesion_load = Label(lf_operations, text="3. Lesion Load Calculation")
 		lb_lesion_load.grid(row=1, column=0,  sticky="W", pady=(3, 10))
 
-		chk_ll_calculation = Checkbutton(lf_operations, variable=controller.b_ll_correction)
+		chk_ll_calculation = Checkbutton(lf_operations, variable=controller.b_ll_calculation)
 		chk_ll_calculation.grid(row=1, column=1, sticky='W', pady=(3, 10))
 
 
@@ -73,7 +73,7 @@ class WelcomePage(BaseInputPage, object):
 	def moveToNextPage(self):
 		if self.controller.b_radiological_convention.get() \
 			or self.controller.b_wm_correction.get() \
-			or self.controller.b_ll_correction.get() \
+			or self.controller.b_ll_calculation.get() \
 			or self.controller.b_quality_control.get():
 			super(WelcomePage, self).moveToNextPage()
 		else:

@@ -4,9 +4,6 @@ from base_operation import BaseOperation
 
 class WMCorrectionOperation(BaseOperation):
 	def runWMCorrection(self):
-		# Skip this step if user has not selected to perform wm correction
-		if self.controller.b_wm_correction.get() == False or self.skip: return False
-
 		max_lesions = 0
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
@@ -54,11 +51,15 @@ class WMCorrectionOperation(BaseOperation):
 				subject_info_list[subject].append(volume_removed)
 				subject_info_list[subject].append(percent_removed)
 
-				cog = ' '.join(map(int, map(round, self.com.runFslStats(lesion, '-C').strip()split())))
+				cog = ' '.join(map(int, map(round, self.com.runFslStats(lesion, '-C').strip().split())))
 
-				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
+				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path)
 				data = ','.join(map(str, subject_info_list[subject]))
 				self.com.runAppendToCSV(data, os.path.join(self.getBaseDirectory(), 'lesion_data.csv'))
+
+		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
+		generateQCPage('lesion', image_files_base)
+		self.logger.info('White Matter correction completed for all subjects')
 
 
 	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):

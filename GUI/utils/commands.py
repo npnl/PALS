@@ -62,9 +62,9 @@ class Commands(object):
 		cmd = 'bet %s %s -R -f 0.5 -g 0;'%(anatomical_file_path, output_file)
 		self.startExecution(cmd)
 
-	def runFslEyes(self, anatomical_file_path, bet_brain_file, output_image_path):
+	def runFslEyes(self, anatomical_file_path, bet_brain_file='', output_image_path='', options='-cm blue -a 50'):
 		# fsleyes render --hideCursor -of "$WORKINGDIR"/QC_BrainExtractions/"${SUBJ}"_BET.png "$ANATOMICAL" "$BET_Brain" -cm blue -a 50;
-		cmd = 'fsleyes render --hideCursor -of %s %s %s -cm blue -a 50;'%(output_image_path, anatomical_file_path, bet_brain_file)
+		cmd = 'fsleyes render --hideCursor -of %s %s %s %s;'%(output_image_path, anatomical_file_path, bet_brain_file, options)
 		self.startExecution(cmd)
 
 	def runFslEyes2(self, anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
@@ -109,6 +109,13 @@ class Commands(object):
 		cmd = 'echo "%s\n" >> %s'%(text, csv_location)
 		self.startExecution(cmd)
 
+	def runFlirt(self, bet_brain_file, brain_file, reg_brain_file, reg_file):
+		# flirt -in "$BET_Brain" -ref $1 -out $RegBrain -omat $RegFile -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear;
+		cmd = 'flirt -in %s -ref %s -out %s -omat %s -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear;'%(bet_brain_file, brain_file, reg_brain_file, reg_file)
+		self.startExecution(cmd)
+
+	def runRawCommand(self, cmd):
+		return self.startExecution(cmd)
 
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)

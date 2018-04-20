@@ -39,7 +39,7 @@ class WMCorrectionOperation(BaseOperation):
 			for counter, lesion_file in enumerate(lesion_files):
 				# calculate original and white matter adjusted lesion volumes
 				original_lesion_vol = self.com.runBrainVolume(lesion_file)
-				corrected_lesion_volume, wm_adjusted_lesion = self.wmCorrection(subject, counter+1, wm_mean, anatomical_file_path, lesion_file)
+				corrected_lesion_volume, wm_adjusted_lesion = self._wmCorrection(subject, counter+1, wm_mean, anatomical_file_path, lesion_file)
 				volume_removed = original_lesion_vol - corrected_lesion_volume
 				percent_removed = volume_removed*1.0/total_native_brain_volume
 
@@ -54,15 +54,14 @@ class WMCorrectionOperation(BaseOperation):
 				subject_info_list[subject].append(volume_removed)
 				subject_info_list[subject].append(percent_removed)
 
-				# Need to fix this
-				cog = self.com.runFslStats(lesion, '-C')
+				cog = ' '.join(map(int, map(round, self.com.runFslStats(lesion, '-C').strip()split())))
 
 				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
 				data = ','.join(map(str, subject_info_list[subject]))
 				self.com.runAppendToCSV(data, os.path.join(self.getBaseDirectory(), 'lesion_data.csv'))
 
 
-	def wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
+	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
 
 		lower = wm_mean - self.controller.voxal_range
 		upper = wm_mean + self.controller.voxal_range

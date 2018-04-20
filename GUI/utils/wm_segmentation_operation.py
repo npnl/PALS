@@ -3,7 +3,7 @@ from qc_page import generateQCPage
 
 from base_operation import BaseOperation
 
-class SubOperation(BaseOperation):
+class WMSegmentationOperation(BaseOperation):
 	def runWMSegmentation(self):
 		# Skip this step if user has already performed brain extraction
 		if self.controller.b_wm_segmentation.get() == True or self.skip: return False

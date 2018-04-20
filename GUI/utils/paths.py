@@ -7,10 +7,11 @@ from commands import Commands
 
 from qc_page import generateQCPage
 
-from sub_operation import SubOperation
 from base_operation import BaseOperation
+from wm_segmentation_operation import WMSegmentationOperation
+from wm_correction_operation import WMCorrectionOperation
 
-class Operations(object, BaseOperation, SubOperation):
+class Operations(object, BaseOperation, WMSegmentationOperation, ):
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
@@ -40,6 +41,7 @@ class Operations(object, BaseOperation, SubOperation):
 		self.reOrientToRadForAllSubjects()
 		self.runBrainExtraction()
 		self.runWMSegmentation()
+		self.runWMCorrection()
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):

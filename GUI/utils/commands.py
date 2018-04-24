@@ -114,6 +114,10 @@ class Commands(object):
 		cmd = 'flirt -in %s -ref %s -out %s -omat %s -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear;'%(bet_brain_file, brain_file, reg_brain_file, reg_file)
 		self.startExecution(cmd)
 
+	def runMriConvert(self, t1_mgz, fs_t1):
+		cmd = 'mri_convert --in_type mgz --out_type nii --out_orientation RAS %s %s >/dev/null;'%(t1_mgz, fs_t1)
+		self.startExecution(cmd)
+
 	def runRawCommand(self, cmd):
 		return self.startExecution(cmd)
 

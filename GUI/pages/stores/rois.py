@@ -114,6 +114,23 @@ FreesurferSubcorticalROINames = [
 	'Left Thalamus',
 	'Right Thalamus']
 
+FreesurferSubCorticalROINamesToFileMapping = {
+	'Left Accumbens'		: 26,
+	'Right Accumbens'		: 58,
+	'Left Amygdala'			: 18,
+	'Right Amygdala'		: 54,
+	'Left Caudate'			: 11,
+	'Right Caudate'			: 50,
+	'Left Hippocampus'		: 17,
+	'Right Hippocampus'		: 53,
+	'Left Pallidum'			: 13,
+	'Right Pallidum'		: 52,
+	'Left Putamen'			: 12,
+	'Right Putamen'			: 51,
+	'Left Thalamus'			: 10,
+	'Right Thalamus'		: 49
+}
+
 def createObjectArrays(controller, names):
 	output = []
 	for name in names:
@@ -124,3 +141,4 @@ def getROIs(controller):
 	return (createObjectArrays(controller, CorticospinalTractROINames),\
 			createObjectArrays(controller, FreesurferCorticalROINames),\
 			createObjectArrays(controller, FreesurferSubcorticalROINames))
+

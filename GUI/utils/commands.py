@@ -24,13 +24,6 @@ class Commands(object):
 		cmd = "gzip %s > /dev/null 2>&1;"%(input_directory)
 		self.startExecution(cmd)
 
-
-	def runFslStat(self, argument):
-		cmd = 'fslstats %s -R'%(argument)
-		output = self.startExecution(cmd)
-		values = map(float, output.strip().split())
-		return values
-
 	def runFslMath(self, arg1, minimum, scalling, arg2):
 		cmd_1 = 'fslmaths %s -sub %f -mul %f %s_scaled;'%(arg1, minimum, scalling, arg2)
 		cmd_2 = 'fslmaths %s_scaled %s_intNorm.nii.gz -odt char;'%(arg2, arg2)
@@ -97,7 +90,14 @@ class Commands(object):
 	def runFslStats(self, input_file, options):
 		# WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -options);
 		cmd = 'fslstats %s %s'%(input_file, options)
-		return self.startExecution(cmd)
+		output = self.startExecution(cmd)
+		if options == '-C':
+			output = ' '.join(map(str, map(int, map(round, output.strip().split()))))
+		if options == '-R':
+			output = map(float, output.strip().split())
+		if options == '-c':
+			output = 'L' if output.startswith('-') else 'R'
+		return output
 
 	def runBrainVolume(self, bet_brain_file):
 		# fslstats "${BET_Brain}" -V | awk '{print $2;}'
@@ -105,8 +105,11 @@ class Commands(object):
 		output = self.startExecution(cmd)
 		return float(output_file.strip.split()[1])
 
-	def runAppendToCSV(self, text, csv_location):
-		cmd = 'echo "%s\n" >> %s'%(text, csv_location)
+	def runAppendToCSV(self, data, csv_location):
+		text = ''
+		for row in data:
+			text += ','.join(map(str, row)) + '\n'
+		cmd = 'echo "%s" >> %s'%(text, csv_location)
 		self.startExecution(cmd)
 
 	def runFlirt(self, bet_brain_file, brain_file, reg_brain_file, reg_file):

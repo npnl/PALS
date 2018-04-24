@@ -46,6 +46,8 @@ class Operations(object, WMSegmentationOperation,\
 		self.runBrainExtraction()
 		self.runWMSegmentation()
 		self._runWMCorrectionHelper()
+		self.runLesionLoadCalculation()
+		self.runLesionLoadCalculationFS()
 		self.createQCPage()
 
 	def createQCPage(self):
@@ -57,8 +59,8 @@ class Operations(object, WMSegmentationOperation,\
 	def _runWMCorrectionHelper(self):
 		# Skip this step if user has not selected to perform wm correction
 		if self.controller.b_wm_correction.get() == False or self.skip: return False
+		sef.controller.sv_lesion_mask_id.set('WMAdjusted') # Doubt : What should happend to the user input for lesion_mask_id
 		self.runWMCorrection()
-		sef.controller.sv_lesion_mask_id.set('WMAdjusted')
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -98,7 +100,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger.info('Lesion files processed for all subjects')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
-		minimum, maximum = self.com.runFslStat(arg_1)
+		minimum, maximum = self.com.runFslStats(arg_1)
 		scaling = 255.0/(maximum - minimum)
 		self.com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 

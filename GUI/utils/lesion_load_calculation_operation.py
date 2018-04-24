@@ -86,7 +86,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 
 class LesionLoadCalculationFSOperation(BaseOperation):
-	def runLesionLoadCalculation(self):
+	def runLesionLoadCalculationFS(self):
 		if self.controller.b_ll_calculation.get() == False or self.skip: return False
 
 		roi_codes = self.controller.roi_codes;
@@ -107,7 +107,7 @@ class LesionLoadCalculationFSOperation(BaseOperation):
 			self.com.runRawCommand(cmd)
 
 			output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
-			self.com.runFslEyes(t12_fs_output_file, output_image_path=output_image_path, options=''):
+			self.com.runFslEyes(t12_fs_output_file, output_image_path=output_image_path, options='')
 
 			# invert transformation matrix
 			xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)

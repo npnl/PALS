@@ -19,7 +19,7 @@ from pages import LesionLoadCalculationInputPage
 from pages import rois
 
 LARGE_FONT = ("Verdana", 12)
- 
+
 class MainWindow(tk.Tk):
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
@@ -27,7 +27,7 @@ class MainWindow(tk.Tk):
 		# self.geometry("1200x800")
 
 		logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: '
-                                '%(message)s')
+							'%(message)s')
 		self.logger = logging.getLogger(__name__)
 
 		#Welcome page
@@ -121,11 +121,11 @@ class MainWindow(tk.Tk):
 			start = event.widget.index("sel.first")
 			end = event.widget.index("sel.last")
 			event.widget.delete(start, end)
-		except TclError, e:
+		except TclError as e:
 			pass
 
 		event.widget.insert("insert", clipboard)
- 
+
 	def show_frame(self, frame_number):
 		if frame_number >= len(self.frames) or frame_number < 0:
 			return

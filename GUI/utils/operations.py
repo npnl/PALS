@@ -11,8 +11,11 @@ from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
 from lesion_load_calculation_operation import LesionLoadCalculationOperation
+from lesion_load_calculation_operation import LesionLoadCalculationFSOperation
 
-class Operations(object, WMSegmentationOperation, WMCorrectionOperation, LesionLoadCalculationOperation):
+class Operations(object, WMSegmentationOperation,\
+				WMCorrectionOperation, LesionLoadCalculationOperation, \
+				LesionLoadCalculationFSOperation):
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
@@ -43,6 +46,13 @@ class Operations(object, WMSegmentationOperation, WMCorrectionOperation, LesionL
 		self.runBrainExtraction()
 		self.runWMSegmentation()
 		self._runWMCorrectionHelper()
+		self.createQCPage()
+
+	def createQCPage(self):
+		# Skip this step if user has not chosen to generate QC page
+		if self.controller.b_visual_qc.get() == False or self.skip: return False
+		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
+		generateQCPage(page_type, images_dir)
 
 	def _runWMCorrectionHelper(self):
 		# Skip this step if user has not selected to perform wm correction

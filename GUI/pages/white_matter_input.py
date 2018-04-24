@@ -11,7 +11,7 @@ import os
 from threading import Thread
 import subprocess
 
-from utils.paths import isValidPath
+from utils import isValidPath
 from base_input import BaseInputPage
 from executor import Worker
 

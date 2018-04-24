@@ -8,7 +8,7 @@ except ImportError:
 from ..components import InputFieldList
 from ..stores import NameVarStore
 
-from utils.paths import isValidPath
+from utils import isValidPath
 
 class OwnROIInputPopup(Toplevel, object):
 	def __init__(self, controller):

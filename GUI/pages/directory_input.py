@@ -6,7 +6,7 @@ except ImportError:
 	from tkinter import *
 
 from base_input import BaseInputPage
-from utils.paths import isValidPath
+from utils import isValidPath
 
 class DirectoryInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):

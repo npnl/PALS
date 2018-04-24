@@ -49,7 +49,7 @@ def generateQCPage(page_type, images_dir):
 		image_name = _extractFileName(image_path)
 		subject = image_name.split('_')[0]
 
-		if page_type == 'lesion':
+		if page_type == 'Lesions':
 			lesion_num = image_name.split('_')[1]
 
 		output += '<table cellspacing="1" style="width:100%; background-color:#000;">' + '\n'
@@ -57,7 +57,7 @@ def generateQCPage(page_type, images_dir):
 		output += '<td> <FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=5> %s </FONT> </td>'%(subject) + '\n'
 		output += '</tr>' + '\n'
 		
-		if page_type == 'lesion':
+		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
 			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div></td>'%(lesion_num, image_path, image_path) + '\n'
 		else:

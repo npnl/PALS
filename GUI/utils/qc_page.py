@@ -1,21 +1,6 @@
 import os
 import ntpath
 
-def _getPathOfFiles(base_path, endswith_str=''):
-	all_files = []
-	for item in os.listdir(base_path):
-		if item.endswith(endswith_str):
-			all_files.append(os.path.join(base_path, item))
-	return all_files
-
-def _extractFileName(path, remove_extension=True):
-	head, tail = ntpath.split(path)
-	filename =  tail or ntpath.basename(head)
-	if remove_extension:
-		filename, file_extension = os.path.splitext(filename)
-	return filename
-
-
 def generateQCPage(page_type, images_dir):
 	output = ''
 	output += '<html>' + '\n'
@@ -72,3 +57,17 @@ def generateQCPage(page_type, images_dir):
 	with open(os.path.join(images_dir, page_type + '.html'), 'w') as f:
 		f.write(output)
 		f.close()
+
+def _getPathOfFiles(base_path, endswith_str=''):
+	all_files = []
+	for item in os.listdir(base_path):
+		if item.endswith(endswith_str):
+			all_files.append(os.path.join(base_path, item))
+	return all_files
+
+def _extractFileName(path, remove_extension=True):
+	head, tail = ntpath.split(path)
+	filename =  tail or ntpath.basename(head)
+	if remove_extension:
+		filename, file_extension = os.path.splitext(filename)
+	return filename

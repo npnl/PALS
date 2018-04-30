@@ -7,24 +7,29 @@ class LesionLoadCalculationOperation(BaseOperation):
 		# Skip this step if user did not ask to perform this operation
 		if self.controller.b_ll_calculation.get() == False or self.skip: return False
 
-		# Need to fix these
-		brain_file = None
-		space = None
-		self._runLesionLoadCalculationHelper(brain_file, space)
+		standard_brain = '/Users/amit/WorkPro/Lily/PALS/ROIs/MNI152_T1_2mm_brain.nii' # Doubt : Need to change this value with correct one
+		template_brain = '/Users/amit/WorkPro/Lily/PALS/ROIs/MNI152_T1_2mm_brain.nii'
+
+		if self.controller.b_own_rois.get() == True:
+			space = 'custom'
+			roi_list = self.controller.user_rois
+			self._runLesionLoadCalculationHelper(standard_brain, space, roi_list)
+
+		if self.controller.b_default_rois.get() == True:
+			space = 'MNI152'
+			roi_list = self.controller.default_roi_paths
+			self._runLesionLoadCalculationHelper(template_brain, space, roi_list)
+
+		if self.controller.b_freesurfer_rois.get() == True:
+			space = 'FS'
+			self.runLesionLoadCalculationFS()
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		generateQCPage('Registration', image_files_base)
 		self.logger.info('Lesion Load Calculation completed for all subjects')
 
-	def _runLesionLoadCalculationHelper(self, brain_file, space):
-		roi_list = []
-		if space == 'custom':
-			roi_list = []
-		elif space == 'MNI152':
-			roi_list = []
-		else:
-			pass
-
+	def _runLesionLoadCalculationHelper(self, brain_file, space, roi_list):
+		all_subjects_info = []
 		max_lesions = 0
 		for subject in self.subjects:
 			subject_info = [subject]
@@ -83,13 +88,39 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 					subject_info.append(roi_volume)
 					subject_info.append(lesion_load)
+				all_subjects_info.append(subject_info)
+
+	def _writeToCSV(self, subject_info_all, max_lesions, roi_list, space):
+		header = ['Subject']
+		for lesion_counter in range(max_lesions):
+			header.append('Lesion%d_Volume_StandardSpace'%lesion_counter+1)
+			for roi in roi_list:
+				roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
+				header.append('Lesion%d_%s_Volume'%(lesion_counter+1, roi_name))
+				header.append('Lesion%d_%s_lesionload'%(lesion_counter+1, roi_name))
+
+		# Write data to the csv file
+		subject_info_with_header = header + subject_info_all
+		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
+
+		self._generateQCForRois(space)
 
 
-class LesionLoadCalculationFSOperation(BaseOperation):
+	def _generateQCForRois(self, space):
+		for roi in roi_list:
+			roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
+			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LL', space, roi_name)
+			generateQCPage('LL_%s'%(roi_name), image_files_base)
+
+
 	def runLesionLoadCalculationFS(self):
-		if self.controller.b_ll_calculation.get() == False or self.skip: return False
+		# Skip this step if user did not ask to perform this operation
+		# Skip if user does not selected any free surfer rois
+		if self.controller.b_ll_calculation.get() == False or\
+			self.controller.b_freesurfer_rois.get() == False or self.skip: return False
 
-		roi_codes = self.controller.roi_codes;
+		roi_codes = self.controller.fs_roi_paths
+		max_lesions = 0
 
 		for subject in self.subjects:
 			subject_info = [subject]
@@ -113,6 +144,12 @@ class LesionLoadCalculationFSOperation(BaseOperation):
 			xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
 			cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, xfm_file)
 			self.com.runRawCommand(cmd)
+
+			lesion_files_count = len(lesion_files)
+
+			if max_lesions < lesion_files_count:
+				max_lesions = lesion_files_count
+				self.logger.debug('Updated num of max lesions : ' + str(max_lesions))
 
 
 			# extract all ROIs for each subj
@@ -161,40 +198,20 @@ class LesionLoadCalculationFSOperation(BaseOperation):
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, t12_fs_output_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
-			# printf '%s,' ${LLArray[@]} >> "$WORKINGDIR"/lesion_load_data.csv;
-			# printf '\n' >> "$WORKINGDIR"/lesion_load_data.csv;
+	def _writeToCSV2(self, subject_info_all, max_lesions, roi_list, space):
+		header = ['Subject']
+		for lesion_counter in range(max_lesions):
+			header.append('Lesion%d_Volume_FSSpace'%lesion_counter+1)
+			for roi in roi_list:
+				roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
+				header.append('roi%s_Volume'%(roi_name))
+				header.append('Lesion%d_roi%s_lesionload'%(lesion_counter+1, roi_name))
 
-		# cd "$WORKINGDIR"/QC_Registrations/FS || exit;
-		# makeQCPage Registration;
 
-		# ##############################[ ADD HEADER TO CSV FILE ]##################################
+		# Write data to the csv file
+		subject_info_with_header = header + subject_info_all
+		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
+		self._generateQCForRois(space)
 
-		# cd $WORKINGDIR;
-		# declare -a HeaderArray;
-		# HeaderArray=(Subject);
 
-		# for i in $(seq 1 $maxlesions); do
-		# 	HeaderArray+=(Lesion${i}_Volume_FSSpace);
-		# 	for roi in ${FSrois[@]}; do
-		# 		HeaderArray+=(roi${roi}_Volume);
-		# 		HeaderArray+=(Lesion${i}_roi${roi}_lesionload);
-		# 	done
-
-		# done
-
-		# StringArray=$(IFS=, ; echo "${HeaderArray[*]}")
-
-		# awk -v env_var="${StringArray}" 'BEGIN{print env_var}{print}' lesion_load_data.csv > lesion_load_FS_database.csv;
-
-		# rm $WORKINGDIR/lesion_load_data.csv;
-
-		# cd $WORKINGDIR/QC_LL/FS;
-
-		# rois=`ls -d *`;
-
-		# for roi in $rois; do
-		# 		cd $roi;
-		# 		makeQCPage LL_$roi;
-		# 		cd $WORKINGDIR/QC_LL/FS/;
-		# done
 

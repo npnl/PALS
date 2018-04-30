@@ -3,6 +3,7 @@ import ntpath
 from shutil import copyfile, rmtree
 
 from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
+from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
 from commands import Commands
 
 from qc_page import generateQCPage
@@ -10,12 +11,12 @@ from qc_page import generateQCPage
 from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
+from brain_extraction_operation import BrainExtractionOperation
 from lesion_load_calculation_operation import LesionLoadCalculationOperation
-from lesion_load_calculation_operation import LesionLoadCalculationFSOperation
 
 class Operations(object, WMSegmentationOperation,\
-				WMCorrectionOperation, LesionLoadCalculationOperation, \
-				LesionLoadCalculationFSOperation):
+				WMCorrectionOperation, BrainExtractionOperation,\
+				LesionLoadCalculationOperation):
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
@@ -100,7 +101,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger.info('Lesion files processed for all subjects')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
-		minimum, maximum = self.com.runFslStats(arg_1)
+		minimum, maximum = self.com.runFslStats(arg_1, '-R')
 		scaling = 255.0/(maximum - minimum)
 		self.com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 
@@ -143,21 +144,33 @@ class Operations(object, WMSegmentationOperation,\
 			rmtree(path)
 		os.makedirs(path)
 
-	def _createROIsHelper(self):
-		pass
+	def _getRoiFilePaths(self, roi_options, mapping):
+		roi_paths = []
+		for roi in roi_options:
+			if roi.get():
+				roi_name = roi.name
+				if roi_name in mapping:
+					roi_file = mapping[roi_name]
+					full_path = os.path.join(self.getBaseDirectory(), 'ROIs', roi_file)
+					roi_paths.append(full_path)
+		return roi_paths
 
 	def _getDefaultROIsPaths(self):
-		return []
+		all_rois = self.controller.default_corticospinal_tract_roi\
+					+ self.controller.default_freesurfer_cortical_roi
+		roi_paths = self._getRoiFilePaths(all_rois, FS_Map)
+		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)
+		self.controller.default_roi_paths = roi_paths
+		return roi_paths
 
 	def _getFSROIsPaths(self):
-		fs_roi_paths = []
-		for obj in self.controller.freesurfer_cortical_roi:
-			if obj.get():
-				fs_roi_paths.append(FS_Map[obj.name])
+		fs_roi_options = self.controller.freesurfer_cortical_roi
+		fs_roi_paths = self._getRoiFilePaths(fs_roi_options, FS_Map)
+		self.controller.fs_roi_paths = fs_roi_paths
 		return fs_roi_paths
 
 	def _getUserROIsPaths(self):
-		return []
+		return self.controller.user_rois;
 
 	def createROIDirectories(self):
 		if self.skip: return False
@@ -302,23 +315,6 @@ class Operations(object, WMSegmentationOperation,\
 			self.com.runFslOrient2Std(lesion_file, output_path)
 
 		return True
-
-
-	def runBrainExtraction(self):
-		# Skip this step if user has already performed brain extraction
-		if self.controller.b_brain_extraction.get() == True or self.skip: return False
-		for subject in self.subjects:
-			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
-			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
-			
-			self.com.runBet(anatomical_file_path, os.path.join(self.getIntermediatePath(subject), subject + '_Brain'))
-
-			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_BrainExtractions')
-			image_path = os.path.join(image_files_base, subject + '_BET.png')
-			self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
-		generateQCPage('bet', image_files_base)
-		self.logger.info('Brain extraction completed for all subjects')
-
 
 	def getTemplateBrainROIS(self):
 		parent_dir =  os.path.abspath(os.path.join(os.getcwd(), os.pardir))

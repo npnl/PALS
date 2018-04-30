@@ -13,8 +13,8 @@ class Commands(object):
 		for stdout_line in iter(self.running_process.stdout.readline, ""):
 			output += stdout_line
 		self.running_process.stdout.close()
-		# if return_code:
-		# 	raise subprocess.CalledProcessError(return_code, cmd)
+		if return_code != 0:
+			self.logger.error('Something went wrong.')
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		return output

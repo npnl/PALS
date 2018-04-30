@@ -29,3 +29,9 @@ class NameVarStore(object):
 
 	def set(self, value):
 		self.holder.set(value)
+
+	def __str__(self):
+		return '%s is set to %s'%(self.name, self.get())
+
+	def __repr__(self):
+		return self.__str__()

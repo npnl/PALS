@@ -4,6 +4,11 @@ from shutil import copyfile, rmtree
 
 class BaseOperation():
 
+	def __new__(cls, *args, **kwargs):
+		if cls is BaseOperation:
+			raise TypeError('BaseOperation may not be instantiated')
+		return object.__new__(cls, *args, **kwargs)
+
 	def getBaseDirectory(self):
 		return self.output_directory
 

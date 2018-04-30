@@ -21,8 +21,6 @@ from pages import rois
 LARGE_FONT = ("Verdana", 12)
 
 
-#comment here added 
-
 class MainWindow(tk.Tk):
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)

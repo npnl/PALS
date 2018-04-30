@@ -23,16 +23,16 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lf_brain_ext.grid_columnconfigure(0, weight=1)
 
 
-		lb_brain_extraction = Label(lf_brain_ext, text="Have you performed brain extraction") #.grid(row=self.starting_row+2, sticky=W)
+		lb_brain_extraction = Label(lf_brain_ext, text="Have you performed skull-stripping?") #.grid(row=self.starting_row+2, sticky=W)
 		lb_brain_extraction.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
 
-		lb_bet_identifier = Label(lf_brain_ext, text="BET Identifier") #.grid(row=self.starting_row+2, sticky=W)
+		lb_bet_identifier = Label(lf_brain_ext, text="Please indicate your skull-stripped brain identifier (e.g., 'Brain')") #.grid(row=self.starting_row+2, sticky=W)
 		lb_bet_identifier.grid(row=1, column=0, columnspan=40, sticky="W", pady=(3, 20))
 
 		en_bet_identifier = Entry(lf_brain_ext, textvariable=controller.sv_bet_id, width = 20)
 		en_bet_identifier.config(state='disabled')
 		en_bet_identifier.grid(row=1, column=41, columnspan=50, sticky="W", pady=(3, 20))
-		
+
 		chk_brain_extraction = tk.Checkbutton(lf_brain_ext, variable=controller.b_brain_extraction, command=lambda : self.setEntryState(en_bet_identifier, self.controller.b_brain_extraction))
 		chk_brain_extraction.grid(row=0, column=41, sticky='W', pady=3)
 
@@ -43,19 +43,19 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lf_lesion_load.grid_columnconfigure(0, weight=1)
 
 
-		lb_default_rois = Label(lf_lesion_load, text="Default regions of interest") #.grid(row=self.starting_row+2, sticky=W)
+		lb_default_rois = Label(lf_lesion_load, text="Use default regions of interest") #.grid(row=self.starting_row+2, sticky=W)
 		lb_default_rois.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
 
 		self.chk_default_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_default_rois, command=lambda: self.showDefaultROIPopup())
 		self.chk_default_rois.grid(row=0, column=41, sticky='W', pady=3)
 
-		lb_subject_specific= Label(lf_lesion_load, text="Use subject specific Freesurfer segmentation") #.grid(row=self.starting_row+2, sticky=W)
+		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific Freesurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
 		lb_subject_specific.grid(row=1, column=0, columnspan=40, sticky="W", pady=3)
 
 		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_freesurfer_rois, command=lambda: self.freesurferROIPopup())
 		chk_subject_specific.grid(row=1, column=41, sticky='W', pady=3)
 
-		lb_own_rois= Label(lf_lesion_load, text="Use my own ROIs") #.grid(row=self.starting_row+2, sticky=W)
+		lb_own_rois= Label(lf_lesion_load, text="Use my own regions of interest") #.grid(row=self.starting_row+2, sticky=W)
 		lb_own_rois.grid(row=2, column=0, columnspan=40, sticky="W", pady=(3, 20))
 
 		chk_own_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_own_rois, command=lambda: self.showOwnROIPopup())
@@ -70,7 +70,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		if True:
 			super(LesionLoadCalculationInputPage, self).moveToNextPage()
 		else:
-			self.setRequiredInputError('Select atleast one operation')
+			self.setRequiredInputError('Please select at least one operation')
 
 	def checkIfAtleastOneSelected(self, options_list):
 		for option in options_list:
@@ -85,7 +85,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		if self.controller.b_default_rois.get():
 			roi_popup = DefaultROIInputPopup(self.controller)
 			roi_popup.grab_set()
-			self.chk_default_rois["state"] = "disabled" 
+			self.chk_default_rois["state"] = "disabled"
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
@@ -109,11 +109,10 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		if self.controller.b_freesurfer_rois.get():
 			roi_popup = FSROIInputPopup(self.controller)
 			roi_popup.grab_set()
-			self.chk_default_rois["state"] = "disabled" 
+			self.chk_default_rois["state"] = "disabled"
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
 			self.updateCheckBoxState(self.controller.b_freesurfer_rois,\
 										self.controller.freesurfer_cortical_roi\
 										+ self.controller.freesurfer_subcortical_roi)
-

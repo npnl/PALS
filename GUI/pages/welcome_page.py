@@ -77,7 +77,7 @@ class WelcomePage(BaseInputPage, object):
 			or self.controller.b_quality_control.get():
 			super(WelcomePage, self).moveToNextPage()
 		else:
-			self.setRequiredInputError('Select atleast one operation')
+			self.setRequiredInputError('Select at least one operation')
 
 
 	def checkValues(self, controller):

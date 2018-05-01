@@ -11,7 +11,6 @@ import logging
 
 from pages import WelcomePage
 from pages import DirectoryInputPage
-from pages import PerformedOperationsInputPage
 from pages import PauseOptionsInputPage
 from pages import RunningOperationsPage
 from pages import WhiteMatterInputPage

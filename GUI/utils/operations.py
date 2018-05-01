@@ -133,7 +133,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger.info('Performing white matter segmentation...[long process]')
 		for subject in self.new_subjects:
 			pass
-		self.logger.info('White Matter segmentation completed for all subjects') 
+		self.logger.info('White Matter segmentation completed for all subjects')
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
 		parent = os.path.join(*parent)
@@ -299,10 +299,10 @@ class Operations(object, WMSegmentationOperation,\
 					self.com.runFslOrient(rad_wm_file, args='-swaporient')
 
 		self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))
-		
+
 		if self.controller.b_brain_extraction.get():
 			self.com.runFslOrient2Std(rad_bet_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_bet_id.get() + '_rad_reorient'))
-		
+
 		if self.controller.b_wm_segmentation.get():
 			self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
 
@@ -337,4 +337,3 @@ def isValidPath(filePath):
 
 if __name__ == '__main__':
 	pass
-

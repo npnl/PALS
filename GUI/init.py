@@ -20,6 +20,7 @@ from pages import rois
 
 LARGE_FONT = ("Verdana", 12)
 
+
 class MainWindow(tk.Tk):
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
@@ -36,7 +37,7 @@ class MainWindow(tk.Tk):
 		self.b_ll_calculation = BooleanVar(self)
 		self.b_visual_qc = BooleanVar(self)
 		self.b_quality_control = BooleanVar(self)
-		
+
 		self.b_radiological_convention.set(False)
 		self.b_wm_correction.set(False)
 		self.b_ll_calculation.set(False)
@@ -99,14 +100,14 @@ class MainWindow(tk.Tk):
 		container.grid_rowconfigure(0, weight=1)
 		container.grid_columnconfigure(0, weight=1)
 		self.frames = {}
-		
+
 		frame_number = 0
 		for PageType in self.getApplicationPages():
 			frame = PageType(container, self, frame_number)
 			self.frames[frame_number] = frame
 			frame_number += 1
 			frame.grid(row=0, column=0, sticky="nsew", padx=25, pady=25)
- 
+
 		self.show_frame(0)
 
 		self.bind_class("Text","<Control-a>", self.selectAll)
@@ -134,9 +135,9 @@ class MainWindow(tk.Tk):
 		frame = self.frames[frame_number]
 		frame.event_generate("<<ShowFrame>>")
 		frame.tkraise()
-	
+
 	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage] 
+		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage]
 		return pages
 
 if __name__ == '__main__':

@@ -14,10 +14,10 @@ class PauseOptionsInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
-		Label(self, text="1. Continue after brain extraction and/or segmentation without any pause").grid(row=1, sticky=W)
+		Label(self, text="Do not pause between processing steps.").grid(row=1, sticky=W)
 		self.chk_no_pause = tk.Checkbutton(self, variable=self.controller.no_pause)
 		self.chk_no_pause.grid(row=1, column=1)
-		
+
 		# btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
 		# btn_prev.grid(row=3, column=0)
 
@@ -39,7 +39,7 @@ class PauseOptionsInputPage(BaseInputPage, object):
 
 	def prepareStatusMessage(self):
 		if self.controller.run_bet.get() == True and self.controller.run_wm.get() == True:
-			self.setStatusMessage('SRQL will run brain extraction and white matter segmentation')
+			self.setStatusMessage('PALS will run brain extraction and white matter segmentation')
 			self.setCheckBoxState(True)
 		else:
 			self.setStatusMessage('No input needed')
@@ -55,5 +55,3 @@ class PauseOptionsInputPage(BaseInputPage, object):
 	# 	print controller.run_bet.get()
 	# 	print controller.run_wm.get()
 	# 	print controller.no_pause.get()
-
-

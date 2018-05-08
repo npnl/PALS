@@ -101,7 +101,7 @@ class WMCorrectionOperation(BaseOperation):
 			self.com.runFslWithArgs(output_file, upper, upper_lesion, '-thr')
 			self.com.runFslWithArgs(upper_lesion, lower_lesion, final_output_file, '-add')
 			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_Lesion%d_bin'%(subject, counter))
-			self.com.runFslmathsOnLesionFile(final_output_file, output_bin_file)
+			self.com.runFslBinarize(final_output_file, output_bin_file)
 			corrected_lesion_volume = self.com.runBrainVolume(output_bin_file)
 			self.logger.info('The Corrected lesion volume is [%f]'%corrected_lesion_volume)
 

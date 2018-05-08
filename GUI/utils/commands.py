@@ -31,7 +31,7 @@ class Commands(object):
 		output = self.startExecution(cmd_1)
 		output = self.startExecution(cmd_2)
 
-	def runFslmathsOnLesionFile(self, lesion_file_path, output_bin_path):
+	def runFslBinarize(self, lesion_file_path, output_bin_path):
 		cmd = 'fslmaths %s -bin %s;'%(lesion_file_path, output_bin_path)
 		output = self.startExecution(cmd)
 		print output
@@ -132,5 +132,3 @@ class Commands(object):
 if __name__ == '__main__':
 	com = Commands()
 	com.runFslMath("/Users/amit/WorkPro/Lily/data/OUTPUTS_FS/subjC/Intermediate_Files/Original_Files/subjC*T1*.nii.gz",0,0.2849162011173184,"/Users/amit/WorkPro/Lily/data/OUTPUTS_FS/subjC/Intermediate_Files/subjC_T1")
-
-

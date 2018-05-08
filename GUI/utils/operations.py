@@ -42,7 +42,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.createROIDirectories()
 		self.runGzip()
 		self.normaliseT1Intensity()
-		self.processLesionFilesForAll()
+		self.binarizeLesionFilesForAll()
 		self.reOrientToRadForAllSubjects()
 		self.runBrainExtraction()
 		self.runWMSegmentation()
@@ -83,7 +83,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.com.runGzip(directory)
 		self.logger.info('Gzip operation completed for all subjects')
 
-	def _processLesionFilesForSubject(self, subject):
+	def _binarizeLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
 		counter = 1
 		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
@@ -91,13 +91,13 @@ class Operations(object, WMSegmentationOperation,\
 			if lesion_mask_id in item:
 				lesion_file_path = os.path.join(subject_dir, item)
 				output_bin_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + lesion_mask_id + str(counter) + '_bin.nii.gz')
-				self.com.runFslmathsOnLesionFile(lesion_file_path, output_bin_path)
+				self.com.runFslBinarize(lesion_file_path, output_bin_path)
 				counter += 1
 
-	def processLesionFilesForAll(self):
+	def binarizeLesionFilesForAll(self):
 		if self.skip: return False
 		for subject in self.subjects:
-			self._processLesionFilesForSubject(subject)
+			self._binarizeLesionFilesForSubject(subject)
 		self.logger.info('Lesion files processed for all subjects')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
@@ -188,7 +188,7 @@ class Operations(object, WMSegmentationOperation,\
 				for user_roi_path in self._getUserROIsPaths():
 					roi_name = self._extractFileName(user_roi_path)
 					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
-					self.com.runFslmathsOnLesionFile(user_roi_path, roi_output_path)
+					self.com.runFslBinarize(user_roi_path, roi_output_path)
 
 				roi_output_directory = os.path.join(self.getBaseDirectory(), ROI_binarized)
 				params = ('', '', '_bin.nii.gz')

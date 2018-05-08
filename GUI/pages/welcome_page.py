@@ -23,7 +23,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky=W)
 
 		lf_main = LabelFrame(self, text='Main Modules', padx=15, font='Helvetica 14 bold')
-		lf_main.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='W', padx=3, pady=3, ipadx=5, ipady=5)
+		lf_main.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		lf_main.grid_rowconfigure(0, weight=1)
 		lf_main.grid_columnconfigure(0, weight=1)
 
@@ -48,7 +48,7 @@ class WelcomePage(BaseInputPage, object):
 		chk_ll_calculation.grid(row=2, column=97, sticky='W', pady=3)
 
 		lf_visual_qc = LabelFrame(self, text='Stand Alone Module', padx=15, font='Helvetica 14 bold')
-		lf_visual_qc.grid(row=self.starting_row+3, column=0, columnspan=100, sticky='W', padx=3, pady=3, ipadx=5, ipady=5)
+		lf_visual_qc.grid(row=self.starting_row+3, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		lf_visual_qc.grid_rowconfigure(0, weight=1)
 		lf_visual_qc.grid_columnconfigure(0, weight=1)
 

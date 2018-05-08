@@ -23,7 +23,7 @@ LARGE_FONT = ("Verdana", 12)
 class MainWindow(tk.Tk):
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
-		self.title("Pipeline for Analysis of Lesions after Stroke")
+		self.title("Pipeline for Analyzing Lesions after Stroke")
 		# self.geometry("1200x800")
 
 		logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: '

@@ -224,10 +224,10 @@ class Operations(object, WMSegmentationOperation,\
 		for subject in self.subjects:
 			keepSubject = self._reOrientToRadForSubject(subject)
 			if not keepSubject:
-				self.logger.info('The subject contains error. Check subject [%s]', subject)
+				self.logger.info('The subject contains error. Check that files are in the same orientation for subject [%s]', subject)
 			else:
 				self.new_subjects.append(subject)
-		self.logger.info('ReOrientToRad completed for all subjects')
+		self.logger.info('Reorientation to the radiological convention has been completed for all subjects.')
 
 	def _reOrientToRadForSubject(self, subject):
 		if self.skip: return False
@@ -236,7 +236,7 @@ class Operations(object, WMSegmentationOperation,\
 		# take in the original T1 and lesion mask images
 		params = (subject, self.controller.sv_t1_id.get(), '_intNorm.nii.gz')
 		original_t1_file = self._getPathOfFiles(self.getIntermediatePath(subject), *params)[0]
-
+		original_t1_orientation = self.com.runFslOrient(original_t1_file)
 		# if the T1 is already radiological, this is set here. otherwise radT1 gets updated.
 		rad_t1_file = original_t1_file
 
@@ -244,60 +244,73 @@ class Operations(object, WMSegmentationOperation,\
 		original_lesion_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
 		rad_lesion_files = original_lesion_files
 
+		# if user has already performed own brain extraction
 		if self.controller.b_brain_extraction.get():
 			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
+			original_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+			# if BET file is already radiological, this is set here. Otherwise rad_bet_file is updated
 			rad_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+			original_bet_orientation = self.com.runFslOrient(original_bet_file)
+		else:
+			original_bet_orientation = 'NULL';
 
-		original_t1_orientation = self.com.runFslOrient(original_t1_file)
+		# if user has already performed own wm segmentation
+		if self.controller.b_wm_segmentation.get():
+			params = (subject, self.controller.sv_wm_id.get(), '', '.nii.gz')
+			original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+			rad_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+			original_wm_orientation =self.com.runFslOrient(original_wm_file)
+		else:
+			original_wm_orientation = 'NULL'
 
-		if original_t1_orientation == 'NEUROLOGICAL':
+		# check that t1, bet and wm are all same orientation, if they exist.
+		if original_t1_orientation == 'NEUROLOGICAL' and original_bet_orientation == 'NEUROLOGICAL' and original_wm_orientation == 'NEUROLOGICAL':
+			all_orientations = 'NEUROLOGICAL'
+		elif original_t1_orientation == 'RADIOLOGICAL' and original_bet_orientation == 'RADIOLOGICAL' and original_wm_orientation == 'RADIOLOGICAL':
+			all_orientations = 'RADIOLOGICAL'
+		elif original_t1_orientation == 'NEUROLOGICAL' and original_bet_orientation == 'NULL' and original_wm_orientation == 'NULL':
+			all_orientations = 'NEUROLOGICAL'
+		elif original_t1_orientation == 'RADIOLOGICAL' and original_bet_orientation == 'NULL' and original_wm_orientation == 'NULL':
+			all_orientations = 'RADIOLOGICAL'
+		else
+			return False
+
+		for index, original_lesion_file in enumerate(original_lesion_files):
+			original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
+			if original_lesion_orientation != all_orientations:
+				return False
+
+		# at this point, only subjects that have files all in the same orientation are retained
+		# now change all files from neurological -> radiological
+
+		if all_orientations == 'NEUROLOGICAL':
 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad')
 			self.com.runFslSwapDim(original_t1_file, output_file_path)
-			self.com.runFslOrient(output_file_path + '.nii.gz')
-
+			self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
 			rad_t1_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad.nii.gz')
 
+			if self.controller.b_brain_extraction.get():
+				output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
+				self.com.runFslSwapDim(original_bet_file, output_file_path)
+				self.com.runFslOrient(rad_bet_file, args='-swaporient')
+				rad_bet_file = output_file_path + '.nii.gz'
+
+			if self.controller.b_wm_segmentation.get():
+				output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
+				self.com.runFslSwapDim(original_wm_file, output_file_path)
+				self.com.runFslOrient(rad_wm_file, args='-swaporient')
+				rad_wm_file = output_file_path + '.nii.gz'
+
 			for index, original_lesion_file in enumerate(original_lesion_files):
-				original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
-				if original_lesion_orientation == 'RADIOLOGICAL':
-					#Don't keep the subject
-					return False
-				else:
-					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index+1) +'_rad')
-					self.com.runFslSwapDim(original_lesion_file, output_file_path)
-					self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
+				output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index+1) +'_rad')
+				self.com.runFslSwapDim(original_lesion_file, output_file_path)
+				self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
 
 			params = (subject, self.controller.sv_lesion_mask_id.get(), 'rad.nii.gz')
 			rad_lesion_files = self._getPathOfFiles(self.getIntermediatePath(subject), *params)
 
-			# if user has already run BET or WMSeg, and they're in NEUROLOGICAL, then convert to RADIOLOGICAl
-			if self.controller.b_brain_extraction.get():
-				params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
-				original_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-				original_bet_orientation = self.com.runFslOrient(original_bet_file)
 
-				if original_bet_orientation == 'RADIOLOGICAl':
-					self.controller.b_brain_extraction.set(False)
-				else:
-					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
-					self.com.runFslSwapDim(original_bet_file, output_file_path)
-					rad_bet_file = output_file_path + '.nii.gz'
-					self.com.runFslOrient(rad_bet_file, args='-swaporient')
-
-			if self.controller.b_wm_segmentation.get():
-				# origWM=$(ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/${1}*"${WM_ID}"*.nii*);
-				params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
-				original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-				original_wm_orientation =self.com.runFslOrient(original_wm_file)
-
-				if original_wm_orientation == 'RADIOLOGICAl':
-					self.controller.b_wm_segmentation.set(False)
-				else:
-					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
-					self.com.runFslSwapDim(original_wm_file, output_file_path)
-					rad_wm_file = output_file_path + '.nii.gz'
-					self.com.runFslOrient(rad_wm_file, args='-swaporient')
-
+		# run reorient2standard on radiological T1, bet, wm, and lesion files
 		self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))
 
 		if self.controller.b_brain_extraction.get():
@@ -306,13 +319,74 @@ class Operations(object, WMSegmentationOperation,\
 		if self.controller.b_wm_segmentation.get():
 			self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
 
-
 		for index, lesion_file in enumerate(rad_lesion_files):
-			if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
-				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
-			else:
-				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
 			self.com.runFslOrient2Std(lesion_file, output_path)
+
+		#
+		# if original_t1_orientation == 'NEUROLOGICAL':
+		# 	output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad')
+		# 	self.com.runFslSwapDim(original_t1_file, output_file_path)
+		# 	self.com.runFslOrient(output_file_path + '.nii.gz')
+		#
+		# 	rad_t1_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad.nii.gz')
+		#
+		# 	for index, original_lesion_file in enumerate(original_lesion_files):
+		# 		original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
+		# 		if original_lesion_orientation == 'RADIOLOGICAL':
+		# 			#Don't keep the subject
+		# 			return False
+		# 		else:
+		# 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index+1) +'_rad')
+		# 			self.com.runFslSwapDim(original_lesion_file, output_file_path)
+		# 			self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
+		#
+		# 	params = (subject, self.controller.sv_lesion_mask_id.get(), 'rad.nii.gz')
+		# 	rad_lesion_files = self._getPathOfFiles(self.getIntermediatePath(subject), *params)
+		#
+		# 	# if user has already run BET or WMSeg, and they're in NEUROLOGICAL, then convert to RADIOLOGICAl
+		# 	if self.controller.b_brain_extraction.get():
+		# 		params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
+		# 		original_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+		# 		original_bet_orientation = self.com.runFslOrient(original_bet_file)
+		#
+		# 		if original_bet_orientation == 'RADIOLOGICAl':
+		# 			self.controller.b_brain_extraction.set(False)
+		# 		else:
+		# 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
+		# 			self.com.runFslSwapDim(original_bet_file, output_file_path)
+		# 			rad_bet_file = output_file_path + '.nii.gz'
+		# 			self.com.runFslOrient(rad_bet_file, args='-swaporient')
+		#
+		# 	if self.controller.b_wm_segmentation.get():
+		# 		# origWM=$(ls ${SUBJECTOPDIR}/Intermediate_Files/Original_Files/${1}*"${WM_ID}"*.nii*);
+		# 		params = (subject, self.controller.sv_wm_id.get(), '', '.nii')
+		# 		original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
+		# 		original_wm_orientation =self.com.runFslOrient(original_wm_file)
+		#
+		# 		if original_wm_orientation == 'RADIOLOGICAl':
+		# 			self.controller.b_wm_segmentation.set(False)
+		# 		else:
+		# 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
+		# 			self.com.runFslSwapDim(original_wm_file, output_file_path)
+		# 			rad_wm_file = output_file_path + '.nii.gz'
+		# 			self.com.runFslOrient(rad_wm_file, args='-swaporient')
+		#
+		# self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))
+		#
+		# if self.controller.b_brain_extraction.get():
+		# 	self.com.runFslOrient2Std(rad_bet_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_bet_id.get() + '_rad_reorient'))
+		#
+		# if self.controller.b_wm_segmentation.get():
+		# 	self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
+		#
+		#
+		# for index, lesion_file in enumerate(rad_lesion_files):
+		# 	if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
+		# 		output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+		# 	else:
+		# 		output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+		# 	self.com.runFslOrient2Std(lesion_file, output_path)
 
 		return True
 

@@ -272,7 +272,7 @@ class Operations(object, WMSegmentationOperation,\
 			all_orientations = 'NEUROLOGICAL'
 		elif original_t1_orientation == 'RADIOLOGICAL' and original_bet_orientation == 'NULL' and original_wm_orientation == 'NULL':
 			all_orientations = 'RADIOLOGICAL'
-		else
+		else:
 			return False
 
 		for index, original_lesion_file in enumerate(original_lesion_files):
@@ -323,7 +323,7 @@ class Operations(object, WMSegmentationOperation,\
 			# if white matter correction will be performed, then the lesions are in the intermediate_files directory because there will be new lesion files output from WM corr
 			if self.controller.b_wm_correction.get():
 				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
-			# otherwise the radiological and reoriented lesions are in the subject directory. 
+			# otherwise the radiological and reoriented lesions are in the subject directory.
 			else:
 				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
 			self.com.runFslOrient2Std(lesion_file, output_path)

@@ -320,7 +320,12 @@ class Operations(object, WMSegmentationOperation,\
 			self.com.runFslOrient2Std(rad_wm_file, os.path.join(self.getIntermediatePath(subject), subject + '_' +  self.controller.sv_wm_id.get() + '_rad_reorient'))
 
 		for index, lesion_file in enumerate(rad_lesion_files):
-			output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			# if white matter correction will be performed, then the lesions are in the intermediate_files directory because there will be new lesion files output from WM corr
+			if self.controller.b_wm_correction.get():
+				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			# otherwise the radiological and reoriented lesions are in the subject directory. 
+			else:
+				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
 			self.com.runFslOrient2Std(lesion_file, output_path)
 
 		#

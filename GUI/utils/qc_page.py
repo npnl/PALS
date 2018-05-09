@@ -29,6 +29,7 @@ def generateQCPage(page_type, images_dir):
 	output += '<body>' + '\n'
 
 
+
 	image_files = _getPathOfFiles(images_dir, endswith_str='.png')
 	for image_path in image_files:
 		image_name = _extractFileName(image_path)
@@ -41,16 +42,21 @@ def generateQCPage(page_type, images_dir):
 		output += '<tr>' + '\n'
 		output += '<td> <FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=5> %s </FONT> </td>'%(subject) + '\n'
 		output += '</tr>' + '\n'
-		
+
+		output += '<form>' + '\n'
+
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
 			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div></td>'%(lesion_num, image_path, image_path) + '\n'
+			output += '<td><input type="checkbox" name="status" value="Subject_Failed_Inspection"> Review this subject <br></td>' + '\n'
 		else:
 			output += '<tr>' + '\n'
 			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div></td>'%(image_path, image_path) + '\n'
-	
+			output += '<td><input type="checkbox" name="status" value="Subject_Failed_Inspection"> Review this subject <br></td>' + '\n'
+
 		output += '</table>' + '\n'
-	
+		output += '<button type="submit" class="btn">Submit</button>' + '\n'
+		output += '</form>' + '\n'
 	output += '</body>' + '\n'
 	output += '</html>\n' + '\n'
 

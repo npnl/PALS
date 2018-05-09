@@ -271,7 +271,7 @@ class Operations(object, WMSegmentationOperation,\
 		# at this point, only subjects that have files all in the same orientation are retained
 		# now change all files from neurological -> radiological
 
-		if all_orientations == 'NEUROLOGICAL':
+		if original_t1_orientation == 'NEUROLOGICAL':
 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad')
 			self.com.runFslSwapDim(original_t1_file, output_file_path)
 			self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')

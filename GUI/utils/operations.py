@@ -251,8 +251,8 @@ class Operations(object, WMSegmentationOperation,\
 			# if BET file is already radiological, this is set here. Otherwise rad_bet_file is updated
 			rad_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 			original_bet_orientation = self.com.runFslOrient(original_bet_file)
-		else:
-			original_bet_orientation = 'NULL';
+			if original_bet_orientation != original_t1_orientation:
+				return False
 
 		# if user has already performed own wm segmentation
 		if self.controller.b_wm_segmentation.get():
@@ -260,24 +260,12 @@ class Operations(object, WMSegmentationOperation,\
 			original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 			rad_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 			original_wm_orientation =self.com.runFslOrient(original_wm_file)
-		else:
-			original_wm_orientation = 'NULL'
-
-		# check that t1, bet and wm are all same orientation, if they exist.
-		if original_t1_orientation == 'NEUROLOGICAL' and original_bet_orientation == 'NEUROLOGICAL' and original_wm_orientation == 'NEUROLOGICAL':
-			all_orientations = 'NEUROLOGICAL'
-		elif original_t1_orientation == 'RADIOLOGICAL' and original_bet_orientation == 'RADIOLOGICAL' and original_wm_orientation == 'RADIOLOGICAL':
-			all_orientations = 'RADIOLOGICAL'
-		elif original_t1_orientation == 'NEUROLOGICAL' and original_bet_orientation == 'NULL' and original_wm_orientation == 'NULL':
-			all_orientations = 'NEUROLOGICAL'
-		elif original_t1_orientation == 'RADIOLOGICAL' and original_bet_orientation == 'NULL' and original_wm_orientation == 'NULL':
-			all_orientations = 'RADIOLOGICAL'
-		else:
-			return False
+			if original_wm_orientation != original_t1_orientation:
+				return False
 
 		for index, original_lesion_file in enumerate(original_lesion_files):
 			original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
-			if original_lesion_orientation != all_orientations:
+			if original_lesion_orientation != original_t1_orientation:
 				return False
 
 		# at this point, only subjects that have files all in the same orientation are retained

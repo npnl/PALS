@@ -62,7 +62,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				subject_info.append(ss_lesion_volume)
 
 				lesion_ss_file_output = os.path.join(self.getBaseDirectory(), '%s_SS.nii.gz'%lesion_name)
-				self.com.runFslmathsOnLesionFile(lesion_ss_file, lesion_ss_file_output)
+				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
 				lesion_bin = lesion_ss_file
 				cog = self.com.runFslStats(lesion_ss_file, '-V')
@@ -173,7 +173,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				# perform transformation on lesion mask, then binarize the mask
 				cmd = 'flirt -in %s -init %s -ref %s -out %s -applyxfm;'%(lesion_file, xfm_inverse_file, fs_t1, lesion_fs)
 				self.com.runRawCommand(cmd)
-				self.com.runFslmathsOnLesionFile(lesion_fs, lesion_fs_bin)
+				self.com.runFslBinarize(lesion_fs, lesion_fs_bin)
 
 				fs_lesion_volume = self.com.runBrainVolume(lesion_fs_bin)
 				subject_info.append(fs_lesion_volume)

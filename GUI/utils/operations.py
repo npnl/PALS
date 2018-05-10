@@ -42,7 +42,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.createROIDirectories()
 		self.runGzip()
 		self.normaliseT1Intensity()
-		self.processLesionFilesForAll()
+		self.binarizeLesionFilesForAll()
 		self.reOrientToRadForAllSubjects()
 		self.runBrainExtraction()
 		self.runWMSegmentation()
@@ -83,7 +83,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.com.runGzip(directory)
 		self.logger.info('Gzip operation completed for all subjects')
 
-	def _processLesionFilesForSubject(self, subject):
+	def _binarizeLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
 		counter = 1
 		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
@@ -91,13 +91,13 @@ class Operations(object, WMSegmentationOperation,\
 			if lesion_mask_id in item:
 				lesion_file_path = os.path.join(subject_dir, item)
 				output_bin_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + lesion_mask_id + str(counter) + '_bin.nii.gz')
-				self.com.runFslmathsOnLesionFile(lesion_file_path, output_bin_path)
+				self.com.runFslBinarize(lesion_file_path, output_bin_path)
 				counter += 1
 
-	def processLesionFilesForAll(self):
+	def binarizeLesionFilesForAll(self):
 		if self.skip: return False
 		for subject in self.subjects:
-			self._processLesionFilesForSubject(subject)
+			self._binarizeLesionFilesForSubject(subject)
 		self.logger.info('Lesion files processed for all subjects')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
@@ -174,9 +174,9 @@ class Operations(object, WMSegmentationOperation,\
 
 	def createROIDirectories(self):
 		if self.skip: return False
-		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
+		if self.controller.b_wm_correction.get(): self._createDirectory('QC_WMAdjustedLesions')
 		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
-		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
+		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WMSegmentations')
 		if self.controller.b_ll_calculation.get():
 			self._createDirectory('QC_LL')
 			self._createDirectory('QC_Registrations')
@@ -185,23 +185,28 @@ class Operations(object, WMSegmentationOperation,\
 			if self.controller.b_own_rois.get():
 				self._createDirectory('custom', parent=['QC_LL'])
 				self._createDirectory('ROI_binarized')
+				# the following takes all of the user input ROIs and binarizes
+				# them; placing them in "/ROI_binarized" directory
 				for user_roi_path in self._getUserROIsPaths():
 					roi_name = self._extractFileName(user_roi_path)
+					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
 					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
-					self.com.runFslmathsOnLesionFile(user_roi_path, roi_output_path)
+					self.com.runFslBinarize(user_roi_path, roi_output_path)
 
-				roi_output_directory = os.path.join(self.getBaseDirectory(), ROI_binarized)
+				roi_output_directory = os.path.join(self.getBaseDirectory(), 'ROI_binarized')
 				params = ('', '', '_bin.nii.gz')
+
+				#get fullpath of all binarized user input ROIs
 				user_rois_output_paths = self._getPathOfFiles(roi_output_directory, *params)
 
-				for user_roi_output_path in user_rois_output_paths:
-					roi_name = self._extractFileName(user_roi_output_path)
-					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
+				# for user_roi_output_path in user_rois_output_paths:
+				# 	roi_name = self._extractFileName(user_roi_output_path)
+				# 	self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
 
 				self._createDirectory('custom', parent=['QC_Registrations'])
 
 			# Default ROIs
-			elif self.controller.b_default_rois.get():
+			if self.controller.b_default_rois.get():
 				self._createDirectory('MNI152', parent=['QC_LL'])
 				for default_roi_path in self._getDefaultROIsPaths():
 					roi_name = self._extractFileName(default_roi_path)
@@ -209,7 +214,7 @@ class Operations(object, WMSegmentationOperation,\
 				self._createDirectory('MNI152', parent=['QC_Registrations'])
 
 			# FreeSurfer specific ROIs
-			elif self.controller.b_freesurfer_rois.get():
+			if self.controller.b_freesurfer_rois.get():
 				self._createDirectory('FS', parent=['QC_LL'])
 				for fs_roi_path in self._getFSROIsPaths():
 					roi_name = self._extractFileName(fs_roi_path)
@@ -217,7 +222,7 @@ class Operations(object, WMSegmentationOperation,\
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:
 				self.logger.info('None of the ROI options selected')
-		self.logger.debug('ROIs direcotory created successfully')
+		self.logger.debug('ROIs directory created successfully')
 
 	def reOrientToRadForAllSubjects(self):
 		if self.skip: return False
@@ -244,23 +249,27 @@ class Operations(object, WMSegmentationOperation,\
 		original_lesion_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
 		rad_lesion_files = original_lesion_files
 
+		# if user has performed brain extraction, then get brain extracted file
 		if self.controller.b_brain_extraction.get():
 			params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
 			rad_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 
+		# get orientation of T1 file, if neurological, then swap orientation
 		original_t1_orientation = self.com.runFslOrient(original_t1_file)
 
 		if original_t1_orientation == 'NEUROLOGICAL':
 			output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad')
 			self.com.runFslSwapDim(original_t1_file, output_file_path)
-			self.com.runFslOrient(output_file_path + '.nii.gz')
+			self.com.runFslOrient(output_file_path + '.nii.gz', args='-swaporient')
 
 			rad_t1_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad.nii.gz')
 
 			for index, original_lesion_file in enumerate(original_lesion_files):
 				original_lesion_orientation = self.com.runFslOrient(original_lesion_file)
+				# if lesion files are in radiological but t1 is in neurological, skip subject
 				if original_lesion_orientation == 'RADIOLOGICAL':
-					#Don't keep the subject
+					# Don't keep the subject
+					# also flag subject
 					return False
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index+1) +'_rad')
@@ -276,7 +285,7 @@ class Operations(object, WMSegmentationOperation,\
 				original_bet_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 				original_bet_orientation = self.com.runFslOrient(original_bet_file)
 
-				if original_bet_orientation == 'RADIOLOGICAl':
+				if original_bet_orientation == 'RADIOLOGICAL':
 					self.controller.b_brain_extraction.set(False)
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
@@ -290,7 +299,7 @@ class Operations(object, WMSegmentationOperation,\
 				original_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 				original_wm_orientation =self.com.runFslOrient(original_wm_file)
 
-				if original_wm_orientation == 'RADIOLOGICAl':
+				if original_wm_orientation == 'RADIOLOGICAL':
 					self.controller.b_wm_segmentation.set(False)
 				else:
 					output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')

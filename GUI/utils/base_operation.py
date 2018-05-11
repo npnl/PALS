@@ -36,49 +36,34 @@ class BaseOperation():
 				all_files.append(os.path.join(base_path, item))
 		return all_files
 
-	def _setSubjectSpecificPaths_1(self, subject):
+	def _setSubjectSpecificPaths_1(self, subject, anatomical_id, lesion_mask_id):
 		if self.skip: return False
 		anatomical_file_path, lesion_files = None, None
 
-		anatomical_id = self.controller.sv_t1_id.get()
-		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 		intermediate_path = self.getIntermediatePath(subject)
+		params = (subject, anatomical_id, '.nii.gz')
 
-		# if reorient2radiological has NOT been run: then keep original lesion mask ID; unless WMcorrection has already been run.
-		if not self.controller.b_radiological_convention.get():
-			params = (subject, anatomical_id, '.nii.gz')
-			anatomical_file_path = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
-
-			if self.controller.b_wm_correction.get():
-				params = (subject, anatomical_id, '_intNorm.nii.gz')
-				anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
-
-				if lesion_mask_id == 'WMAdjusted':
-					params = (subject, lesion_mask_id, 'bin.nii.gz')
-					lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
-
-				else:
-					params = (subject, lesion_mask_id, 'bin.nii.gz')
-					lesion_files = self._getPathOfFiles(intermediate_path, *params)
-
-		# if reorient2radiological has been run, then use lesion mask ID + 'rad_reorient.nii.gz'
+		if self.controller.b_radiological_convention.get():
+			anatomical_file_path = self._getPathOfFiles(self.getSubjectPath(subject), *params)[0]
 		else:
-			anatomical_file_path=os.path.join(self.getSubjectPath(subject), subject + '_' + anatomical_id + '_rad_reorient.nii.gz')
+			anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
 
-			if self.controller.b_wm_correction.get():
-				params = (subject, anatomical_id, '_intNorm.nii.gz')
-				anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
+		if type(lesion_mask_id) == type([]):
+			params = (subject, lesion_mask_id[0], '.nii.gz', lesion_mask_id[1])
+		else:
+			params = (subject, lesion_mask_id, '.nii.gz')
+		lesion_files = self._getPathOfFiles(intermediate_path, *params)
+		if type(lesion_mask_id) == type([]):
+			print lesion_files
 
-				if lesion_mask_id == 'WMAdjusted':
-					params = (subject, lesion_mask_id, 'bin.nii.gz')
-					lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
+		## put in a check here; if there are no T1 and/or lesion files, then set the path to the Original_Files directory.
+		if not os.path.exists(anatomical_file_path):
+			params = (subject, anatomical_id, '.nii.gz')
+			anatomical_file_path =  self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 
-				else:
-					params = (subject, lesion_mask_id, 'rad_reorient.nii.gz')
-					lesion_files = self._getPathOfFiles(intermediate_path, *params)
-			else:
-				params = (subject, lesion_mask_id, 'rad_reorient.nii.gz')
-				lesion_files = self._getPathOfFiles(self.getSubjectPath(subject), *params)
+		if len(lesion_files) == 0 or not os.path.exists(lesion_files[0]):
+			params = (subject, lesion_mask_id, '.nii.gz')
+			lesion_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
 
 		return anatomical_file_path, lesion_files
 

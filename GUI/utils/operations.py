@@ -42,12 +42,18 @@ class Operations(object, WMSegmentationOperation,\
 		self.createROIDirectories()
 		self.runGzip()
 		self.binarizeLesionFilesForAll()
-		self.reOrientToRadForAllSubjects()
+
+		anatomical_id = self.controller.sv_t1_id.get()
+		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
+
+		anatomical_id, lesion_mask_id = self.reOrientToRadForAllSubjects()
+
 		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
-			self.runBrainExtraction()
-		self._runWMCorrectionHelper()
-		self.runLesionLoadCalculation()
-		self.runLesionLoadCalculationFS()
+			self.runBrainExtraction(anatomical_id, lesion_mask_id)
+
+		anatomical_id, lesion_mask_id=self._runWMCorrectionHelper(anatomical_id, lesion_mask_id)
+		self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
+		self.runLesionLoadCalculationFS(anatomical_id, lesion_mask_id)
 		self.createQCPage()
 
 	def createQCPage(self):
@@ -56,13 +62,16 @@ class Operations(object, WMSegmentationOperation,\
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		generateQCPage('Lesions', images_dir)
 
-	def _runWMCorrectionHelper(self):
+	def _runWMCorrectionHelper(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has not selected to perform wm correction
 		if self.controller.b_wm_correction.get() == False or self.skip: return False
-		self.runWMSegmentation()
-		self.normaliseT1Intensity()
-		self.runWMCorrection()
-		self.controller.sv_lesion_mask_id.set('WMAdjusted')
+		self.runWMSegmentation(anatomical_id, lesion_mask_id)
+		anatomical_id = self.normaliseT1Intensity(anatomical_id)
+		lesion_mask_id=self.runWMCorrection(anatomical_id, lesion_mask_id)
+
+		return anatomical_id, lesion_mask_id
+		#self.controller.sv_lesion_mask_id.set('WMAdjusted')
+
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -97,9 +106,10 @@ class Operations(object, WMSegmentationOperation,\
 
 	def binarizeLesionFilesForAll(self):
 		if self.skip: return False
+		self.logger.info('Lesion files binarization initiated')
 		for subject in self.subjects:
 			self._binarizeLesionFilesForSubject(subject)
-		self.logger.info('Lesion files processed for all subjects')
+		self.logger.info('Lesion files of all subjects binarized successfully')
 
 	def _normaliseSubject(self, arg_1, arg_2, arg_3):
 		minimum, maximum = self.com.runFslStats(arg_1, '-R')
@@ -107,9 +117,10 @@ class Operations(object, WMSegmentationOperation,\
 		# intNorm.nii.gz is created with runFslMath
 		self.com.runFslMath(arg_1, minimum, scaling, os.path.join(arg_3, arg_2))
 
-	def normaliseT1Intensity(self):
+	def normaliseT1Intensity(self, anatomical_id):
 		if self.skip: return False
-		t1_identifier = self.controller.sv_t1_id.get()
+		self.logger.info('Normalization of subjects initiated')
+		t1_identifier = anatomical_id
 		for subject in self.subjects:
 			if not self.controller.b_radiological_convention.get():
 				arg_1 = os.path.join(self.getOriginalPath(subject), subject + '*' + t1_identifier + '*.nii.gz')
@@ -118,7 +129,10 @@ class Operations(object, WMSegmentationOperation,\
 			arg_2 = subject + '_' + t1_identifier
 			arg_3 = os.path.join(self.getIntermediatePath(subject))
 			self._normaliseSubject(arg_1, arg_2, arg_3)
-		self.logger.debug('Normalization completed for all subjects')
+		self.logger.info('Normalization completed for all subjects')
+
+		anatomical_id = (self.controller.sv_t1_id.get() + 'intNorm')
+		return anatomical_id
 
 	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory):
 		if self.skip: return False
@@ -179,6 +193,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def createROIDirectories(self):
 		if self.skip: return False
+		self.logger.info('Creating ROIs directories')
 		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
 		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
 		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
@@ -222,10 +237,11 @@ class Operations(object, WMSegmentationOperation,\
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:
 				self.logger.info('None of the ROI options selected')
-		self.logger.debug('ROIs direcotory created successfully')
+		self.logger.info('ROIs direcotory created successfully')
 
 	def reOrientToRadForAllSubjects(self):
 		if not self.controller.b_radiological_convention.get() or self.skip: return False
+		self.logger.info('Reorientation to the radiological convention initiated.')
 		new_subjects = []
 		for subject in self.subjects:
 			keepSubject = self._reOrientToRadForSubject(subject)
@@ -235,6 +251,12 @@ class Operations(object, WMSegmentationOperation,\
 				new_subjects.append(subject)
 		self.logger.info('Reorientation to the radiological convention has been completed for all subjects.')
 		self.subjects = new_subjects
+
+		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
+		lesion_mask_id = (self.controller.sv_lesion_mask_id.get() + '_rad_reorient')
+
+		return anatomical_id, lesion_mask_id
+
 
 	def _reOrientToRadForSubject(self, subject):
 		if self.skip: return False
@@ -322,11 +344,7 @@ class Operations(object, WMSegmentationOperation,\
 
 		for index, lesion_file in enumerate(rad_lesion_files):
 			# if white matter correction will be performed, then the lesions are in the intermediate_files directory because there will be new lesion files output from WM corr
-			if self.controller.b_wm_correction.get():
-				output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
-			# otherwise the radiological and reoriented lesions are in the subject directory.
-			else:
-				output_path = os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
 			self.com.runFslOrient2Std(lesion_file, output_path)
 
 		return True

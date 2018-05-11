@@ -3,13 +3,13 @@ from qc_page import generateQCPage
 from base_operation import BaseOperation
 
 class WMCorrectionOperation(BaseOperation):
-	def runWMCorrection(self):
+	def runWMCorrection(self, anatomical_id, lesion_mask_id):
 		max_lesions = 0
 		subject_info_all = []
 		for subject in self.subjects:
 			subject_info = [subject]
 
-			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
+			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
 			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_files[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
@@ -78,6 +78,11 @@ class WMCorrectionOperation(BaseOperation):
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		generateQCPage('Lesions', image_files_base)
 		self.logger.info('White Matter correction completed for all subjects')
+
+
+		lesion_mask_id = ('WMAdjusted')
+
+		return lesion_mask_id
 
 
 	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):

@@ -12,7 +12,7 @@ class WMCorrectionOperation(BaseOperation):
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
-			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_file[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
+			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_files[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
 				self.logger.info('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: %s'%subject)
 				subject_info.append('Skipped')
 				continue
@@ -32,7 +32,7 @@ class WMCorrectionOperation(BaseOperation):
 				self.logger.debug('Updated num of max lesions : ' + str(max_lesions))
 
 			total_native_brain_volume = self.com.runBrainVolume(bet_brain_file)
-			
+
 			subject_info.append(total_native_brain_volume)
 			subject_info.append(wm_mean)
 
@@ -109,4 +109,3 @@ class WMCorrectionOperation(BaseOperation):
 			self.logger.info('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: %s'%subject)
 			skip_subject = True
 		return skip_subject, corrected_lesion_volume, output_bin_file
-

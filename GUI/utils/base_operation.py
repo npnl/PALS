@@ -43,8 +43,14 @@ class BaseOperation():
 		intermediate_path = self.getIntermediatePath(subject)
 		params = (subject, anatomical_id, '.nii.gz')
 
+		print "The params are : ", params
+
 		if self.controller.b_radiological_convention.get():
-			anatomical_file_path = self._getPathOfFiles(self.getSubjectPath(subject), *params)[0]
+			try:
+				anatomical_file_path = self._getPathOfFiles(self.getSubjectPath(subject), *params)[0]
+			except:
+				print "In exception block"
+				anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
 		else:
 			anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
 

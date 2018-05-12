@@ -14,14 +14,14 @@ class Commands(object):
 			output += stdout_line
 		self.running_process.stdout.close()
 		if return_code != 0:
-			self.logger.error('Something went wrong.')
+			self.logger.error('File was not zipped.')
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		return output
 
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')
-		cmd = "gzip %s > /dev/null 2>&1;"%(input_directory)
+		cmd = "gzip %s"%(input_directory)
 		self.startExecution(cmd)
 
 	def runFslMath(self, arg1, minimum, scalling, arg2):
@@ -60,9 +60,9 @@ class Commands(object):
 		cmd = 'fsleyes render --hideCursor -of %s %s %s %s;'%(output_image_path, anatomical_file_path, bet_brain_file, options)
 		self.startExecution(cmd)
 
-	def runFslEyes2(self, anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path):
+	def runFslEyes2(self, anatomical_file_path, lesion_file, wm_adjusted_lesion, x, y, z, output_image_path):
 		# fsleyes render -vl $COG --hideCursor -of "$WORKINGDIR"/QC_Lesions/"${SUBJ}"_Lesion"${counter}".png "$ANATOMICAL" $Lesion -a 40 "$SUBJECTOPDIR"/"${SUBJ}"_WMAdjusted_Lesion"${counter}"_bin -cm blue -a 50;
-		cmd = 'fsleyes render -vl $f --hideCursor -of %s %s %s -a 40 %s -cm blue -a 50;'%(cog, output_image_path, anatomical_file_path, lesion_file, wm_adjusted_lesion)
+		cmd = 'fsleyes render -vl %d %d %d --hideCursor -of %s %s %s -a 40 %s -cm blue -a 50;'%(x, y, z, output_image_path, anatomical_file_path, lesion_file, wm_adjusted_lesion)
 		self.startExecution(cmd)
 
 	def runFast(self, subject_dir, brain_file):
@@ -74,7 +74,7 @@ class Commands(object):
 		# fslmaths "${WM_MASK}" -sub ${LesionFiles[0]} "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM
 		# cmd = 'fslmaths %s -sub %s %s'%(wm_mask_file, lesion_file, output_file)
 		# return self.startExecution(cmd)
-		return self.runFslWithArgs(wm_mask_file, lesion_file, output_file, '-sub')
+		return self.runFslWithArgs(wm_mask_file, lesion_file, output_file, '-sub') == ''
 
 	def runFslMultiply(self, anatomical_file_path, corrected_wm_file, output_file):
 		# fslmaths $ANATOMICAL -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
@@ -92,18 +92,20 @@ class Commands(object):
 		cmd = 'fslstats %s %s'%(input_file, options)
 		output = self.startExecution(cmd)
 		if options == '-C':
-			output = ' '.join(map(str, map(int, map(round, output.strip().split()))))
+			output = ' '.join(map(str, map(int, map(round, map(float, output.strip().split())))))
 		if options == '-R':
 			output = map(float, output.strip().split())
 		if options == '-c':
 			output = 'L' if output.startswith('-') else 'R'
+		if options == '-M':
+			output = float(output.strip())
 		return output
 
 	def runBrainVolume(self, bet_brain_file):
 		# fslstats "${BET_Brain}" -V | awk '{print $2;}'
 		cmd = 'fslstats %s -V'%(bet_brain_file)
 		output = self.startExecution(cmd)
-		return float(output_file.strip.split()[1])
+		return float(output.strip().split()[1])
 
 	def runAppendToCSV(self, data, csv_location):
 		text = ''

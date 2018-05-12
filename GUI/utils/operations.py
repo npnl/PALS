@@ -46,14 +46,19 @@ class Operations(object, WMSegmentationOperation,\
 		anatomical_id = self.controller.sv_t1_id.get()
 		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 
-		anatomical_id, lesion_mask_id = self.reOrientToRadForAllSubjects()
+		if self.controller.b_radiological_convention.get():
+			anatomical_id, lesion_mask_id = self.reOrientToRadForAllSubjects()
 
 		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
 			self.runBrainExtraction(anatomical_id, lesion_mask_id)
 
-		anatomical_id, lesion_mask_id=self._runWMCorrectionHelper(anatomical_id, lesion_mask_id)
-		self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
-		self.runLesionLoadCalculationFS(anatomical_id, lesion_mask_id)
+		if self.controller.b_wm_correction.get():
+			anatomical_id, lesion_mask_id=self._runWMCorrectionHelper(anatomical_id, lesion_mask_id)
+
+		if self.controller.b_ll_calculation.get():
+			self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
+			self.runLesionLoadCalculationFS(anatomical_id, lesion_mask_id)
+
 		self.createQCPage()
 
 	def createQCPage(self):
@@ -120,18 +125,18 @@ class Operations(object, WMSegmentationOperation,\
 	def normaliseT1Intensity(self, anatomical_id):
 		if self.skip: return False
 		self.logger.info('Normalization of subjects initiated')
-		t1_identifier = anatomical_id
+
 		for subject in self.subjects:
 			if not self.controller.b_radiological_convention.get():
-				arg_1 = os.path.join(self.getOriginalPath(subject), subject + '*' + t1_identifier + '*.nii.gz')
+				arg_1 = os.path.join(self.getOriginalPath(subject), subject + '*' + anatomical_id + '*.nii.gz')
 			else:
-				arg_1 = os.path.join(self.getSubjectPath(subject), subject + '*' + t1_identifier + '_rad_reorient.nii.gz')
-			arg_2 = subject + '_' + t1_identifier
+				arg_1 = os.path.join(self.getSubjectPath(subject), subject + '*' + anatomical_id + '.nii.gz')
+			arg_2 = subject + '_' + anatomical_id
 			arg_3 = os.path.join(self.getIntermediatePath(subject))
 			self._normaliseSubject(arg_1, arg_2, arg_3)
 		self.logger.info('Normalization completed for all subjects')
 
-		anatomical_id = (self.controller.sv_t1_id.get() + 'intNorm')
+		anatomical_id = (anatomical_id + '_intNorm')
 		return anatomical_id
 
 	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory):
@@ -253,7 +258,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.subjects = new_subjects
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
-		lesion_mask_id = (self.controller.sv_lesion_mask_id.get() + '_rad_reorient')
+		lesion_mask_id = [self.controller.sv_lesion_mask_id.get(), '_rad_reorient']
 
 		return anatomical_id, lesion_mask_id
 

@@ -6,7 +6,7 @@ class BaseOperation():
 
 	def __new__(cls, *args, **kwargs):
 		if cls is BaseOperation:
-			raise TypeError('BaseOperation may not be instantiated')
+			raise TypeError('Base operation may not be instantiated')
 		return object.__new__(cls, *args, **kwargs)
 
 	def getBaseDirectory(self):
@@ -41,7 +41,7 @@ class BaseOperation():
 
 	def _setSubjectSpecificPaths_1(self, subject, anatomical_id, lesion_mask_id):
 		if self.skip: return False
-		anatomical_file_path, lesion_files = None, None
+		anatomical_file_path, lesion_files = '', ''
 
 		intermediate_path = self.getIntermediatePath(subject)
 		params = (subject, anatomical_id, '.nii.gz')
@@ -55,7 +55,10 @@ class BaseOperation():
 				print "In exception block"
 				anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
 		else:
-			anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
+			try:
+				anatomical_file_path = self._getPathOfFiles(intermediate_path, *params)[0]
+			except:
+				pass
 
 		if type(lesion_mask_id) == type([]):
 			params = (subject, lesion_mask_id[0], '.nii.gz', lesion_mask_id[1])

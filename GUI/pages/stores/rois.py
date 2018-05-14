@@ -4,8 +4,8 @@ CorticospinalTractROINames = ['Left Corticospinal Tract',
 	'Right Corticospinal Tract']
 
 CorticospinalTractROINamesToFileMapping = {
-	'Left Corticospinal Tract': 'roi_L_CST_bin.nii.gz',\
-	'Right Corticospinal Tract': 'roi_R_CST_bin.nii.gz'
+	'Left Corticospinal Tract': 'roi_L_CST.nii.gz',\
+	'Right Corticospinal Tract': 'roi_R_CST.nii.gz'
 }
 
 FreesurferCorticalROINames =  ['Left Bank of the Superior Temporal Sulcus', 'Right Bank of the Superior Temporal Sulcus',\
@@ -141,4 +141,3 @@ def getROIs(controller):
 	return (createObjectArrays(controller, CorticospinalTractROINames),\
 			createObjectArrays(controller, FreesurferCorticalROINames),\
 			createObjectArrays(controller, FreesurferSubcorticalROINames))
-

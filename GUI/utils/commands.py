@@ -22,12 +22,11 @@ class Commands(object):
 			output += stdout_line
 		self.running_process.stdout.close()
 		if return_code != 0:
-			self.logger.error('File was not zipped.')
 			output = 'Something went wrong.'
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		self.parent.updateGUI(output)
-		return output
+		return output, return_code
 
 	def stopCurrentProcess(self):
 		self.running = False
@@ -37,22 +36,25 @@ class Commands(object):
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')
 		cmd = "gzip %s"%(input_directory)
-		self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
+		if ret_code != 0:
+			self.logger.error('File was not zipped.')
+
 
 	def runFslMath(self, arg1, minimum, scalling, arg2):
 		cmd_1 = 'fslmaths %s -sub %f -mul %f %s_scaled;'%(arg1, minimum, scalling, arg2)
 		cmd_2 = 'fslmaths %s_scaled %s_intNorm.nii.gz -odt char;'%(arg2, arg2)
 
-		output = self.startExecution(cmd_1)
-		output = self.startExecution(cmd_2)
+		output, ret_code = self.startExecution(cmd_1)
+		output, ret_code = self.startExecution(cmd_2)
 
 	def runFslBinarize(self, lesion_file_path, output_bin_path):
 		cmd = 'fslmaths %s -bin %s;'%(lesion_file_path, output_bin_path)
-		output = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
 
 	def runFslOrient(self, original_t1_files, args=''):
 		cmd = 'fslorient %s %s'%(args, original_t1_files)
-		output = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
 		return output.strip()
 
 	def runFslOrient2Std(self, rad_ti_file, output_file):
@@ -62,7 +64,7 @@ class Commands(object):
 	def runFslSwapDim(self, original_t1_files, output_bin_path):
 		# fslswapdim $origT1 -x y z ${SUBJECTOPDIR}/Intermediate_Files/"${SUBJ}"_"${ANATOMICAL_ID}"_rad;
 		cmd = 'fslswapdim %s -x y z %s;'%(original_t1_files, output_bin_path)
-		output = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
 
 	def runBet(self, anatomical_file_path, output_file):
 		# bet "${ANATOMICAL}" "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_Brain -R -f 0.5 -g 0;
@@ -99,12 +101,13 @@ class Commands(object):
 	def runFslWithArgs(self, arg_1, arg_2, arg_3, option):
 		# fslmaths arg_1 option arg_2 arg_3;
 		cmd = 'fslmaths %s %s %s %s;'%(arg_1, option, arg_2, arg_3)
-		return self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
+		return output
 
 	def runFslStats(self, input_file, options):
 		# WM_Mean=$(fslstats "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM -options);
 		cmd = 'fslstats %s %s'%(input_file, options)
-		output = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
 		if options == '-C':
 			output = ' '.join(map(str, map(int, map(round, map(float, output.strip().split())))))
 		if options == '-R':
@@ -118,7 +121,7 @@ class Commands(object):
 	def runBrainVolume(self, bet_brain_file):
 		# fslstats "${BET_Brain}" -V | awk '{print $2;}'
 		cmd = 'fslstats %s -V'%(bet_brain_file)
-		output = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
 		return float(output.strip().split()[1])
 
 	def runAppendToCSV(self, data, csv_location):
@@ -138,7 +141,8 @@ class Commands(object):
 		self.startExecution(cmd)
 
 	def runRawCommand(self, cmd):
-		return self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd)
+		return output
 
 	def runPlayer(self, input_directory):
 		cmd = 'mplayer %s'%(input_directory)

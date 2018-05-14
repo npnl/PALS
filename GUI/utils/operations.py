@@ -188,7 +188,7 @@ class Operations(object, WMSegmentationOperation,\
 		return roi_paths
 
 	def _getDefaultROIsPaths(self):
-		all_rois = self.controller.default_corticospinal_tract_roi
+		all_rois = self.controller.default_corticospinal_tract_roi\
 					+ self.controller.default_freesurfer_cortical_roi
 		roi_paths = self._getRoiFilePaths(all_rois, FS_Map)
 		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)

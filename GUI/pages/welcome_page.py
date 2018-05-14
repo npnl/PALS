@@ -55,14 +55,14 @@ class WelcomePage(BaseInputPage, object):
 		lb_visual_qc = Label(lf_visual_qc, text="4. Perform Visual Quality Control only")
 		lb_visual_qc.grid(row=0, column=0, sticky="W", pady=3)
 
-		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_quality_control)
+		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc)
 		chk_visual_qc.grid(row=0, column=97, sticky='W', pady=3)
 
 
 		lb_opt_sout = Label(self, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step. Uncheck to opt out of pausing.", padx=10)
 		lb_opt_sout.grid(row=self.starting_row+4, column=0, columnspan=96, sticky="W", padx=20, pady=(20, 10))
 
-		chk_out_out = Checkbutton(self, variable=controller.b_visual_qc)
+		chk_out_out = Checkbutton(self, variable=controller.b_quality_control)
 		chk_out_out.grid(row=self.starting_row+4, column=97, sticky='W', pady=(20, 10))
 
 

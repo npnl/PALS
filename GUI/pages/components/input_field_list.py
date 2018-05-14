@@ -68,7 +68,7 @@ class InputFieldList(object):
 
 	def bulkInputUpdate(self, *args):
 		text = self.text_area.get("1.0",END)
-		text = text.strip().split('\n')
+		text = text.strip().replace('\\n','\n').split('\n')
 		self.bulk_text = [line.strip() for line in text if len(line.strip()) > 0]
 		if len(self.bulk_text) > 0:
 			self.changeInDropDown()

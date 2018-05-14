@@ -91,8 +91,8 @@ class LesionLoadCalculationOperation(BaseOperation):
 					subject_info.append(lesion_load)
 					subject_info.append(percent_overlap)
 
-				all_subjects_info.append(subject_info)
-			self._writeToCSV(all_subjects_info, max_lesions, roi_list, space)
+			all_subjects_info.append(subject_info)
+		self._writeToCSV(all_subjects_info, max_lesions, roi_list, space)
 
 	def _writeToCSV(self, subject_info_all, max_lesions, roi_list, space):
 		header = ['Subject']
@@ -105,7 +105,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				header.append('Lesion%s_%s_PercentOverlap'%(str(lesion_counter+1),roi_name))
 
 		# Write data to the csv file
-		subject_info_with_header = [header, subject_info_all]
+		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
 
 		self._generateQCForRois(space, roi_list, roi_name)
@@ -224,7 +224,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 
 		# Write data to the csv file
-		subject_info_with_header = [header, subject_info_all]
+		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
 		#self._generateQCForRois(space)
 		self.updateProgressBar(8)

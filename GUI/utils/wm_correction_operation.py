@@ -3,13 +3,13 @@ from qc_page import generateQCPage
 from base_operation import BaseOperation
 
 class WMCorrectionOperation(BaseOperation):
-	def runWMCorrection(self):
+	def runWMCorrection(self, anatomical_id, lesion_mask_id):
 		max_lesions = 0
 		subject_info_all = []
 		for subject in self.subjects:
 			subject_info = [subject]
 
-			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
+			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
 			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_files[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
@@ -25,14 +25,14 @@ class WMCorrectionOperation(BaseOperation):
 			self.com.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul')
 			wm_mean = self.com.runFslStats(output_file, '-M')
 
-			lesion_files_count = len(self._getPathOfFiles(self, self.getSubjectPath(subject), startswith_str=subject, substr=self.controller.sv_lesion_mask_id.get(), endswith_str='', second_sub_str='.nii'))
+			lesion_files_count = len(lesion_files)
 
 			if max_lesions < lesion_files_count:
 				max_lesions = lesion_files_count
 				self.logger.debug('Updated num of max lesions : ' + str(max_lesions))
 
 			total_native_brain_volume = self.com.runBrainVolume(bet_brain_file)
-			
+
 			subject_info.append(total_native_brain_volume)
 			subject_info.append(wm_mean)
 
@@ -50,7 +50,7 @@ class WMCorrectionOperation(BaseOperation):
 
 				#determine side of lesion
 				#this gets the center of gravity of the lesion using the mni coord and then extracts the first char of the X coordinate
-				lesion_side = self.com.runFslStats(lesion, '-c')
+				lesion_side = self.com.runFslStats(lesion_file, '-c')
 
 				subject_info.append(lesion_side)
 				subject_info.append(original_lesion_vol)
@@ -58,18 +58,25 @@ class WMCorrectionOperation(BaseOperation):
 				subject_info.append(volume_removed)
 				subject_info.append(percent_removed)
 
-				cog = self.com.runFslStats(lesion, '-C')
+				cog = self.com.runFslStats(lesion_file, '-C')
+				x,y,z=cog.split(' ')
+				x=int(x)
+				y=int(y)
+				z=int(z)
 
-				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, cog, output_image_path)
+				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_WMAdjLesion%d.png'%(subject, counter+1))
+				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, x, y, z, output_image_path)
 		subject_info_all.append(subject_info)
 
 		header = ['Subject', 'Total_Native_Brain_Volume', 'Mean_White_Matter_Intensity']
 		for lesion_counter in range(max_lesions):
-			header.append('Lesion%d_Hemisphere'%lesion_counter+1)
-			header.append('Lesion%d_Original_Lesion_Volume'%lesion_counter+1)
-			header.append('Lesion%d_Corrected_Lesion_Volume'%lesion_counter+1)
-			header.append('Lesion%d_Volume_Removed'%lesion_counter+1)
-			header.append('Lesion%_Percent_Removed'%lesion_counter+1)
+
+			lesion_num=str(lesion_counter+1)
+			header.append('Lesion%s_Hemisphere'%lesion_num)
+			header.append('Lesion%s_Original_Lesion_Volume'%lesion_num)
+			header.append('Lesion%s_Corrected_Lesion_Volume'%lesion_num)
+			header.append('Lesion%s_Volume_Removed'%lesion_num)
+			header.append('Lesion%s_Percent_Removed'%lesion_num)
 
 		# Write data to the csv file
 		subject_info_with_header = header + subject_info_all
@@ -81,33 +88,41 @@ class WMCorrectionOperation(BaseOperation):
 		self.updateProgressBar(8)
 
 
+		lesion_mask_id = 'WMAdjusted'
+
+		return lesion_mask_id
+
+
 	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
 
-		lower = wm_mean - self.controller.voxal_range
-		upper = wm_mean + self.controller.voxal_range
+		rm_percentage = self.controller.percent_intensity / 100.0
+		voxel_range = (rm_percentage * 255)/2.0
+
+		lower = wm_mean - voxel_range
+		upper = wm_mean + voxel_range
 
 		corrected_lesion_volume = 0.0
 		output_bin_file = ''
 		skip_subject = False
 
-		output_file = os.path.join(self.getIntermediatePath(subject), '%s_Lesion%d_NormRange'%(subject, lesion_counter))
-		if self.com.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul'):
+		normRange_file = os.path.join(self.getIntermediatePath(subject), '%s_Lesion%d_NormRange'%(subject, lesion_counter))
+
+		if self.com.runFslWithArgs(anatomical_file_path, lesion_file, normRange_file, '-mul') == '':
 
 			lower_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_lower'%(subject, lesion_counter))
 			upper_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_upper'%(subject, lesion_counter))
 
 			final_output_file = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d'%(subject, lesion_counter))
 
-			self.com.runFslWithArgs(output_file, lower, lower_lesion, '-uthr')
-			self.com.runFslWithArgs(output_file, upper, upper_lesion, '-thr')
+			self.com.runFslWithArgs(normRange_file, lower, lower_lesion, '-uthr')
+			self.com.runFslWithArgs(normRange_file, upper, upper_lesion, '-thr')
 			self.com.runFslWithArgs(upper_lesion, lower_lesion, final_output_file, '-add')
-			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_Lesion%d_bin'%(subject, counter))
-			self.com.runFslBinarize(final_output_file, output_bin_file)
-			corrected_lesion_volume = self.com.runBrainVolume(output_bin_file)
+			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_Lesion%d_bin'%(subject, lesion_counter))
+			self.com.runFslBinarize(final_output_file, final_output_file)
+			corrected_lesion_volume = self.com.runBrainVolume(final_output_file)
 			self.logger.info('The Corrected lesion volume is [%f]'%corrected_lesion_volume)
 
 		else:
 			self.logger.info('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: %s'%subject)
 			skip_subject = True
-		return skip_subject, corrected_lesion_volume, output_bin_file
-
+		return skip_subject, corrected_lesion_volume, final_output_file

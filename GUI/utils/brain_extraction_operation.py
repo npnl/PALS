@@ -3,13 +3,13 @@ from qc_page import generateQCPage
 from base_operation import BaseOperation
 
 class BrainExtractionOperation(BaseOperation):
-	def runBrainExtraction(self):
+	def runBrainExtraction(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has already performed brain extraction
 		if self.controller.b_brain_extraction.get() == True or self.skip: return False
 		for subject in self.subjects:
-			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
+			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
-			
+
 			self.com.runBet(anatomical_file_path, os.path.join(self.getIntermediatePath(subject), subject + '_Brain'))
 
 			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_BrainExtractions')

@@ -116,7 +116,6 @@ class MainWindow(tk.Tk):
 		self.bind_class("Text","<Control-a>", self.selectAll)
 		self.bind_class("Text","<Command-v>", self.pasteAll)
 
-
 	def updateGUI(self, text):
 		self.display.insert(END, text + '\n')
 		self.display.see(END)

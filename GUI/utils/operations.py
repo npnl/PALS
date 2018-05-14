@@ -31,7 +31,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def stopThreads(self):
 		self.skip = True
-		print "Ooops. Kill the thread 01"
+		print "Oops. Kill the thread 01"
 		self.com.stopCurrentProcess()
 
 	def initialiseConstants(self):
@@ -68,14 +68,15 @@ class Operations(object, WMSegmentationOperation,\
 
 		if self.controller.b_ll_calculation.get():
 			self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
-			self.runLesionLoadCalculationFS(anatomical_id, lesion_mask_id)
 
-		self.createQCPage()
+		if self.controller.b_visual_qc.get():
+			self.createQCPage()
 
 	def createQCPage(self):
 		# Skip this step if user has not chosen to generate QC page
 		if self.controller.b_visual_qc.get() == False or self.skip: return False
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
+		os.makedirs(imgaes_dir)
 		generateQCPage('Lesions', images_dir)
 		self.logger.info('QC Page generation completed')
 
@@ -124,7 +125,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def binarizeLesionFilesForAll(self):
 		if self.skip: return False
-		self.logger.info('Lesion files binarization initiated')
+		self.logger.info('Lesion file binarization initiated')
 		for subject in self.subjects:
 			self._binarizeLesionFilesForSubject(subject)
 		self.logger.info('Lesion files of all subjects binarized successfully')
@@ -137,7 +138,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def normaliseT1Intensity(self, anatomical_id):
 		if self.skip: return False
-		self.logger.info('Normalization of subjects initiated')
+		self.logger.info('Intensity normalization of subjects initiated')
 
 		for subject in self.subjects:
 			if not self.controller.b_radiological_convention.get():
@@ -147,7 +148,7 @@ class Operations(object, WMSegmentationOperation,\
 			arg_2 = subject + '_' + anatomical_id
 			arg_3 = os.path.join(self.getIntermediatePath(subject))
 			self._normaliseSubject(arg_1, arg_2, arg_3)
-		self.logger.info('Normalization completed for all subjects')
+		self.logger.info('Intensity normalization completed for all subjects')
 
 		anatomical_id = (anatomical_id + '_intNorm')
 		return anatomical_id
@@ -183,7 +184,7 @@ class Operations(object, WMSegmentationOperation,\
 				roi_name = roi.name
 				if roi_name in mapping:
 					roi_file = mapping[roi_name][1]
-					full_path = os.path.join(self.getBaseDirectory(), 'ROIs', roi_file)
+					full_path = os.path.join(os.getcwd(), 'ROIs', roi_file)
 					roi_paths.append(full_path)
 		return roi_paths
 
@@ -206,10 +207,12 @@ class Operations(object, WMSegmentationOperation,\
 
 	def createROIDirectories(self):
 		if self.skip: return False
-		self.logger.info('Creating ROIs directories')
-		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
-		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
-		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WMSegmentations')
+		self.logger.info('Creating Directories')
+		if self.controller.b_wm_correction.get():
+			self._createDirectory('QC_Lesions')
+			if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WMSegmentations')
+		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
+			if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
 		if self.controller.b_ll_calculation.get():
 			self._createDirectory('QC_LL')
 			self._createDirectory('QC_Registrations')
@@ -221,7 +224,10 @@ class Operations(object, WMSegmentationOperation,\
 				# the following takes all of the user input ROIs and binarizes
 				# them; placing them in "/ROI_binarized" directory
 				for user_roi_path in self._getUserROIsPaths():
-					roi_name = self._extractFileName(user_roi_path)
+					#roi_name = self._extractFileName(user_roi_path)
+
+					roi_name = self._extractFileName(user_roi_path, remove_extension=True, extension_count=2)
+
 					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
 					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
 					self.com.runFslBinarize(user_roi_path, roi_output_path)
@@ -242,7 +248,8 @@ class Operations(object, WMSegmentationOperation,\
 			if self.controller.b_default_rois.get():
 				self._createDirectory('MNI152', parent=['QC_LL'])
 				for default_roi_path in self._getDefaultROIsPaths():
-					roi_name = self._extractFileName(default_roi_path)
+					roi_name = self._extractFileName(default_roi_path, remove_extension=True, extension_count=2)
+
 					self._createDirectory(roi_name, parent=['QC_LL', 'MNI152'])
 				self._createDirectory('MNI152', parent=['QC_Registrations'])
 
@@ -259,7 +266,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def reOrientToRadForAllSubjects(self):
 		if not self.controller.b_radiological_convention.get() or self.skip: return False
-		self.logger.info('Reorientation to the radiological convention initiated.')
+		self.logger.info('Reorient to radiological module initiated.')
 		new_subjects = []
 		for subject in self.subjects:
 			keepSubject = self._reOrientToRadForSubject(subject)
@@ -267,7 +274,7 @@ class Operations(object, WMSegmentationOperation,\
 				self.logger.info('The subject contains error. Check that files are in the same orientation for subject [%s]', subject)
 			else:
 				new_subjects.append(subject)
-		self.logger.info('Reorientation to the radiological convention has been completed for all subjects.')
+		self.logger.info('Reorient to radiological has been completed for all subjects.')
 		self.subjects = new_subjects
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
@@ -310,7 +317,7 @@ class Operations(object, WMSegmentationOperation,\
 			rad_wm_file = self._getPathOfFiles(self.getOriginalPath(subject), *params)[0]
 			original_wm_orientation =self.com.runFslOrient(original_wm_file)
 			if original_wm_orientation != original_t1_orientation:
-				self.logger.info('white matter mask is in a different orientation from T1.Check subject %s'%subject)
+				self.logger.info('White matter mask is in a different orientation from T1.Check subject %s'%subject)
 				# flag subject
 				return False
 

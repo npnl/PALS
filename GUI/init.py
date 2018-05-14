@@ -44,8 +44,8 @@ class MainWindow(tk.Tk):
 		self.b_radiological_convention.set(False)
 		self.b_wm_correction.set(False)
 		self.b_ll_calculation.set(False)
-		self.b_visual_qc.set(True)
-		self.b_quality_control.set(False)
+		self.b_visual_qc.set(False)
+		self.b_quality_control.set(True)
 
 		#Directory Input Page
 		self.sv_input_dir = StringVar(self)

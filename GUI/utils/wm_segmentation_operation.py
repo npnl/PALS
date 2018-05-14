@@ -7,6 +7,7 @@ class WMSegmentationOperation(BaseOperation):
 	def runWMSegmentation(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has already performed brain extraction
 		if self.controller.b_wm_segmentation.get() == True or self.skip: return False
+		self.logger.info('White matter segmentation has been initiated')
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
@@ -17,5 +18,5 @@ class WMSegmentationOperation(BaseOperation):
 			image_path = os.path.join(image_files_base, subject + '_WM.png')
 			self.com.runFslEyes(anatomical_file_path, wm_mask_file, image_path)
 		generateQCPage('WM', image_files_base)
-		self.logger.info('White Matter segmentation completed for all subjects')
+		self.logger.info('White matter segmentation completed for all subjects')
 		self.updateProgressBar(8)

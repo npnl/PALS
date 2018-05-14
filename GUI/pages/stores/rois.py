@@ -141,4 +141,3 @@ def getROIs(controller):
 	return (createObjectArrays(controller, CorticospinalTractROINames),\
 			createObjectArrays(controller, FreesurferCorticalROINames),\
 			createObjectArrays(controller, FreesurferSubcorticalROINames))
-

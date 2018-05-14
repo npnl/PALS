@@ -1,1 +1,2 @@
 from worker import Worker
+from stoppable_thread import StoppableThread

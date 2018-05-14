@@ -26,9 +26,13 @@ class MainWindow(tk.Tk):
 		self.title("Pipeline for Analyzing Lesions after Stroke")
 		# self.geometry("1200x800")
 
-		logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: '
+		logging.basicConfig(level=logging.INFO, format='%(levelname)s: '
 							'%(message)s')
 		self.logger = logging.getLogger(__name__)
+
+		# Text area to show the logs of running operations
+		self.display = None
+		self.progressbar = None
 
 		#Welcome page
 		self.b_radiological_convention = BooleanVar(self)
@@ -111,6 +115,12 @@ class MainWindow(tk.Tk):
 
 		self.bind_class("Text","<Control-a>", self.selectAll)
 		self.bind_class("Text","<Command-v>", self.pasteAll)
+
+
+	def updateGUI(self, text):
+		self.display.insert(END, text + '\n')
+		self.display.see(END)
+		self.update()
 
 	def selectAll(self, event):
 		event.widget.tag_add("sel","1.0","end")

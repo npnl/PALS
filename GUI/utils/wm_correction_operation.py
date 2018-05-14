@@ -12,7 +12,7 @@ class WMCorrectionOperation(BaseOperation):
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
-			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_file[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
+			if not self.com.runFslMathToCheckInSameSpace(wm_mask_file, lesion_files[0], os.path.join(self.getIntermediatePath(subject), subject + '_corrWM')):
 				self.logger.info('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: %s'%subject)
 				subject_info.append('Skipped')
 				continue
@@ -78,6 +78,7 @@ class WMCorrectionOperation(BaseOperation):
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		generateQCPage('Lesions', image_files_base)
 		self.logger.info('White Matter correction completed for all subjects')
+		self.updateProgressBar(8)
 
 
 	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):

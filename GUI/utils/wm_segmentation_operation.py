@@ -18,3 +18,4 @@ class WMSegmentationOperation(BaseOperation):
 			self.com.runFslEyes(anatomical_file_path, wm_mask_file, image_path)
 		generateQCPage('WM', image_files_base)
 		self.logger.info('White Matter segmentation completed for all subjects')
+		self.updateProgressBar(8)

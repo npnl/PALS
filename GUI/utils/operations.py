@@ -1,6 +1,7 @@
 import os
 import ntpath
 from shutil import copyfile, rmtree
+from threading import Thread
 
 from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
 from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
@@ -20,11 +21,21 @@ class Operations(object, WMSegmentationOperation,\
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
-		self.com = Commands(controller.logger)
+		self.com = Commands(controller.logger, self.controller)
 
 		self.initialiseConstants()
 
+	def startThreads(self):
+		thread = Thread(target=self.startExecution, args=())
+		thread.start()
+
+	def stopThreads(self):
+		self.skip = True
+		print "Ooops. Kill the thread 01"
+		self.com.stopCurrentProcess()
+
 	def initialiseConstants(self):
+		self.INCREMENT = 8
 		self.subjects = []
 		self.new_subjects = []
 		self.input_directory = self.controller.sv_input_dir.get()
@@ -35,7 +46,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.ORIGINAL_FILES = 'Original_Files'
 
 
-	def initialise(self):
+	def startExecution(self):
 		self.skip = False
 		self.initialiseConstants()
 		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
@@ -55,12 +66,13 @@ class Operations(object, WMSegmentationOperation,\
 		# Skip this step if user has not chosen to generate QC page
 		if self.controller.b_visual_qc.get() == False or self.skip: return False
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
-		generateQCPage(page_type, images_dir)
+		generateQCPage('Lesions', images_dir)
+		self.logger.info('QC Page generation completed')
 
 	def _runWMCorrectionHelper(self):
 		# Skip this step if user has not selected to perform wm correction
 		if self.controller.b_wm_correction.get() == False or self.skip: return False
-		sef.controller.sv_lesion_mask_id.set('WMAdjusted') # Doubt : What should happend to the user input for lesion_mask_id
+		self.controller.sv_lesion_mask_id.set('WMAdjusted') # Doubt : What should happend to the user input for lesion_mask_id
 		self.runWMCorrection()
 
 	def _copyDirectories(self, source_dir, dest_dir):
@@ -82,6 +94,7 @@ class Operations(object, WMSegmentationOperation,\
 			directory = self.getOriginalPath(subject)
 			self.com.runGzip(directory)
 		self.logger.info('Gzip operation completed for all subjects')
+		self.updateProgressBar(self.INCREMENT)
 
 	def _binarizeLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
@@ -127,13 +140,8 @@ class Operations(object, WMSegmentationOperation,\
 				os.makedirs(output_directory)
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
+		self.updateProgressBar(self.INCREMENT)
 
-	def performWMSegmentation(self):
-		if self.skip: return False
-		self.logger.info('Performing white matter segmentation...[long process]')
-		for subject in self.new_subjects:
-			pass
-		self.logger.info('White Matter segmentation completed for all subjects')
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
 		parent = os.path.join(*parent)

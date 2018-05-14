@@ -183,7 +183,7 @@ class Operations(object, WMSegmentationOperation,\
 			if roi.get():
 				roi_name = roi.name
 				if roi_name in mapping:
-					roi_file = mapping[roi_name]
+					roi_file = mapping[roi_name][1]
 					full_path = os.path.join(os.getcwd(), 'ROIs', roi_file)
 					roi_paths.append(full_path)
 		return roi_paths

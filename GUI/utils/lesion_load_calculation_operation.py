@@ -27,6 +27,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		generateQCPage('Registration', image_files_base)
 		self.logger.info('Lesion Load Calculation completed for all subjects')
+		self.updateProgressBar(8)
 
 	def _runLesionLoadCalculationHelper(self, brain_file, space, roi_list):
 		all_subjects_info = []
@@ -212,6 +213,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		subject_info_with_header = header + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
 		self._generateQCForRois(space)
+		self.updateProgressBar(8)
 
 
 

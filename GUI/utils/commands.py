@@ -2,22 +2,37 @@ import os
 import subprocess
 
 class Commands(object):
-	def __init__(self, logger):
+	def __init__(self, logger, parent):
 		self.logger = logger
+		self.parent = parent
+		self.display = parent.display
 
 	def startExecution(self, cmd):
-		self.logger.debug("Running [%s]"%cmd)
+		self.running = True
+		msg = "Running [%s]"%cmd
+		self.logger.debug(msg)
+		self.parent.updateGUI(msg)
 		self.running_process = subprocess.Popen('exec ' + cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 		return_code = self.running_process.wait()
 		output = ''
 		for stdout_line in iter(self.running_process.stdout.readline, ""):
+			if not self.running:
+				print "Ooops. Kill the thread 03"
+				break
 			output += stdout_line
 		self.running_process.stdout.close()
 		if return_code != 0:
 			self.logger.error('File was not zipped.')
+			output = 'Something went wrong.'
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
+		self.parent.updateGUI(output)
 		return output
+
+	def stopCurrentProcess(self):
+		self.running = False
+		self.running_process.kill()
+		print "Ooops. Kill the thread 02"
 
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')
@@ -34,7 +49,6 @@ class Commands(object):
 	def runFslBinarize(self, lesion_file_path, output_bin_path):
 		cmd = 'fslmaths %s -bin %s;'%(lesion_file_path, output_bin_path)
 		output = self.startExecution(cmd)
-		print output
 
 	def runFslOrient(self, original_t1_files, args=''):
 		cmd = 'fslorient %s %s'%(args, original_t1_files)

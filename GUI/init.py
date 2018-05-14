@@ -26,9 +26,13 @@ class MainWindow(tk.Tk):
 		self.title("Pipeline for Analyzing Lesions after Stroke")
 		# self.geometry("1200x800")
 
-		logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: '
+		logging.basicConfig(level=logging.INFO, format='%(levelname)s: '
 							'%(message)s')
 		self.logger = logging.getLogger(__name__)
+
+		# Text area to show the logs of running operations
+		self.display = None
+		self.progressbar = None
 
 		#Welcome page
 		self.b_radiological_convention = BooleanVar(self)
@@ -112,19 +116,10 @@ class MainWindow(tk.Tk):
 		self.bind_class("Text","<Control-a>", self.selectAll)
 		self.bind_class("Text","<Command-v>", self.pasteAll)
 
-		self.debugging()
-
-	def debugging(self):
-		self.sv_input_dir.set('/Users/npnlusc/Documents/PALS/validation/Data_Files/20170613_ATLAS_R1.1_FINAL/native/c0005')
-		self.sv_output_dir.set('/Users/npnlusc/Documents/PALS/validation/Output_Files/ATLAS/c0005')
-		self.sv_t1_id.set('t1')
-		self.sv_lesion_mask_id.set('LesionSmooth')
-		# self.b_radiological_convention.set(True)
-		self.b_wm_correction.set(True)
-		self.b_brain_extraction.set(True)
-		self.b_wm_segmentation.set(True)
-		self.sv_bet_id.set('Brain')
-		self.sv_wm_id.set('wm')
+	def updateGUI(self, text):
+		self.display.insert(END, text + '\n')
+		self.display.see(END)
+		self.update()
 
 	def selectAll(self, event):
 		event.widget.tag_add("sel","1.0","end")

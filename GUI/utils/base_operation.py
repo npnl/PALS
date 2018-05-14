@@ -21,6 +21,9 @@ class BaseOperation():
 	def getOriginalPath(self, subject):
 		return os.path.join(self.getIntermediatePath(subject), self.ORIGINAL_FILES)
 
+	def updateProgressBar(self, value):
+		self.controller.progressbar.step(value)
+
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):
 		head, tail = ntpath.split(path)
 		filename =  tail or ntpath.basename(head)

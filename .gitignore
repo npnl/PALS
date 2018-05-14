@@ -2,3 +2,7 @@
 *.pyc
 ROIs/*
 GUI/data/*
+.ipynb_checkpoints/
+*.ipynb
+GUI/song.wav
+ROIs.zip

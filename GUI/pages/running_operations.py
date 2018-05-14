@@ -20,22 +20,23 @@ class RunningOperationsPage(BaseInputPage, object):
 		# p = ttk.Progressbar(parent, orient=HORIZONTAL, length=100, mode='determinate')
 		# p.grid(row=self.starting_row)
 
-		play = tk.Button(self, text='Play', command=lambda : self.executeCommand())
+		play = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
 		play.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 
-		stop = tk.Button(self, text='Stop', command=lambda : self.stopCommand())
+		stop = tk.Button(self, text='Stop Execution', command=lambda : self.terminateCommand())
 		stop.grid(row=self.starting_row, column=1, sticky='W', padx=5, pady=3)
 
-		test_command = tk.Button(self, text='Test Command', command=lambda : self.testCommands())
-		test_command.grid(row=self.starting_row + 1, column=0, sticky='W', padx=5, pady=3)
+		self.progressbar = ttk.Progressbar(self)
+		self.progressbar.configure(mode='determinate', max=100)
+		self.progressbar.grid(row=self.starting_row+1, column=0, columnspan=2, sticky='ew', padx=10, pady=10)
+
+		self.controller.progressbar = self.progressbar
 
 		self.output = Text(self, height=20, width=100)
 		self.output.grid(row=self.starting_row+2, column=0)
 
+		self.controller.display = self.output
 
-	def testCommands(self):
-		operation = Operations(self.controller)
-		operation.initialise()
 
 	def setFrameTitle(self):
 		self.title.set('Please wait')
@@ -44,11 +45,10 @@ class RunningOperationsPage(BaseInputPage, object):
 		super(RunningOperationsPage, self).moveToNextPage()
 
 	def executeCommand(self):
-		main_py.stop()
-		
-		self.worker = Worker()
-		self.thread_name = self.worker.execute('mplayer song.wav', self.output, self)
-		print self.thread_name
+		self.operation = Operations(self.controller)
+		self.operation.startThreads()
 
-	def stopCommand(self):
-		self.worker.stop(self.thread_name)
+	def terminateCommand(self):
+		self.operation.stopThreads()
+
+

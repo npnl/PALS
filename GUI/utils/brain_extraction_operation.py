@@ -17,3 +17,4 @@ class BrainExtractionOperation(BaseOperation):
 			self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
 		generateQCPage('BET', image_files_base)
 		self.logger.info('Brain extraction completed for all subjects')
+		self.updateProgressBar(8)

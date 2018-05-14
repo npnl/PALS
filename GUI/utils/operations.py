@@ -1,6 +1,7 @@
 import os
 import ntpath
 from shutil import copyfile, rmtree
+from threading import Thread
 
 from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
 from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
@@ -20,11 +21,21 @@ class Operations(object, WMSegmentationOperation,\
 	def __init__(self, controller):
 		self.controller = controller
 		self.logger = controller.logger
-		self.com = Commands(controller.logger)
+		self.com = Commands(controller.logger, self.controller)
 
 		self.initialiseConstants()
 
+	def startThreads(self):
+		thread = Thread(target=self.startExecution, args=())
+		thread.start()
+
+	def stopThreads(self):
+		self.skip = True
+		print "Ooops. Kill the thread 01"
+		self.com.stopCurrentProcess()
+
 	def initialiseConstants(self):
+		self.INCREMENT = 8
 		self.subjects = []
 		self.new_subjects = []
 		self.input_directory = self.controller.sv_input_dir.get()
@@ -35,7 +46,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.ORIGINAL_FILES = 'Original_Files'
 
 
-	def initialise(self):
+	def startExecution(self):
 		self.skip = False
 		self.initialiseConstants()
 		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
@@ -66,6 +77,8 @@ class Operations(object, WMSegmentationOperation,\
 		if self.controller.b_visual_qc.get() == False or self.skip: return False
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		generateQCPage('Lesions', images_dir)
+		self.logger.info('QC Page generation completed')
+
 
 	def _runWMCorrectionHelper(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has not selected to perform wm correction
@@ -76,7 +89,6 @@ class Operations(object, WMSegmentationOperation,\
 
 		return anatomical_id, lesion_mask_id
 		#self.controller.sv_lesion_mask_id.set('WMAdjusted')
-
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -97,6 +109,7 @@ class Operations(object, WMSegmentationOperation,\
 			directory = self.getOriginalPath(subject)
 			self.com.runGzip(directory)
 		self.logger.info('Gzip operation completed for all subjects')
+		self.updateProgressBar(self.INCREMENT)
 
 	def _binarizeLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
@@ -151,13 +164,8 @@ class Operations(object, WMSegmentationOperation,\
 				os.makedirs(output_directory)
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
+		self.updateProgressBar(self.INCREMENT)
 
-	def performWMSegmentation(self):
-		if self.skip: return False
-		self.logger.info('Performing white matter segmentation...[long process]')
-		for subject in self.new_subjects:
-			pass
-		self.logger.info('White Matter segmentation completed for all subjects')
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
 		parent = os.path.join(*parent)
@@ -201,7 +209,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger.info('Creating ROIs directories')
 		if self.controller.b_wm_correction.get(): self._createDirectory('QC_Lesions')
 		if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
-		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WM')
+		if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WMSegmentations')
 		if self.controller.b_ll_calculation.get():
 			self._createDirectory('QC_LL')
 			self._createDirectory('QC_Registrations')
@@ -210,23 +218,28 @@ class Operations(object, WMSegmentationOperation,\
 			if self.controller.b_own_rois.get():
 				self._createDirectory('custom', parent=['QC_LL'])
 				self._createDirectory('ROI_binarized')
+				# the following takes all of the user input ROIs and binarizes
+				# them; placing them in "/ROI_binarized" directory
 				for user_roi_path in self._getUserROIsPaths():
 					roi_name = self._extractFileName(user_roi_path)
+					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
 					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
 					self.com.runFslBinarize(user_roi_path, roi_output_path)
 
-				roi_output_directory = os.path.join(self.getBaseDirectory(), ROI_binarized)
+				roi_output_directory = os.path.join(self.getBaseDirectory(), 'ROI_binarized')
 				params = ('', '', '_bin.nii.gz')
+
+				#get fullpath of all binarized user input ROIs
 				user_rois_output_paths = self._getPathOfFiles(roi_output_directory, *params)
 
-				for user_roi_output_path in user_rois_output_paths:
-					roi_name = self._extractFileName(user_roi_output_path)
-					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
+				# for user_roi_output_path in user_rois_output_paths:
+				# 	roi_name = self._extractFileName(user_roi_output_path)
+				# 	self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
 
 				self._createDirectory('custom', parent=['QC_Registrations'])
 
 			# Default ROIs
-			elif self.controller.b_default_rois.get():
+			if self.controller.b_default_rois.get():
 				self._createDirectory('MNI152', parent=['QC_LL'])
 				for default_roi_path in self._getDefaultROIsPaths():
 					roi_name = self._extractFileName(default_roi_path)
@@ -234,7 +247,7 @@ class Operations(object, WMSegmentationOperation,\
 				self._createDirectory('MNI152', parent=['QC_Registrations'])
 
 			# FreeSurfer specific ROIs
-			elif self.controller.b_freesurfer_rois.get():
+			if self.controller.b_freesurfer_rois.get():
 				self._createDirectory('FS', parent=['QC_LL'])
 				for fs_roi_path in self._getFSROIsPaths():
 					roi_name = self._extractFileName(fs_roi_path)
@@ -242,7 +255,7 @@ class Operations(object, WMSegmentationOperation,\
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:
 				self.logger.info('None of the ROI options selected')
-		self.logger.info('ROIs direcotory created successfully')
+		self.logger.info('ROIs directory created successfully')
 
 	def reOrientToRadForAllSubjects(self):
 		if not self.controller.b_radiological_convention.get() or self.skip: return False
@@ -336,7 +349,6 @@ class Operations(object, WMSegmentationOperation,\
 
 			params = (subject, self.controller.sv_lesion_mask_id.get(), 'rad.nii.gz')
 			rad_lesion_files = self._getPathOfFiles(self.getIntermediatePath(subject), *params)
-
 
 		# run reorient2standard on radiological T1, bet, wm, and lesion files
 		self.com.runFslOrient2Std(rad_t1_file, os.path.join(self.getSubjectPath(subject), subject + '_' + self.controller.sv_t1_id.get() + '_rad_reorient'))

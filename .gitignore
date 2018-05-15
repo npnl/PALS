@@ -6,3 +6,4 @@ GUI/data/*
 *.ipynb
 GUI/song.wav
 ROIs.zip
+GUI/logs/*

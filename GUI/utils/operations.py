@@ -31,7 +31,6 @@ class Operations(object, WMSegmentationOperation,\
 
 	def stopThreads(self):
 		self.skip = True
-		print "Oops. Kill the thread 01"
 		self.com.stopCurrentProcess()
 
 	def initialiseConstants(self):
@@ -48,6 +47,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def startExecution(self):
 		self.skip = False
+		self.controller.progressbar['value'] = 0
 		self.initialiseConstants()
 		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
 		self.createROIDirectories()

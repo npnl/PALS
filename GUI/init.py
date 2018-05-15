@@ -8,6 +8,7 @@ except ImportError:
 import tkFileDialog
 import os
 import logging
+from datetime import datetime
 
 from pages import WelcomePage
 from pages import DirectoryInputPage
@@ -26,9 +27,7 @@ class MainWindow(tk.Tk):
 		self.title("Pipeline for Analyzing Lesions after Stroke")
 		# self.geometry("1200x800")
 
-		logging.basicConfig(level=logging.INFO, format='%(levelname)s: '
-							'%(message)s')
-		self.logger = logging.getLogger(__name__)
+		self.setupLogger()
 
 		# Text area to show the logs of running operations
 		self.display = None
@@ -138,6 +137,22 @@ class MainWindow(tk.Tk):
 			pass
 
 		event.widget.insert("insert", clipboard)
+
+	def setupLogger(self):
+		project_path = os.path.dirname(os.path.realpath(__file__))
+		logs_dir = os.path.join(project_path, 'logs')
+		if not os.path.exists(logs_dir):
+			os.makedirs(logs_dir)
+		logging.basicConfig(level=logging.DEBUG,
+					format='%(levelname)s %(message)s',
+					filename=os.path.join(logs_dir, datetime.now().strftime('logfile_%H_%M_%d_%m_%Y.log')),
+					filemode='w')
+		console = logging.StreamHandler()
+		console.setLevel(logging.INFO)
+		formatter = logging.Formatter('%(levelname)-8s %(message)s')
+		console.setFormatter(formatter)
+		logging.getLogger('').addHandler(console)
+		self.logger = logging.getLogger(__name__)
 
 	def show_frame(self, frame_number):
 		if frame_number >= len(self.frames) or frame_number < 0:

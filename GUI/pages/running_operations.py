@@ -17,9 +17,6 @@ class RunningOperationsPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
-		# p = ttk.Progressbar(parent, orient=HORIZONTAL, length=100, mode='determinate')
-		# p.grid(row=self.starting_row)
-
 		play = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
 		play.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 

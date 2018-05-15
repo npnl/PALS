@@ -17,7 +17,6 @@ class Commands(object):
 		output = ''
 		for stdout_line in iter(self.running_process.stdout.readline, ""):
 			if not self.running:
-				print "Ooops. Kill the thread 03"
 				break
 			output += stdout_line
 		self.running_process.stdout.close()
@@ -31,7 +30,6 @@ class Commands(object):
 	def stopCurrentProcess(self):
 		self.running = False
 		self.running_process.kill()
-		print "Ooops. Kill the thread 02"
 
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')

@@ -17,11 +17,11 @@ class RunningOperationsPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
-		play = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
-		play.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
+		self.start = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
+		self.start.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 
-		stop = tk.Button(self, text='Stop Execution', command=lambda : self.terminateCommand())
-		stop.grid(row=self.starting_row, column=1, sticky='W', padx=5, pady=3)
+		self.stop = tk.Button(self, text='Stop Execution', state="disabled", command=lambda : self.terminateCommand())
+		self.stop.grid(row=self.starting_row, column=1, sticky='W', padx=5, pady=3)
 
 		self.progressbar = ttk.Progressbar(self)
 		self.progressbar.configure(mode='determinate', max=100)
@@ -42,10 +42,14 @@ class RunningOperationsPage(BaseInputPage, object):
 		super(RunningOperationsPage, self).moveToNextPage()
 
 	def executeCommand(self):
+		self.start.config(state="disabled")
+		self.stop.config(state="normal")
 		self.operation = Operations(self.controller)
 		self.operation.startThreads()
 
 	def terminateCommand(self):
+		self.start.config(state="normal")
+		self.stop.config(state="disabled")
 		self.operation.stopThreads()
 
 

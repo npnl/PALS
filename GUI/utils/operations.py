@@ -71,6 +71,7 @@ class Operations(object, WMSegmentationOperation,\
 
 		if self.controller.b_visual_qc.get():
 			self.createQCPage()
+		self.controller.progressbar['value'] = 100
 
 	def createQCPage(self):
 		# Skip this step if user has not chosen to generate QC page

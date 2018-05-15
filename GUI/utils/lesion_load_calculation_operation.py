@@ -55,18 +55,18 @@ class LesionLoadCalculationOperation(BaseOperation):
 			for counter, lesion_file in enumerate(lesion_files):
 				lesion_name = self._extractFileName(lesion_file, remove_extension=True, extension_count=2)
 				self.logger.info('Registering lesion to template space...')
-				lesion_ss_file = os.path.join(self.getIntermediatePath(subject), '%s_%s_SS.nii.gz'%(lesion_name, space))
+				lesion_ss_file = os.path.join(self.getIntermediatePath(subject), '%s_%s.nii.gz'%(lesion_name, space))
 				cmd = 'flirt -in %s -applyxfm -init %s -out %s -paddingsize 0.0 -interp trilinear -ref %s'%(lesion_file, reg_file, lesion_ss_file, reg_brain_file)
 				self.com.runRawCommand(cmd)
 
 				ss_lesion_volume = self.com.runBrainVolume(lesion_file)
 				subject_info.append(ss_lesion_volume)
 
-				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_SS.nii.gz'%lesion_name)
+				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s_bin.nii.gz'%(lesion_name,space))
 				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
-				lesion_bin = lesion_ss_file
-				cog = self.com.runFslStats(lesion_ss_file, '-C')
+				lesion_bin = lesion_ss_file_output
+				cog = self.com.runFslStats(lesion_bin, '-C')
 
 				for roi_file in roi_list:
 					roi_name = self._extractFileName(roi_file, remove_extension=True, extension_count=2)

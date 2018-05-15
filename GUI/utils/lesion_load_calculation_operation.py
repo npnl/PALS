@@ -7,8 +7,8 @@ class LesionLoadCalculationOperation(BaseOperation):
 		# Skip this step if user did not ask to perform this operation
 		if self.controller.b_ll_calculation.get() == False or self.skip: return False
 
-		standard_brain = '/Users/npnlusc/Documents/PALS/PALS_v1.0.0/GUI/ROIs/MNI152_T1_2mm_brain.nii.gz' # Doubt : Need to change this value with correct one
-		template_brain = '/Users/npnlusc/Documents/PALS/PALS_v1.0.0/GUI/ROIs/MNI152_T1_2mm_brain.nii.gz'
+		standard_brain = self.controller.sv_user_brain_template.get()
+		template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
 
 		if self.controller.b_own_rois.get() == True:
 			space = 'custom'

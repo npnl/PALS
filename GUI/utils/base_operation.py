@@ -9,6 +9,9 @@ class BaseOperation():
 			raise TypeError('Base operation may not be instantiated')
 		return object.__new__(cls, *args, **kwargs)
 
+	def getProjectDirectory(self):
+		return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 	def getBaseDirectory(self):
 		return self.output_directory
 

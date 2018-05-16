@@ -32,10 +32,35 @@ def generateQCPage(page_type, images_dir):
 	output += ' margin-top: -200px;' + '\n'
 	output += '}' + '\n'
 	output += '</style>' + '\n'
+
+	output += """<script language="Javascript" >
+					function download(filename, text) {
+					  var all_checked_boxes = document.getElementsByClassName('subject_checkbox');
+					  var subjects_passed = ''
+					  for(var i = 0; i < all_checked_boxes.length; i++){
+					  	if(all_checked_boxes[i].checked === true){
+					  		subjects_passed += all_checked_boxes[i].value + '\n';
+					  	}
+					  }
+
+					  var pom = document.createElement('a');
+					  pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(subjects_passed));
+					  pom.setAttribute('download', filename);
+					
+					  pom.style.display = 'none';
+					  document.body.appendChild(pom);
+					
+					  pom.click();
+					
+					  document.body.removeChild(pom);
+					}
+					</script>"""
+
 	output += '</head>' + '\n'
 	output += '<body>' + '\n'
 
 
+	output += """<form onsubmit="download('selected_subjects.txt', this['text'].value)>""" + '\n'
 
 	image_files = _getPathOfFiles(images_dir, endswith_str='.png')
 	for image_path in image_files:
@@ -50,16 +75,15 @@ def generateQCPage(page_type, images_dir):
 		output += '<td> <FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=5> %s </FONT> </td>'%(subject) + '\n'
 		output += '</tr>' + '\n'
 
-		output += '<form>' + '\n'
 
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
 			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, image_path, image_path) + '\n'
-			output += '<center><input type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial> Flag subject</FONT></center><br><br></td>' + '\n'
+			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial> Flag subject</FONT></center><br><br></td>' + '\n'
 		else:
 			output += '<tr>' + '\n'
 			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(image_path, image_path) + '\n'
-			output += '<center><input type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>' + '\n'
+			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>' + '\n'
 
 		output += '</table>' + '\n'
 	output += '<button type="submit" class="btn">Submit</button><br></br>' + '\n'

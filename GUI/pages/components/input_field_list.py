@@ -106,7 +106,7 @@ class InputFieldList(object):
 	def chooseDir(self, parent, controller, place_holder, message):
 		current_dir = os.getcwd()
 		parent.update()
-		chosen_dir =  tkFileDialog.askdirectory(parent=parent, initialdir = current_dir, title='Select the location of ' + message)
+		chosen_dir =  tkFileDialog.askopenfilename(parent=parent, initialdir = current_dir, title='Select the location of ' + message)
 		place_holder.set(chosen_dir)
 
 	def frameWidth(self, event):

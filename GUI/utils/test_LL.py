@@ -7,30 +7,38 @@ class LesionLoadCalculationOperation(BaseOperation):
 		# Skip this step if user did not ask to perform this operation
 		if self.controller.b_ll_calculation.get() == False or self.skip: return False
 
-		standard_brain = self.controller.sv_user_brain_template.get()
-		template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
+		#standard_brain = self.controller.sv_user_brain_template.get()
+		#template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 
 		if self.controller.b_own_rois.get() == True:
 			space = 'custom'
+			template_brain = self.controller.sv_user_brain_template.get()
+			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
 			roi_list = self.controller.user_rois
-			self._runLesionLoadCalculationHelper(standard_brain, space, roi_list, anatomical_id, lesion_mask_id)
+			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
 
 		if self.controller.b_default_rois.get() == True:
 			space = 'MNI152'
+			template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 			roi_list = self.controller.default_roi_paths
-			self._runLesionLoadCalculationHelper(template_brain, space, roi_list, anatomical_id, lesion_mask_id)
+			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
+			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
 
 		if self.controller.b_freesurfer_rois.get() == True:
 			space = 'FS'
+			template_brain = ''
+			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
 			self.runLesionLoadCalculationFS(space)
 
 		self.logger.info('Lesion Load Calculation completed for all subjects')
 		self.updateProgressBar(8)
 
+
 	def runReg(self, template_brain, space, anatomical_id, lesion_mask_id):
 		self.logger.info('Performing registration...')
 
-		if ## space == MNI152
+		if space == 'MNI152' or space == 'custom':
+			#same template brain for all subject; passed in as template_brain
 			for subject in self.subjects:
 				anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 				((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
@@ -38,20 +46,50 @@ class LesionLoadCalculationOperation(BaseOperation):
 				reg_brain_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_brain_%s'%(subject, space))
 				reg_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_%s.mat'%(subject, space))
 
-				self.com.runFlirt(bet_brain_file, brain_file, reg_brain_file, reg_file)
+				self.com.runFlirt(bet_brain_file, template_brain, reg_brain_file, reg_file)
 				out_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space, '%s_Reg.png'%subject)
 				self.com.runFslEyes(out_image_path, reg_brain_file + '.nii.gz', options='')
+
+		if space == 'FS':
+			# new template brain for each subject
+			for subject in self.subjects:
+				anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
+				((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
+
+				template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
+				self.com.runMriConvert(t1_mgz, template_brain)
+
+				# perform registration to FS Space for each subject to get transformation matrix
+				reg_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.xfm'%subject)
+				reg_brain_file= os.path.join(self.getIntermediatePath(subject), '%s_T12FS'%subject)
+				#cmd = 'flirt -in %s -ref %s -omat %s -out %s;'%(anatomical_file_path, template_brain, reg_file, reg_brain_file)
+				#self.com.runRawCommand(cmd)
+				self.com.runFlirt(anatomical_file_path, template_brain, reg_brain_file, reg_file)
+
+				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
+				self.com.runFslEyes(out_image_path, reg_brain_file + '.nii.gz', options='')
+				#self.com.runFslEyes(reg_brain_file, output_image_path=output_image_path, options='')
+
+				# invert transformation matrix
+				xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
+				cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, reg_file)
+				self.com.runRawCommand(cmd)
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		generateQCPage('Registration', image_files_base)
 
-	def _runLesionLoadCalculationHelper(self, brain_file, space, roi_list, anatomical_id, lesion_mask_id):
+
+	def _runLesionLoadCalculationHelper(self, space, roi_list, anatomical_id, lesion_mask_id):
 		all_subjects_info = []
 		max_lesions = 0
+
 		for subject in self.subjects:
 			subject_info = [subject]
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
+
+			reg_brain_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_brain_%s'%(subject, space))
+			reg_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_%s.mat'%(subject, space))
 
 			lesion_files_count = len(lesion_files)
 
@@ -141,22 +179,22 @@ class LesionLoadCalculationOperation(BaseOperation):
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
-			fs_t1 = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
-			self.com.runMriConvert(t1_mgz, fs_t1)
-
-			# perform registration to FS Space for each subject to get transformation matrix
-			xfm_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.xfm'%subject)
-			t12_fs_output_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.nii.gz'%subject)
-			cmd = 'flirt -in %s -ref %s -omat %s -out %s;'%(anatomical_file_path, fs_t1, xfm_file, t12_fs_output_file)
-			self.com.runRawCommand(cmd)
-
-			output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
-			self.com.runFslEyes(t12_fs_output_file, output_image_path=output_image_path, options='')
-
-			# invert transformation matrix
-			xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
-			cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, xfm_file)
-			self.com.runRawCommand(cmd)
+			# template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
+			# self.com.runMriConvert(t1_mgz, template_brain)
+			#
+			# # perform registration to FS Space for each subject to get transformation matrix
+			# reg_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.xfm'%subject)
+			# reg_brain_file= os.path.join(self.getIntermediatePath(subject), '%s_T12FS.nii.gz'%subject)
+			# cmd = 'flirt -in %s -ref %s -omat %s -out %s;'%(anatomical_file_path, template_brain, reg_file, reg_brain_file)
+			# self.com.runRawCommand(cmd)
+			#
+			# output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
+			# self.com.runFslEyes(reg_brain_file, output_image_path=output_image_path, options='')
+			#
+			# # invert transformation matrix
+			# xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
+			# cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, reg_file)
+			# self.com.runRawCommand(cmd)
 
 			lesion_files_count = len(lesion_files)
 
@@ -164,6 +202,8 @@ class LesionLoadCalculationOperation(BaseOperation):
 				max_lesions = lesion_files_count
 				self.logger.debug('Updated num of max lesions : ' + str(max_lesions))
 
+			xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
+			reg_brain_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.nii.gz'%subject)
 
 			# extract all ROIs for each subj
 			for roi_code in roi_codes:
@@ -184,7 +224,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				lesion_fs_bin = os.path.join(self.getIntermediatePath(subject), '%s_lesion%d_FS_bin.nii.gz')
 
 				# perform transformation on lesion mask, then binarize the mask
-				cmd = 'flirt -in %s -init %s -ref %s -out %s -applyxfm;'%(lesion_file, xfm_inverse_file, fs_t1, lesion_fs)
+				cmd = 'flirt -in %s -init %s -ref %s -out %s -applyxfm;'%(lesion_file, xfm_inverse_file, template_brain, lesion_fs)
 				self.com.runRawCommand(cmd)
 				self.com.runFslBinarize(lesion_fs, lesion_fs_bin)
 
@@ -211,7 +251,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 					subject_info.append(percent_overlap)
 
 					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', 'roi%d'%roi_code, '%s_LL.png'%subject)
-					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, t12_fs_output_file, lesion_fs_bin, new_binary_file)
+					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, reg_brain_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
 			subject_info_all.append(subject_info)

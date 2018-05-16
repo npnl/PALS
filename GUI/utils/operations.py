@@ -13,7 +13,7 @@ from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
 from brain_extraction_operation import BrainExtractionOperation
-from lesion_load_calculation_operation import LesionLoadCalculationOperation
+from test_LL import LesionLoadCalculationOperation
 
 class Operations(object, WMSegmentationOperation,\
 				WMCorrectionOperation, BrainExtractionOperation,\

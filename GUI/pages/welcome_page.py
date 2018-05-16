@@ -20,7 +20,7 @@ class WelcomePage(BaseInputPage, object):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
 		lb_main = Label(self, text="Please select the modules you would like to perform", font='Helvetica 14 bold')
-		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky=W)
+		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky='W')
 
 		lf_main = LabelFrame(self, text='Main Modules', padx=15, font='Helvetica 14 bold')
 		lf_main.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)

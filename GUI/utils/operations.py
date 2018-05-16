@@ -215,12 +215,12 @@ class Operations(object, WMSegmentationOperation,\
 		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
 			if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
 		if self.controller.b_ll_calculation.get():
-			self._createDirectory('QC_LL')
+			self._createDirectory('QC_LesionLoad')
 			self._createDirectory('QC_Registrations')
 
 			# User gave a list of ROIs paths
 			if self.controller.b_own_rois.get():
-				self._createDirectory('custom', parent=['QC_LL'])
+				self._createDirectory('custom', parent=['QC_LesionLoad'])
 				self._createDirectory('ROI_binarized')
 				# the following takes all of the user input ROIs and binarizes
 				# them; placing them in "/ROI_binarized" directory
@@ -229,7 +229,7 @@ class Operations(object, WMSegmentationOperation,\
 
 					roi_name = self._extractFileName(user_roi_path, remove_extension=True, extension_count=2)
 
-					self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
+					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'custom'])
 					roi_output_path = os.path.join(self.getBaseDirectory(), 'ROI_binarized', roi_name + '_bin')
 					self.com.runFslBinarize(user_roi_path, roi_output_path)
 
@@ -241,25 +241,25 @@ class Operations(object, WMSegmentationOperation,\
 
 				# for user_roi_output_path in user_rois_output_paths:
 				# 	roi_name = self._extractFileName(user_roi_output_path)
-				# 	self._createDirectory(roi_name, parent=['QC_LL', 'custom'])
+				# 	self._createDirectory(roi_name, parent=['QC_LesionLoad', 'custom'])
 
 				self._createDirectory('custom', parent=['QC_Registrations'])
 
 			# Default ROIs
 			if self.controller.b_default_rois.get():
-				self._createDirectory('MNI152', parent=['QC_LL'])
+				self._createDirectory('MNI152', parent=['QC_LesionLoad'])
 				for default_roi_path in self._getDefaultROIsPaths():
 					roi_name = self._extractFileName(default_roi_path, remove_extension=True, extension_count=2)
 
-					self._createDirectory(roi_name, parent=['QC_LL', 'MNI152'])
+					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'MNI152'])
 				self._createDirectory('MNI152', parent=['QC_Registrations'])
 
 			# FreeSurfer specific ROIs
 			if self.controller.b_freesurfer_rois.get():
-				self._createDirectory('FS', parent=['QC_LL'])
+				self._createDirectory('FS', parent=['QC_LesionLoad'])
 				for fs_roi_path in self._getFSROIsPaths():
 					roi_name = self._extractFileName(fs_roi_path)
-					self._createDirectory(roi_name, parent=['QC_LL', 'FS'])
+					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'FS'])
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:
 				self.logger.info('None of the ROI options selected')

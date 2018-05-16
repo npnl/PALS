@@ -14,6 +14,13 @@ def generateQCPage(page_type, images_dir):
 	output += 'html, body'  + '\n'
 	output += '{' + '\n'
 	output += 'height: 100%;' + '\n'
+	output += 'background-color: black;' + '\n'
+	output += 'max-width: 800px;' + '\n'
+	output += 'margin: auto;' + '\n'
+	output += '}' + '\n'
+
+	output += 'button[type=submit] {' + '\n'
+	output += 'width: 20em; height: 3em;' + '\n'
 	output += '}' + '\n'
 
 	output += '.container {' + '\n'
@@ -47,16 +54,16 @@ def generateQCPage(page_type, images_dir):
 
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
-			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div></td>'%(lesion_num, image_path, image_path) + '\n'
-			output += '<td><input type="checkbox" name="status" value="Subject_Failed_Inspection"> Review this subject <br></td>' + '\n'
+			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, image_path, image_path) + '\n'
+			output += '<center><input type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial> Flag subject</FONT></center><br><br></td>' + '\n'
 		else:
 			output += '<tr>' + '\n'
-			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div></td>'%(image_path, image_path) + '\n'
-			output += '<td><input type="checkbox" name="status" value="Subject_Failed_Inspection"> Review this subject <br></td>' + '\n'
+			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(image_path, image_path) + '\n'
+			output += '<center><input type="checkbox" name="status" value="Subject_Failed_Inspection"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>' + '\n'
 
 		output += '</table>' + '\n'
-		output += '<button type="submit" class="btn">Submit</button>' + '\n'
-		output += '</form>' + '\n'
+	output += '<button type="submit" class="btn">Submit</button><br></br>' + '\n'
+	output += '</form>' + '\n'
 	output += '</body>' + '\n'
 	output += '</html>\n' + '\n'
 

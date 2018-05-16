@@ -8,7 +8,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		if self.controller.b_ll_calculation.get() == False or self.skip: return False
 
 		standard_brain = self.controller.sv_user_brain_template.get()
-		template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
+		template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 
 		if self.controller.b_own_rois.get() == True:
 			space = 'custom'
@@ -62,7 +62,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				ss_lesion_volume = self.com.runBrainVolume(lesion_file)
 				subject_info.append(ss_lesion_volume)
 
-				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s_bin.nii.gz'%(lesion_name,space))
+				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s%d_%s_bin.nii.gz'%(subject, lesion_mask_id, counter, space))
 				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
 				lesion_bin = lesion_ss_file_output
@@ -83,7 +83,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 					lesion_load = self.com.runBrainVolume(output_file_2)
 					percent_overlap = (lesion_load * 1.0) / roi_volume
 
-					image_output_path = os.path.join(self.getBaseDirectory(), 'QC_LL', space, roi_name, subject + '_LL.png')
+					image_output_path = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name, subject + '_LL.png')
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s %s %s -cm blue -a 50 %s -cm copper -a 40'%(cog, image_output_path, reg_brain_file + '.nii.gz', lesion_bin, roi_file)
 					self.com.runRawCommand(cmd)
 
@@ -108,13 +108,13 @@ class LesionLoadCalculationOperation(BaseOperation):
 		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
 
-		self._generateQCForRois(space, roi_list, roi_name)
+		self._generateQCForRois(space, roi_list)
 
 
-	def _generateQCForRois(self, space, roi_list, roi_name):
+	def _generateQCForRois(self, space, roi_list):
 		for roi in roi_list:
 			roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
-			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LL', space, roi_name)
+			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name)
 			generateQCPage('LL_%s'%(roi_name), image_files_base)
 
 
@@ -203,7 +203,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 					subject_info.append(lesion_load_volume)
 					subject_info.append(percent_overlap)
 
-					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LL', 'FS', 'roi%d'%roi_code, '%s_LL.png'%subject)
+					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', 'roi%d'%roi_code, '%s_LL.png'%subject)
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, t12_fs_output_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
@@ -226,5 +226,5 @@ class LesionLoadCalculationOperation(BaseOperation):
 		# Write data to the csv file
 		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
-		#self._generateQCForRois(space)
+		self._generateQCForRois(space, roi_list)
 		self.updateProgressBar(8)

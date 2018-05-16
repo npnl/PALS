@@ -21,7 +21,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 
 		self.stop = tk.Button(self, text='Stop Execution', state="disabled", command=lambda : self.terminateCommand())
-		self.stop.grid(row=self.starting_row, column=1, sticky='W', padx=5, pady=3)
+		self.stop.grid(row=self.starting_row, column=1, sticky='E', padx=5, pady=3)
 
 		self.progressbar = ttk.Progressbar(self)
 		self.progressbar.configure(mode='determinate', max=100)
@@ -30,7 +30,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.controller.progressbar = self.progressbar
 
 		self.output = Text(self, height=20, width=100)
-		self.output.grid(row=self.starting_row+2, column=0)
+		self.output.grid(row=self.starting_row+2, columnspan=2, sticky='ew', padx=10)
 
 		self.controller.display = self.output
 
@@ -51,5 +51,3 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.config(state="normal")
 		self.stop.config(state="disabled")
 		self.operation.stopThreads()
-
-

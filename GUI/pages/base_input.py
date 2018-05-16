@@ -29,10 +29,10 @@ class BaseInputPage(tk.Frame):
 
 		if frame_number > 0:
 			btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
-			btn_prev.grid(row=last_row+1, column=0, columnspan=50)
+			btn_prev.grid(row=last_row+1, column=0, columnspan=50, sticky='W')
 
 		btn_next = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
-		btn_next.grid(row=last_row+1, column=51, columnspan=50)
+		btn_next.grid(row=last_row+1, column=51, columnspan=50, sticky='E')
 
 
 		self.setFrameTitle()
@@ -77,7 +77,3 @@ class BaseInputPage(tk.Frame):
 		print controller.sv_input_dir.get()
 		print controller.sv_output_dir.get()
 		print controller.run_normalize_status.get()
-
-	
-
-

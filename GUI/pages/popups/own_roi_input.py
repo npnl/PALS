@@ -5,6 +5,8 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
+import os
+import tkFileDialog
 from ..components import InputFieldList
 from ..components import EntryWithPlaceholder
 from ..stores import NameVarStore
@@ -26,7 +28,7 @@ class OwnROIInputPopup(Toplevel, object):
 		en_select_dir = EntryWithPlaceholder(self, placeholder="Path of Standard brain template (Required field)", textvariable = self.controller.sv_user_brain_template, width = 50)
 		en_select_dir.grid(row=1, column=0, sticky="W", padx=10, pady=3)
 
-		button = tk.Button(self, text='Select', command=lambda : self.chooseDir(self, self.controller, self.controller.sv_user_brain_template, 'Standard brain template'))
+		button = tk.Button(self, text='Select', command=lambda : self.chooseDir(self, self.controller, self.controller.sv_user_brain_template, 'Standard brain template', en_select_dir))
 		button.grid(row=1, column=0, sticky="E", padx=5, pady=3)
 
 		option_heading= 'Harvard-Oxford Corticospinal Tract'
@@ -49,4 +51,11 @@ class OwnROIInputPopup(Toplevel, object):
 
 		self.controller.user_rois = [NameVarStore(self.controller, index, default_value=sv.get().strip()) for index, sv in enumerate(self.inputs)]
 		self.destroy()
+
+	def chooseDir(self, parent, controller, place_holder, message, entry):
+		current_dir = os.getcwd()
+		parent.update()
+		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Select the location of ' + message)
+		place_holder.set(chosen_file)
+		entry['fg'] = entry.default_fg_color
 

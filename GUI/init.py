@@ -179,7 +179,7 @@ class MainWindow(tk.Tk):
 
 	def checkFslInstalled(self):
 		try:
-			subprocess.call(["fslmathss"])
+			subprocess.call(["fslmaths"])
 			return True
 		except OSError as e:
 			if e.errno == os.errno.ENOENT:

@@ -16,6 +16,7 @@ class BrainExtractionOperation(BaseOperation):
 			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_BrainExtractions')
 			image_path = os.path.join(image_files_base, subject + '_BET.png')
 			self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
-		generateQCPage('BET', image_files_base)
+		html_file_path = generateQCPage('BET', image_files_base)
+		self.printQCPageUrl('Brain extraction', html_file_path)
 		self.logger.info('Brain extraction completed for all subjects')
 		self.updateProgressBar(8)

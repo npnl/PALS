@@ -27,6 +27,15 @@ class BaseOperation():
 	def updateProgressBar(self, value):
 		self.controller.progressbar.step(value)
 
+	def updateSubjects(self, new_subjects_file):
+		new_subjects = []
+		with open(new_subjects_file, 'r') as sub_file:
+			new_subjects = sub_file.readlines()
+		self.subjects = map(lambda x: x.strip(), new_subjects)
+
+	def printQCPageUrl(self, operation_name, html_path):
+		self.callback.pause(operation_name, html_path, True)
+
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):
 		head, tail = ntpath.split(path)
 		filename =  tail or ntpath.basename(head)

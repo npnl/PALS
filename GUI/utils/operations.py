@@ -22,10 +22,12 @@ class Operations(object, WMSegmentationOperation,\
 		self.controller = controller
 		self.logger = controller.logger
 		self.com = Commands(controller.logger, self.controller)
+		self.callback = None
 
 		self.initialiseConstants()
 
-	def startThreads(self):
+	def startThreads(self, callback):
+		self.callback = callback
 		thread = Thread(target=self.startExecution, args=())
 		thread.start()
 
@@ -72,13 +74,15 @@ class Operations(object, WMSegmentationOperation,\
 		if self.controller.b_visual_qc.get():
 			self.createQCPage()
 		self.controller.progressbar['value'] = 100
+		self.callback.finished('all', '')
 
 	def createQCPage(self):
 		# Skip this step if user has not chosen to generate QC page
 		if self.controller.b_visual_qc.get() == False or self.skip: return False
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		os.makedirs(imgaes_dir)
-		generateQCPage('Lesions', images_dir)
+		html_file_path = generateQCPage('Lesions', images_dir)
+		self.printQCPageUrl('createQCPage', html_file_path)
 		self.logger.info('QC Page generation completed')
 
 

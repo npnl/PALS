@@ -20,6 +20,8 @@ class RunningOperationsPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
+		self.operation = Operations(self.controller)
+
 		self.start = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
 		self.start.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 
@@ -50,7 +52,9 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.btn_prev.config(state="disabled")
 		self.btn_next.config(state="disabled")
 		self.stop.config(state="normal")
-		self.operation = Operations(self.controller)
+		if self.start['text'] == 'Continue Execution':
+			print "Text is Continue"
+			self.operation.stage += 1
 		self.operation.startThreads(self)
 
 	def terminateCommand(self):
@@ -62,7 +66,6 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.operation.stopThreads()
 
 	def pause(self, operation_name='', data='', need_pause=False):
-		print "The url for [%s] is [%s]"%(operation_name, data)
 		if need_pause:
 			self.start.config(state="normal")
 			self.start.config(text='Continue Execution')
@@ -70,7 +73,7 @@ class RunningOperationsPage(BaseInputPage, object):
 			self.btn_next.config(state="normal")
 			self.stop.config(state="disabled")
 		if data:
-			self.insertHyperLink(data)
+			self.insertHyperLink(operation_name, data)
 
 	def finished(self, operation_name='', data=''):
 		self.start.config(state="normal")
@@ -78,10 +81,10 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.btn_next.config(state="normal")
 		self.stop.config(state="disabled")
 		if data:
-			self.insertHyperLink(data)
+			self.insertHyperLink(operation_name, data)
 
-	def insertHyperLink(self, link):
-		self.output.insert(INSERT, "Inspect subject in browser", self.hyperlink.add(partial(webbrowser.open, link)))
+	def insertHyperLink(self, heading, link):
+		self.output.insert(INSERT, "Qc Page for : " + heading, self.hyperlink.add(partial(webbrowser.open, link)))
 		self.output.insert(END, '\n')
 
 

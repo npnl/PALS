@@ -84,8 +84,8 @@ class WMCorrectionOperation(BaseOperation):
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		html_file_path = generateQCPage('Lesions', image_files_base)
-		self.printQCPageUrl('LL Calculation', html_file_path)
-		
+		self.printQCPageUrl('WM Correction', html_file_path)
+
 		self.logger.info('White Matter correction completed for all subjects')
 		self.updateProgressBar(8)
 

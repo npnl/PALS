@@ -33,8 +33,9 @@ class BaseOperation():
 			new_subjects = sub_file.readlines()
 		self.subjects = map(lambda x: x.strip(), new_subjects)
 
-	def printQCPageUrl(self, operation_name, html_path):
-		self.callback.pause(operation_name, html_path, True)
+	def printQCPageUrl(self, operation_name, html_path, pause=True):
+		pause = pause and self.controller.b_quality_control.get()
+		self.callback.pause(operation_name, html_path, pause)
 
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):
 		head, tail = ntpath.split(path)

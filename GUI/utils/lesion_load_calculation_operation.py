@@ -26,7 +26,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		html_file_path = generateQCPage('Registration', image_files_base)
-		self.printQCPageUrl('LL Calculation', html_file_path)
+		self.printQCPageUrl('LL Calculation', html_file_path, pause=False)
 		self.logger.info('Lesion Load Calculation completed for all subjects')
 		self.updateProgressBar(8)
 
@@ -117,7 +117,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
 			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name)
 			html_file_path = generateQCPage('LL_%s'%(roi_name), image_files_base)
-			self.printQCPageUrl('LL Calculation', html_file_path)
+			self.printQCPageUrl('QC for ROIs', html_file_path)
 
 
 	def runLesionLoadCalculationFS(self, space):

@@ -23,6 +23,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger = controller.logger
 		self.com = Commands(controller.logger, self.controller)
 		self.callback = None
+		self.stage = 0
 
 		self.initialiseConstants()
 
@@ -35,6 +36,9 @@ class Operations(object, WMSegmentationOperation,\
 		self.skip = True
 		self.com.stopCurrentProcess()
 
+	def resetOperations(self):
+		self.stage = 0
+
 	def initialiseConstants(self):
 		self.INCREMENT = 8
 		self.subjects = []
@@ -46,35 +50,53 @@ class Operations(object, WMSegmentationOperation,\
 		self.INTERMEDIATE_FILES = 'Intermediate_Files'
 		self.ORIGINAL_FILES = 'Original_Files'
 
+		self.anatomical_id = None
+		self.lesion_mask_id = None
+
 
 	def startExecution(self):
 		self.skip = False
-		self.controller.progressbar['value'] = 0
-		self.initialiseConstants()
-		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
-		self.createROIDirectories()
-		self.runGzip()
-		self.binarizeLesionFilesForAll()
+		if self.stage == 0:
+			self.controller.progressbar['value'] = 0
+			self.initialiseConstants()
+			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
+			self.createROIDirectories()
+			self.runGzip()
+			self.binarizeLesionFilesForAll()
+			self.stage += 1
 
-		anatomical_id = self.controller.sv_t1_id.get()
-		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
+		if self.stage == 1:
+			self.anatomical_id = self.controller.sv_t1_id.get()
+			self.lesion_mask_id = self.controller.sv_lesion_mask_id.get()
+			self.stage += 1
 
-		if self.controller.b_radiological_convention.get():
-			anatomical_id, lesion_mask_id = self.reOrientToRadForAllSubjects()
+		if self.stage == 2:
+			if self.controller.b_radiological_convention.get():
+				self.anatomical_id, self.lesion_mask_id = self.reOrientToRadForAllSubjects()
+			self.stage += 1
 
-		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
-			self.runBrainExtraction(anatomical_id, lesion_mask_id)
+		if self.stage == 3:
+			if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
+				self.runBrainExtraction(self.anatomical_id, self.lesion_mask_id)
+			# self.stage += 1
 
-		if self.controller.b_wm_correction.get():
-			anatomical_id, lesion_mask_id=self._runWMCorrectionHelper(anatomical_id, lesion_mask_id)
+		if self.stage == 4:
+			if self.controller.b_wm_correction.get():
+				self.anatomical_id, self.lesion_mask_id=self._runWMCorrectionHelper(self.anatomical_id, self.lesion_mask_id)
+			# self.stage += 1
 
-		if self.controller.b_ll_calculation.get():
-			self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
+		if self.stage == 5:
+			if self.controller.b_ll_calculation.get():
+				self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
+			# self.stage += 1
 
-		if self.controller.b_visual_qc.get():
-			self.createQCPage()
-		self.controller.progressbar['value'] = 100
-		self.callback.finished('all', '')
+		if self.stage == 6:
+			if self.controller.b_visual_qc.get():
+				self.createQCPage()
+			# self.stage += 1
+			self.controller.progressbar['value'] = 100
+			self.callback.finished('all', '')
+		self.logger.debug("Waiting for stage [%d] to start"%self.stage)
 
 	def createQCPage(self):
 		# Skip this step if user has not chosen to generate QC page

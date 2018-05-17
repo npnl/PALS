@@ -36,6 +36,7 @@ class SettingsInput(BaseInputPage, object):
 			return True
 		except OSError as e:
 			if e.errno == os.errno.ENOENT:
+				pass
 		return False
 
 

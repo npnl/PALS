@@ -6,11 +6,12 @@ except ImportError:
 	from tkinter import *
 
 import tkFileDialog
-import os
+import os, subprocess
 import logging
 from datetime import datetime
 
 from pages import WelcomePage
+from pages import SettingsInput
 from pages import DirectoryInputPage
 from pages import PauseOptionsInputPage
 from pages import RunningOperationsPage
@@ -98,6 +99,10 @@ class MainWindow(tk.Tk):
 		self.user_agreed = BooleanVar(self)
 		self.user_agreed.set(False)
 
+		#Settings Page
+		self.sv_fsl_binaries = StringVar(self)
+		self.sv_fsl_binaries.set('')
+
 		# this container contains all the pages
 		container = tk.Frame(self)
 		container.pack(side="top", fill="both", expand=True)
@@ -162,8 +167,24 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 
 	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage]
+		pages = [DirectoryInputPage, RunningOperationsPage, WelcomePage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
+		try:
+			with open('pals.config', 'r') as f:
+				self.sv_fsl_binaries.set(f.readlines()[0].strip())
+		except:
+			if not self.checkFslInstalled():
+				pages = [SettingsInput] + pages
+		
 		return pages
+
+	def checkFslInstalled(self):
+		try:
+			subprocess.call(["fslmathss"])
+			return True
+		except OSError as e:
+			if e.errno == os.errno.ENOENT:
+				pass
+		return False
 
 if __name__ == '__main__':
 	app = MainWindow()

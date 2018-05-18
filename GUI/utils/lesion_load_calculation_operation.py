@@ -35,8 +35,8 @@ class LesionLoadCalculationOperation(BaseOperation):
 			self.incrementStage()
 
 		if self.controller.b_freesurfer_rois.get() == True:
-				space = 'FS'
-				template_brain = ''
+			space = 'FS'
+			template_brain = ''
 			if self.stage == 10:
 				self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
 			if self.stage == 11:

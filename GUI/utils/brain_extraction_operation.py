@@ -5,7 +5,7 @@ from base_operation import BaseOperation
 class BrainExtractionOperation(BaseOperation):
 	def runBrainExtraction(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has already performed brain extraction
-		if self.controller.b_brain_extraction.get() == True or self.skip: return False
+		if self.controller.b_brain_extraction.get() == True or self.skip: self.stage +=1; return False
 		self.logger.info('Brain extraction has been initiated')
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)

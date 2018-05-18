@@ -5,7 +5,7 @@ from base_operation import BaseOperation
 class LesionLoadCalculationOperation(BaseOperation):
 	def runLesionLoadCalculation(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user did not ask to perform this operation
-		if self.controller.b_ll_calculation.get() == False or self.skip: return False
+		if self.controller.b_ll_calculation.get() == False or self.skip: self.stage += 1; return False
 
 		standard_brain = self.controller.sv_user_brain_template.get()
 		template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
@@ -26,7 +26,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		html_file_path = generateQCPage('Registration', image_files_base)
-		self.printQCPageUrl('LL Calculation', html_file_path, pause=False)
+		self.printQCPageUrl('LL Calculation', html_file_path)
 		self.logger.info('Lesion Load Calculation completed for all subjects')
 		self.updateProgressBar(8)
 
@@ -117,7 +117,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
 			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name)
 			html_file_path = generateQCPage('LL_%s'%(roi_name), image_files_base)
-			self.printQCPageUrl('QC for ROIs', html_file_path)
+			self.printQCPageUrl('QC for ROIs', html_file_path, pause=False)
 
 
 	def runLesionLoadCalculationFS(self, space):

@@ -110,7 +110,7 @@ class Operations(object, WMSegmentationOperation,\
 
 	def _runWMCorrectionHelper(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has not selected to perform wm correction
-		if self.controller.b_wm_correction.get() == False or self.skip: return False
+		if self.controller.b_wm_correction.get() == False or self.skip: self.stage += 1; return False
 		self.runWMSegmentation(anatomical_id, lesion_mask_id)
 		anatomical_id = self.normaliseT1Intensity(anatomical_id)
 		lesion_mask_id=self.runWMCorrection(anatomical_id, lesion_mask_id)

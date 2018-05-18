@@ -13,7 +13,7 @@ from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
 from brain_extraction_operation import BrainExtractionOperation
-from test_LL import LesionLoadCalculationOperation
+from lesion_load_calculation_operation import LesionLoadCalculationOperation
 
 class Operations(object, WMSegmentationOperation,\
 				WMCorrectionOperation, BrainExtractionOperation,\
@@ -23,6 +23,8 @@ class Operations(object, WMSegmentationOperation,\
 		self.logger = controller.logger
 		self.com = Commands(controller.logger, self.controller)
 		self.callback = None
+		self.stage = 0
+		self.total_stages = 14
 
 		self.initialiseConstants()
 
@@ -35,8 +37,10 @@ class Operations(object, WMSegmentationOperation,\
 		self.skip = True
 		self.com.stopCurrentProcess()
 
+	def resetOperations(self):
+		self.stage = 0
+
 	def initialiseConstants(self):
-		self.INCREMENT = 8
 		self.subjects = []
 		self.new_subjects = []
 		self.input_directory = self.controller.sv_input_dir.get()
@@ -46,55 +50,88 @@ class Operations(object, WMSegmentationOperation,\
 		self.INTERMEDIATE_FILES = 'Intermediate_Files'
 		self.ORIGINAL_FILES = 'Original_Files'
 
+		self.anatomical_id = None
+		self.lesion_mask_id = None
+
 
 	def startExecution(self):
 		self.skip = False
-		self.controller.progressbar['value'] = 0
-		self.initialiseConstants()
-		self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
-		self.createROIDirectories()
-		self.runGzip()
-		self.binarizeLesionFilesForAll()
+		if self.stage == 0:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 
-		anatomical_id = self.controller.sv_t1_id.get()
-		lesion_mask_id = self.controller.sv_lesion_mask_id.get()
+			self.controller.progressbar['value'] = 0
+			self.initialiseConstants()
+			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
+			self.createROIDirectories()
+			self.runGzip()
+			self.binarizeLesionFilesForAll()
+			self.incrementStage()
 
-		if self.controller.b_radiological_convention.get():
-			anatomical_id, lesion_mask_id = self.reOrientToRadForAllSubjects()
+		if self.stage == 1:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 
-		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
-			self.runBrainExtraction(anatomical_id, lesion_mask_id)
+			self.anatomical_id = self.controller.sv_t1_id.get()
+			self.lesion_mask_id = self.controller.sv_lesion_mask_id.get()
+			self.incrementStage()
 
-		if self.controller.b_wm_correction.get():
-			anatomical_id, lesion_mask_id=self._runWMCorrectionHelper(anatomical_id, lesion_mask_id)
+		if self.stage == 2:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 
-		if self.controller.b_ll_calculation.get():
-			self.runLesionLoadCalculation(anatomical_id, lesion_mask_id)
+			if self.controller.b_radiological_convention.get():
+				self.anatomical_id, self.lesion_mask_id = self.reOrientToRadForAllSubjects()
+			self.incrementStage()
 
-		if self.controller.b_visual_qc.get():
-			self.createQCPage()
-		self.controller.progressbar['value'] = 100
-		self.callback.finished('all', '')
+		if self.stage == 3:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
+
+			if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
+				self.runBrainExtraction(self.anatomical_id, self.lesion_mask_id)
+			else:
+				self.incrementStage()
+
+		if self.stage == 4 or self.stage == 5:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
+
+			if self.controller.b_wm_correction.get():
+				if self.stage == 4:
+					self.runWMSegmentation(self.anatomical_id, self.lesion_mask_id)
+
+				if self.stage == 5:
+					self.anatomical_id = self.normaliseT1Intensity(self.anatomical_id)
+					self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
+			else:
+				self.incrementStage()
+				self.incrementStage()
+
+
+		if self.stage == 6:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
+
+			if self.controller.b_ll_calculation.get() and self.skip == False:
+				self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
+			else:
+				for i in range(7):
+					self.incrementStage()
+
+		if self.stage == 13:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
+
+			if self.controller.b_visual_qc.get() and self.skip == False:
+				self.createQCPage()
+			else:
+				self.incrementStage()
+			self.controller.progressbar['value'] = 100
+			self.callback.finished('all', '')
+		if self.stage != 14:
+			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
 
 	def createQCPage(self):
-		# Skip this step if user has not chosen to generate QC page
-		if self.controller.b_visual_qc.get() == False or self.skip: return False
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		os.makedirs(imgaes_dir)
 		html_file_path = generateQCPage('Lesions', images_dir)
 		self.printQCPageUrl('createQCPage', html_file_path)
 		self.logger.info('QC Page generation completed')
 
-
-	def _runWMCorrectionHelper(self, anatomical_id, lesion_mask_id):
-		# Skip this step if user has not selected to perform wm correction
-		if self.controller.b_wm_correction.get() == False or self.skip: return False
-		self.runWMSegmentation(anatomical_id, lesion_mask_id)
-		anatomical_id = self.normaliseT1Intensity(anatomical_id)
-		lesion_mask_id=self.runWMCorrection(anatomical_id, lesion_mask_id)
-
-		return anatomical_id, lesion_mask_id
-		#self.controller.sv_lesion_mask_id.set('WMAdjusted')
 
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
@@ -115,7 +152,6 @@ class Operations(object, WMSegmentationOperation,\
 			directory = self.getOriginalPath(subject)
 			self.com.runGzip(directory)
 		self.logger.info('Gzip operation completed for all subjects')
-		self.updateProgressBar(self.INCREMENT)
 
 	def _binarizeLesionFilesForSubject(self, subject):
 		subject_dir = self.getOriginalPath(subject)
@@ -170,7 +206,6 @@ class Operations(object, WMSegmentationOperation,\
 				os.makedirs(output_directory)
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
-		self.updateProgressBar(self.INCREMENT)
 
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):

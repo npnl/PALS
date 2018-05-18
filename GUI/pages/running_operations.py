@@ -9,6 +9,9 @@ except ImportError:
 
 from base_input import BaseInputPage
 from executor import Worker
+import webbrowser
+from functools import partial
+from .components import HyperlinkManager
 
 from utils import Operations
 
@@ -31,6 +34,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 		self.output = Text(self, height=20, width=100)
 		self.output.grid(row=self.starting_row+2, columnspan=2, sticky='ew', padx=10)
+		self.hyperlink = HyperlinkManager(self.output)
 
 		self.controller.display = self.output
 
@@ -43,11 +47,43 @@ class RunningOperationsPage(BaseInputPage, object):
 
 	def executeCommand(self):
 		self.start.config(state="disabled")
+		self.btn_prev.config(state="disabled")
+		self.btn_next.config(state="disabled")
 		self.stop.config(state="normal")
 		self.operation = Operations(self.controller)
-		self.operation.startThreads()
+		self.operation.startThreads(self)
 
 	def terminateCommand(self):
 		self.start.config(state="normal")
+		self.start.config(text='Start Execution')
+		self.btn_prev.config(state="normal")
+		self.btn_next.config(state="normal")
 		self.stop.config(state="disabled")
 		self.operation.stopThreads()
+
+	def pause(self, operation_name='', data='', need_pause=False):
+		print "The url for [%s] is [%s]"%(operation_name, data)
+		if need_pause:
+			self.start.config(state="normal")
+			self.start.config(text='Continue Execution')
+			self.btn_prev.config(state="normal")
+			self.btn_next.config(state="normal")
+			self.stop.config(state="disabled")
+		if data:
+			self.insertHyperLink(data)
+
+	def finished(self, operation_name='', data=''):
+		self.start.config(state="normal")
+		self.btn_prev.config(state="normal")
+		self.btn_next.config(state="normal")
+		self.stop.config(state="disabled")
+		if data:
+			self.insertHyperLink(data)
+
+	def insertHyperLink(self, link):
+		self.output.insert(INSERT, "Inspect subject in browser", self.hyperlink.add(partial(webbrowser.open, link)))
+		self.output.insert(END, '\n')
+
+
+
+

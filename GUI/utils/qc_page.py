@@ -1,5 +1,6 @@
 import os
 import ntpath
+import pathlib
 
 def generateQCPage(page_type, images_dir):
 	output = ''
@@ -91,9 +92,13 @@ def generateQCPage(page_type, images_dir):
 	output += '</body>' + '\n'
 	output += '</html>\n' + '\n'
 
-	with open(os.path.join(images_dir, page_type + '.html'), 'w') as f:
+	html_file_path = os.path.join(images_dir, page_type + '.html')
+
+	with open(html_file_path, 'w') as f:
 		f.write(output)
 		f.close()
+
+	return pathlib.Path(html_file_path).as_uri()
 
 def _getPathOfFiles(base_path, endswith_str=''):
 	all_files = []

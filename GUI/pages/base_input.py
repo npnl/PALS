@@ -28,11 +28,11 @@ class BaseInputPage(tk.Frame):
 		Label(self, text='', textvariable=self.status, fg="red").grid(row=last_row, column=0, columnspan=100, sticky='nwes',)
 
 		if frame_number > 0:
-			btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
-			btn_prev.grid(row=last_row+1, column=0, columnspan=50, sticky='W')
+			self.btn_prev = tk.Button(self, text='Prev', command=lambda : self.moveToPrevPage())
+			self.btn_prev.grid(row=last_row+1, column=0, columnspan=50, sticky='W')
 
-		btn_next = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
-		btn_next.grid(row=last_row+1, column=51, columnspan=50, sticky='E')
+		self.btn_next = tk.Button(self, text='Next', command=lambda : self.moveToNextPage())
+		self.btn_next.grid(row=last_row+1, column=51, columnspan=50, sticky='E')
 
 
 		self.setFrameTitle()

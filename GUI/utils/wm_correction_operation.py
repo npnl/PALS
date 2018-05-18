@@ -83,7 +83,9 @@ class WMCorrectionOperation(BaseOperation):
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_database.csv'))
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
-		generateQCPage('Lesions', image_files_base)
+		html_file_path = generateQCPage('Lesions', image_files_base)
+		self.printQCPageUrl('LL Calculation', html_file_path)
+		
 		self.logger.info('White Matter correction completed for all subjects')
 		self.updateProgressBar(8)
 

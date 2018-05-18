@@ -177,9 +177,11 @@ class MainWindow(tk.Tk):
 		
 		return pages
 
-	def checkFslInstalled(self):
+	def checkFslInstalled(self, path=''):
+		cmd = os.path.join(path, "fslmaths")
 		try:
-			subprocess.call(["fslmaths"])
+			FNULL = open(os.devnull, 'w')
+			subprocess.call([cmd], stdout=FNULL, stderr=subprocess.STDOUT)
 			return True
 		except OSError as e:
 			if e.errno == os.errno.ENOENT:

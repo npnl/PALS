@@ -7,7 +7,7 @@ except ImportError:
 
 from base_input import BaseInputPage
 from utils import isValidPath
-import os, subprocess
+import os
 
 class SettingsInput(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -29,23 +29,12 @@ class SettingsInput(BaseInputPage, object):
 		en_input_dir.grid(row=0, column=1, columnspan=90, sticky="W", pady=3)
 
 
-	def checkFslInstalled(self, path=''):
-		cmd = os.path.join(path, "fslmaths")
-		try:
-			subprocess.call([cmd])
-			return True
-		except OSError as e:
-			if e.errno == os.errno.ENOENT:
-				pass
-		return False
-
-
 	def setFrameTitle(self):
 		self.title.set('Please indicate the following:')
 
 	def moveToNextPage(self):
 		input_dir = self.controller.sv_fsl_binaries.get()
-		if isValidPath(input_dir.strip()) and self.checkFslInstalled(input_dir):
+		if isValidPath(input_dir.strip()) and self.controller.checkFslInstalled(input_dir):
 			super(SettingsInput, self).moveToNextPage()
 		else:
 			with open('pals.config', 'w') as f:

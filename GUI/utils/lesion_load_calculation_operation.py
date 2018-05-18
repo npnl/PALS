@@ -94,8 +94,9 @@ class LesionLoadCalculationOperation(BaseOperation):
 				cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, reg_file)
 				self.com.runRawCommand(cmd)
 
-		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
+		html_file_path = image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		generateQCPage('Registration', image_files_base)
+		self.printQCPageUrl('runReg', html_file_path)
 
 
 	def _runLesionLoadCalculationHelper(self, space, roi_list, anatomical_id, lesion_mask_id):

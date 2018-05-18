@@ -13,7 +13,7 @@ from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
 from wm_correction_operation import WMCorrectionOperation
 from brain_extraction_operation import BrainExtractionOperation
-from lesion_load_calculation_operation import LesionLoadCalculationOperation
+from test_LL import LesionLoadCalculationOperation
 
 class Operations(object, WMSegmentationOperation,\
 				WMCorrectionOperation, BrainExtractionOperation,\
@@ -208,7 +208,9 @@ class Operations(object, WMSegmentationOperation,\
 		return fs_roi_paths
 
 	def _getUserROIsPaths(self):
-		return self.controller.user_rois;
+		user_roi_paths = [roi_holder.get() for roi_holder in self.controller.user_rois]
+		self.controller.user_roi_paths = user_roi_paths
+		return user_roi_paths
 
 	def createROIDirectories(self):
 		if self.skip: return False
@@ -283,7 +285,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.subjects = new_subjects
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
-		lesion_mask_id = [self.controller.sv_lesion_mask_id.get(), '_rad_reorient']
+		lesion_mask_id = '_rad_reorient'
 
 		return anatomical_id, lesion_mask_id
 

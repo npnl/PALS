@@ -27,6 +27,10 @@ class BaseOperation():
 	def updateProgressBar(self, value):
 		self.controller.progressbar.step(value)
 
+	def incrementStage(self):
+		self.stage += 1
+		self.updateProgressBar((100.0/self.total_stages))
+
 	def updateSubjects(self, new_subjects_file):
 		new_subjects = []
 		with open(new_subjects_file, 'r') as sub_file:

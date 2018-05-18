@@ -6,7 +6,7 @@ from base_operation import BaseOperation
 class WMSegmentationOperation(BaseOperation):
 	def runWMSegmentation(self, anatomical_id, lesion_mask_id):
 		# Skip this step if user has already performed brain extraction
-		if self.controller.b_wm_segmentation.get() == True or self.skip: return False
+		if self.controller.b_wm_segmentation.get() == True or self.skip: self.incrementStage(); return False
 		self.logger.info('White matter segmentation has been initiated')
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
@@ -20,4 +20,3 @@ class WMSegmentationOperation(BaseOperation):
 		html_file_path = generateQCPage('WM', image_files_base)
 		self.printQCPageUrl('WM Sengmentation', html_file_path)
 		self.logger.info('White matter segmentation completed for all subjects')
-		self.updateProgressBar(8)

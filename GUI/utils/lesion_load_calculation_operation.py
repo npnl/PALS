@@ -4,37 +4,53 @@ from base_operation import BaseOperation
 
 class LesionLoadCalculationOperation(BaseOperation):
 	def runLesionLoadCalculation(self, anatomical_id, lesion_mask_id):
-		# Skip this step if user did not ask to perform this operation
-		if self.controller.b_ll_calculation.get() == False or self.skip: self.stage += 1; return False
-
 		#standard_brain = self.controller.sv_user_brain_template.get()
 		#template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 
 		if self.controller.b_own_rois.get() == True:
 			space = 'custom'
 			template_brain = self.controller.sv_user_brain_template.get()
-			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
-			roi_list = self.controller.user_roi_paths
-			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
+			if self.stage == 6:
+				self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
+			if self.stage == 7:
+				roi_list = self.controller.user_roi_paths
+				self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
+				self.incrementStage()
+		else:
+			self.incrementStage()
+			self.incrementStage()
 
 		if self.controller.b_default_rois.get() == True:
 			space = 'MNI152'
 			template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
-			roi_list = self.controller.default_roi_paths
-			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
-			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
+
+			if self.stage == 8:
+				self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
+			if self.stage == 9:
+				roi_list = self.controller.default_roi_paths
+				self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
+				self.incrementStage()
+		else:
+			self.incrementStage()
+			self.incrementStage()
 
 		if self.controller.b_freesurfer_rois.get() == True:
-			space = 'FS'
-			template_brain = ''
-			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
-			self.runLesionLoadCalculationFS(space)
+				space = 'FS'
+				template_brain = ''
+			if self.stage == 10:
+				self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
+			if self.stage == 11:
+				self.runLesionLoadCalculationFS(space)
+				self.incrementStage()
+		else:
+			self.incrementStage()
+			self.incrementStage()
 
-		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
-		html_file_path = generateQCPage('Registration', image_files_base)
-		self.printQCPageUrl('LL Calculation', html_file_path)
-		self.logger.info('Lesion Load Calculation completed for all subjects')
-		self.updateProgressBar(8)
+		if self.stage == 12:
+			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
+			html_file_path = generateQCPage('Registration', image_files_base)
+			self.logger.info('Lesion Load Calculation completed for all subjects')
+			self.printQCPageUrl('LL Calculation', html_file_path)
 
 
 	def runReg(self, template_brain, space, anatomical_id, lesion_mask_id):
@@ -274,9 +290,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				header.append('Lesion%s_roi%s_lesionload'%(str(lesion_counter+1), roi_name))
 				header.append('Lesion%s_roi%s_PercentOverlap'%(str(lesion_counter+1), roi_name))
 
-
 		# Write data to the csv file
 		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_load_%s_database.csv'%(space)))
 		self._generateQCForRois(space, roi_list)
-		self.updateProgressBar(8)

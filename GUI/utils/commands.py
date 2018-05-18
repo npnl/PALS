@@ -29,7 +29,10 @@ class Commands(object):
 
 	def stopCurrentProcess(self):
 		self.running = False
-		self.running_process.kill()
+		try:
+			self.running_process.kill()
+		except:
+			pass
 
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')

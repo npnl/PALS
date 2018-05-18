@@ -87,11 +87,7 @@ class WMCorrectionOperation(BaseOperation):
 		self.printQCPageUrl('WM Correction', html_file_path)
 
 		self.logger.info('White Matter correction completed for all subjects')
-		self.updateProgressBar(8)
-
-
 		lesion_mask_id = 'WMAdjusted'
-
 		return lesion_mask_id
 
 

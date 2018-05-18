@@ -93,6 +93,7 @@ class MainWindow(tk.Tk):
 
 		#User ROIs
 		self.user_rois = []
+		self.user_roi_paths = None
 		self.sv_user_brain_template = StringVar(self)
 		self.sv_user_brain_template.set('')
 		self.user_agreed = BooleanVar(self)

@@ -14,12 +14,12 @@ class LesionLoadCalculationOperation(BaseOperation):
 			space = 'custom'
 			template_brain = self.controller.sv_user_brain_template.get()
 			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
-			roi_list = self.controller.user_rois
+			roi_list = self.controller.user_roi_paths
 			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
 
 		if self.controller.b_default_rois.get() == True:
 			space = 'MNI152'
-			template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
+			template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
 			roi_list = self.controller.default_roi_paths
 			self.runReg(template_brain,space,anatomical_id, lesion_mask_id)
 			self._runLesionLoadCalculationHelper(space, roi_list, anatomical_id, lesion_mask_id)
@@ -91,6 +91,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			reg_brain_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_brain_%s'%(subject, space))
 			reg_file = os.path.join(self.getIntermediatePath(subject), '%s_Reg_%s.mat'%(subject, space))
 
+
 			lesion_files_count = len(lesion_files)
 
 			if max_lesions < lesion_files_count:
@@ -107,7 +108,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				ss_lesion_volume = self.com.runBrainVolume(lesion_file)
 				subject_info.append(ss_lesion_volume)
 
-				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s%d_%s_bin.nii.gz'%(subject, lesion_mask_id, counter, space))
+				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s%d_%s_bin.nii.gz'%(subject, lesion_mask_id, counter+1, space))
 				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
 				lesion_bin = lesion_ss_file_output
@@ -118,11 +119,11 @@ class LesionLoadCalculationOperation(BaseOperation):
 					roi_volume = self.com.runBrainVolume(roi_file)
 
 					#add the two binarized masks together
-					output_file = os.path.join(self.getIntermediatePath(subject), '%s_combined_%s_lesion%d_%s.nii.gz'%(subject, roi_name, counter, space))
+					output_file = os.path.join(self.getIntermediatePath(subject), '%s_combined_%s_lesion%d_%s.nii.gz'%(subject, roi_name, counter+1, space))
 					self.com.runFslWithArgs(roi_file, lesion_bin, output_file, option='-add')
 
 					#now that two binarized masks are added, the overlapping regions will have a value of 2 so we threshold the image to remove any region that isn't overlapping
-					output_file_2 = os.path.join(self.getIntermediatePath(subject), '%s_%s_lesion%d_overlap_%s.nii.gz'%(subject, roi_name, counter, space))
+					output_file_2 = os.path.join(self.getIntermediatePath(subject), '%s_%s_lesion%d_overlap_%s.nii.gz'%(subject, roi_name, counter+1, space))
 					self.com.runFslWithArgs(output_file, '2', output_file_2, '-thr')
 
 					lesion_load = self.com.runBrainVolume(output_file_2)

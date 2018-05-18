@@ -12,7 +12,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 		if self.controller.b_own_rois.get() == True:
 			space = 'custom'
-			roi_list = self.controller.user_rois
+			roi_list = self.controller.user_roi_paths
 			self._runLesionLoadCalculationHelper(standard_brain, space, roi_list, anatomical_id, lesion_mask_id)
 
 		if self.controller.b_default_rois.get() == True:

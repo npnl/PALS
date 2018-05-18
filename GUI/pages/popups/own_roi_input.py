@@ -58,4 +58,3 @@ class OwnROIInputPopup(Toplevel, object):
 		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Select the location of ' + message)
 		place_holder.set(chosen_file)
 		entry['fg'] = entry.default_fg_color
-

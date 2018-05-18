@@ -6,11 +6,12 @@ except ImportError:
 	from tkinter import *
 
 import tkFileDialog
-import os
+import os, subprocess
 import logging
 from datetime import datetime
 
 from pages import WelcomePage
+from pages import SettingsInput
 from pages import DirectoryInputPage
 from pages import PauseOptionsInputPage
 from pages import RunningOperationsPage
@@ -99,6 +100,10 @@ class MainWindow(tk.Tk):
 		self.user_agreed = BooleanVar(self)
 		self.user_agreed.set(False)
 
+		#Settings Page
+		self.sv_fsl_binaries_msg = StringVar(self)
+		self.sv_fsl_binaries_msg.set('')
+
 		# this container contains all the pages
 		container = tk.Frame(self)
 		container.pack(side="top", fill="both", expand=True)
@@ -163,8 +168,28 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 
 	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage]
+		pages = [DirectoryInputPage, RunningOperationsPage, WelcomePage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
+		if not self.checkFslInstalled():
+			pages = [SettingsInput]
 		return pages
+
+	def checkFslInstalled(self, path=''):
+		commands = ['fslmaths', 'fsleyes', 'mri_convert', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
+		flag = True
+		msg = ''
+		FNULL = open(os.devnull, 'w')
+		for cmd in commands:
+			cmd_to_exe = 'which ' + cmd
+			try:
+				exit_code = subprocess.call([cmd_to_exe], shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+				if exit_code != 0:
+					raise
+			except Exception as e:
+				flag = False
+				msg += cmd + '\n'
+		msg = 'The following binaries location is not set in the path:\n' + msg if len(msg) != 0 else '' 
+		self.sv_fsl_binaries_msg.set(msg)
+		return flag
 
 if __name__ == '__main__':
 	app = MainWindow()

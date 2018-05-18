@@ -168,7 +168,7 @@ class MainWindow(tk.Tk):
 		frame.tkraise()
 
 	def getApplicationPages(self):
-		pages = [DirectoryInputPage, RunningOperationsPage, WelcomePage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
+		pages = [WelcomePage, DirectoryInputPage, WhiteMatterInputPage, LesionLoadCalculationInputPage, RunningOperationsPage] 
 		if not self.checkFslInstalled():
 			pages = [SettingsInput]
 		return pages

@@ -100,8 +100,8 @@ class MainWindow(tk.Tk):
 		self.user_agreed.set(False)
 
 		#Settings Page
-		self.sv_fsl_binaries = StringVar(self)
-		self.sv_fsl_binaries.set('')
+		self.sv_fsl_binaries_msg = StringVar(self)
+		self.sv_fsl_binaries_msg.set('')
 
 		# this container contains all the pages
 		container = tk.Frame(self)
@@ -168,25 +168,27 @@ class MainWindow(tk.Tk):
 
 	def getApplicationPages(self):
 		pages = [DirectoryInputPage, RunningOperationsPage, WelcomePage, WhiteMatterInputPage, LesionLoadCalculationInputPage] 
-		try:
-			with open('pals.config', 'r') as f:
-				self.sv_fsl_binaries.set(f.readlines()[0].strip())
-		except:
-			if not self.checkFslInstalled():
-				pages = [SettingsInput] + pages
-		
+		if not self.checkFslInstalled():
+			pages = [SettingsInput]
 		return pages
 
 	def checkFslInstalled(self, path=''):
-		cmd = os.path.join(path, "fslmaths")
-		try:
-			FNULL = open(os.devnull, 'w')
-			subprocess.call([cmd], stdout=FNULL, stderr=subprocess.STDOUT)
-			return True
-		except OSError as e:
-			if e.errno == os.errno.ENOENT:
-				pass
-		return False
+		commands = ['fslmaths', 'fsleyes', 'mri_convert', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
+		flag = True
+		msg = ''
+		FNULL = open(os.devnull, 'w')
+		for cmd in commands:
+			cmd_to_exe = 'which ' + cmd
+			try:
+				exit_code = subprocess.call([cmd_to_exe], shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+				if exit_code != 0:
+					raise
+			except Exception as e:
+				flag = False
+				msg += cmd + '\n'
+		msg = 'The following binaries location is not set in the path:\n' + msg if len(msg) != 0 else '' 
+		self.sv_fsl_binaries_msg.set(msg)
+		return flag
 
 if __name__ == '__main__':
 	app = MainWindow()

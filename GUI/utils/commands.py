@@ -11,7 +11,6 @@ class Commands(object):
 		self.running = True
 		msg = "Running [%s]"%cmd
 		self.logger.debug(msg)
-		self.parent.updateGUI(msg)
 		self.running_process = subprocess.Popen('exec ' + cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 		return_code = self.running_process.wait()
 		output = ''
@@ -22,9 +21,9 @@ class Commands(object):
 		self.running_process.stdout.close()
 		if return_code != 0:
 			output = 'Something went wrong.'
+			self.parent.updateGUI(output)
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
-		self.parent.updateGUI(output)
 		return output, return_code
 
 	def stopCurrentProcess(self):

@@ -35,7 +35,7 @@ def generateQCPage(page_type, images_dir):
 	output += '</style>' + '\n'
 
 	output += """<script language="Javascript" >
-					function download(filename, text) {
+					function download(filename) {
 					  var all_checked_boxes = document.getElementsByClassName('subject_checkbox');
 					  var subjects_passed = ''
 					  for(var i = 0; i < all_checked_boxes.length; i++){
@@ -61,7 +61,7 @@ def generateQCPage(page_type, images_dir):
 	output += '<body>' + '\n'
 
 
-	output += """<form onsubmit="download('selected_subjects.txt', this['text'].value)">""" + '\n'
+	output += """<form onsubmit="download('selected_subjects.txt')">""" + '\n'
 
 	image_files = _getPathOfFiles(images_dir, endswith_str='.png')
 	for image_path in image_files:
@@ -79,11 +79,11 @@ def generateQCPage(page_type, images_dir):
 
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
-			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, image_path, image_path) + '\n'
+			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, _extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'
 			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial> Flag subject</FONT></center><br><br></td>'%subject + '\n'
 		else:
 			output += '<tr>' + '\n'
-			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(image_path, image_path) + '\n'
+			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(_extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'
 			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%subject + '\n'
 
 		output += '</table>' + '\n'

@@ -54,7 +54,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.stop.config(state="normal")
 		if self.start['text'] == 'Continue Execution':
 			print "Text is Continue"
-			self.operation.stage += 1
+			self.operation.incrementStage()
 		self.operation.startThreads(self)
 
 	def terminateCommand(self):

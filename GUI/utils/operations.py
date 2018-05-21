@@ -89,7 +89,7 @@ class Operations(object, WMSegmentationOperation,\
 			else:
 				self.incrementStage()
 
-		if self.stage == 4 or self.stage == 5:
+		if self.stage in (4, 5):
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 
 			if self.controller.b_wm_correction.get():
@@ -100,18 +100,16 @@ class Operations(object, WMSegmentationOperation,\
 					self.anatomical_id = self.normaliseT1Intensity(self.anatomical_id)
 					self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
 			else:
-				self.incrementStage()
-				self.incrementStage()
+				self.incrementStage(2)
 
 
-		if self.stage == 6:
+		if self.stage in (6, 7, 8, 9, 10, 11, 12):
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 
 			if self.controller.b_ll_calculation.get() and self.skip == False:
 				self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
 			else:
-				for i in range(7):
-					self.incrementStage()
+				self.incrementStage(7)
 
 		if self.stage == 13:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
@@ -122,6 +120,7 @@ class Operations(object, WMSegmentationOperation,\
 				self.incrementStage()
 			self.controller.progressbar['value'] = 100
 			self.callback.finished('all', '')
+
 		if self.stage != 14:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
 

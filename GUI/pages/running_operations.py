@@ -20,6 +20,8 @@ class RunningOperationsPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
+		self.move_back = False
+
 		self.operation = Operations(self.controller)
 
 		self.start = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
@@ -44,42 +46,70 @@ class RunningOperationsPage(BaseInputPage, object):
 	def setFrameTitle(self):
 		self.title.set('Please wait')
 
+	def onShowFrame(self, event):
+		super(RunningOperationsPage, self).onShowFrame(event)
+		self.resetAll()
+
+	def resetAll(self):
+		self.resetUI()
+		self.operation.resetOperations()
+
 	def moveToNextPage(self):
 		super(RunningOperationsPage, self).moveToNextPage()
+
+	def resetClickCounter(self):
+		self.move_back = False
+		self.setRequiredInputError('')
+
+	def userAgreed(self):
+		if self.move_back: return True
+		self.setRequiredInputError('Warning: All the progress will be lost. If you wish to continue, press the button again')
+		self.move_back = True
+		return False
+
+	def moveToPrevPage(self):
+		if self.userAgreed():
+			super(RunningOperationsPage, self).moveToPrevPage()
+
+	def resetUI(self):
+		self.start.config(state="normal")
+		self.start.config(text='Start Execution')
+		self.btn_prev.config(state="normal")
+		self.btn_next.config(state="disabled")
+		self.stop.config(state="disabled")
+		self.progressbar.config(value=0)
+		self.resetClickCounter()
 
 	def executeCommand(self):
 		self.start.config(state="disabled")
 		self.btn_prev.config(state="disabled")
-		self.btn_next.config(state="disabled")
 		self.stop.config(state="normal")
+		self.resetClickCounter()
 		if self.start['text'] == 'Continue Execution':
 			print "Text is Continue"
 			self.operation.incrementStage()
 		self.operation.startThreads(self)
 
 	def terminateCommand(self):
-		self.start.config(state="normal")
-		self.start.config(text='Start Execution')
-		self.btn_prev.config(state="normal")
-		self.btn_next.config(state="normal")
-		self.stop.config(state="disabled")
-		self.operation.stopThreads()
+		if self.userAgreed():
+			self.stop.config(state="disabled")
+			self.operation.stopThreads()
 
 	def pause(self, operation_name='', data='', need_pause=False):
 		if need_pause:
 			self.start.config(state="normal")
 			self.start.config(text='Continue Execution')
 			self.btn_prev.config(state="normal")
-			self.btn_next.config(state="normal")
 			self.stop.config(state="disabled")
+			self.resetClickCounter()
 		if data:
 			self.insertHyperLink(operation_name, data)
 
 	def finished(self, operation_name='', data=''):
 		self.start.config(state="normal")
 		self.btn_prev.config(state="normal")
-		self.btn_next.config(state="normal")
 		self.stop.config(state="disabled")
+		self.resetClickCounter()
 		if data:
 			self.insertHyperLink(operation_name, data)
 

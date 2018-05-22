@@ -84,7 +84,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				self.com.runFlirt(anatomical_file_path, template_brain, reg_brain_file, reg_file)
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
-				self.com.runFslEyes(out_image_path, reg_brain_file + '.nii.gz', options='')
+				self.com.runFslEyes(output_image_path, reg_brain_file + '.nii.gz', options='')
 				#self.com.runFslEyes(reg_brain_file, output_image_path=output_image_path, options='')
 
 				# invert transformation matrix

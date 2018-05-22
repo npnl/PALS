@@ -89,10 +89,12 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()
-			self.updateCheckBoxState(self.controller.b_default_rois,\
-										self.controller.default_corticospinal_tract_roi\
+			is_selected = self.checkIfAtleastOneSelected(self.controller.default_corticospinal_tract_roi\
 										+ self.controller.default_freesurfer_cortical_roi\
 										+ self.controller.default_freesurfer_subcortical_roi)
+			is_selected = is_selected or (len(self.controller.default_custom_rois) > 0)
+
+			self.controller.b_default_rois.set(is_selected)
 
 	def showOwnROIPopup(self):
 		if self.controller.b_own_rois.get():

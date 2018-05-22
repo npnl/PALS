@@ -34,15 +34,13 @@ class BaseOperation():
 	def updateProgressBar(self, value):
 		self.controller.progressbar.step(value)
 
+	def updateSubjects(self, new_subjects):
+		self.subjects = new_subjects
+		self.logger.debug("Updated the subjects to " + str(new_subjects))
+
 	def incrementStage(self, count=1):
 		self.stage += count
 		self.updateProgressBar((100.0/self.total_stages))
-
-	def updateSubjects(self, new_subjects_file):
-		new_subjects = []
-		with open(new_subjects_file, 'r') as sub_file:
-			new_subjects = sub_file.readlines()
-		self.subjects = map(lambda x: x.strip(), new_subjects)
 
 	def printQCPageUrl(self, operation_name, html_path, pause=True):
 		pause = pause and self.controller.b_quality_control.get()

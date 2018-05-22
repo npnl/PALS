@@ -67,6 +67,12 @@ class BaseInputPage(tk.Frame):
 		chosen_dir =  tkFileDialog.askdirectory(parent=self, initialdir = current_dir, title='Select the location of ' + message)
 		place_holder.set(chosen_dir)
 
+	def chooseFile(self, parent, controller, place_holder, message, default_dir=''):
+		current_dir = default_dir or os.getcwd()
+		parent.update()
+		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Select the location of ' + message)
+		place_holder.set(chosen_file)
+
 	def setEntryState(self, entry, flag):
 		if flag.get():
 			entry.config(state='normal')

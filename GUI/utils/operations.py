@@ -43,7 +43,6 @@ class Operations(object, WMSegmentationOperation,\
 
 	def initialiseConstants(self):
 		self.subjects = []
-		self.new_subjects = []
 		self.input_directory = self.controller.sv_input_dir.get()
 		self.output_directory = self.controller.sv_output_dir.get()
 		self.output_directories = []

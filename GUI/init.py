@@ -101,6 +101,10 @@ class MainWindow(tk.Tk):
 		self.user_agreed = BooleanVar(self)
 		self.user_agreed.set(False)
 
+		#Running Operations
+		self.selected_subjects = StringVar(self)
+		self.selected_subjects.set('')
+
 		#Settings Page
 		self.sv_fsl_binaries_msg = StringVar(self)
 		self.sv_fsl_binaries_msg.set('')

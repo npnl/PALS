@@ -23,11 +23,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.controller = controller
 		self.logger = controller.logger
 		self.com = Commands(controller.logger, self.controller)
-		self.callback = None
-		self.stage = 0
-		self.total_stages = 14
-
-		self.initialiseConstants()
+		self.resetOperations()
 
 	def startThreads(self, callback):
 		self.callback = callback
@@ -36,10 +32,14 @@ class Operations(object, WMSegmentationOperation,\
 
 	def stopThreads(self):
 		self.skip = True
+		self.reset_from_ui = True
 		self.com.stopCurrentProcess()
 
 	def resetOperations(self):
 		self.stage = 0
+		self.callback = None
+		self.total_stages = 14
+		self.reset_from_ui = False
 
 	def initialiseConstants(self):
 		self.subjects = []
@@ -81,7 +81,10 @@ class Operations(object, WMSegmentationOperation,\
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 
 			if self.controller.b_radiological_convention.get():
-				self.anatomical_id, self.lesion_mask_id = self.reOrientToRadForAllSubjects()
+				try:
+					self.anatomical_id, self.lesion_mask_id = self.reOrientToRadForAllSubjects()
+				except Exception as e:
+					self.logger.error(e.message)
 			self.incrementStage()
 
 		if self.stage == 3:
@@ -97,11 +100,17 @@ class Operations(object, WMSegmentationOperation,\
 
 			if self.controller.b_wm_correction.get():
 				if self.stage == 4:
-					self.runWMSegmentation(self.anatomical_id, self.lesion_mask_id)
+					try:
+						self.runWMSegmentation(self.anatomical_id, self.lesion_mask_id)
+					except Exception as e:
+						self.logger.error(e.message)
 
 				if self.stage == 5:
-					self.anatomical_id = self.normaliseT1Intensity(self.anatomical_id)
-					self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
+					try:
+						self.anatomical_id = self.normaliseT1Intensity(self.anatomical_id)
+						self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
+					except Exception as e:
+						self.logger.error(e.message)
 			else:
 				self.incrementStage(2)
 
@@ -110,7 +119,10 @@ class Operations(object, WMSegmentationOperation,\
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 
 			if self.controller.b_ll_calculation.get() and self.skip == False:
-				self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
+				try:
+					self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
+				except Exception as e:
+					self.logger.error(e.message)
 			else:
 				self.incrementStage(7)
 
@@ -124,8 +136,11 @@ class Operations(object, WMSegmentationOperation,\
 			self.controller.progressbar['value'] = 100
 			self.callback.finished('all', '')
 
-		if self.stage != 14:
-			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
+		if self.skip and self.reset_from_ui:
+			self.callback.resetAll()
+		elif self.stage != 14:
+			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1)) 
+
 
 	def createQCPage(self):
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')

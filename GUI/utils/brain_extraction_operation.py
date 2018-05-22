@@ -1,4 +1,4 @@
-import os
+import os, traceback
 from qc_page import generateQCPage
 from base_operation import BaseOperation
 
@@ -20,6 +20,7 @@ class BrainExtractionOperation(BaseOperation):
 				image_path = os.path.join(image_files_base, subject + '_BET.png')
 				self.com.runFslEyes(anatomical_file_path, bet_brain_file, image_path)
 			except:
+				self.logger.debug(traceback.format_exc())
 				pass
 		html_file_path = generateQCPage('BET', image_files_base)
 		self.printQCPageUrl('Brain extraction', html_file_path)

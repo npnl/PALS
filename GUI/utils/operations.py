@@ -1,4 +1,4 @@
-import os
+import os, traceback
 import ntpath
 from datetime import datetime
 from shutil import copyfile, rmtree
@@ -85,6 +85,7 @@ class Operations(object, WMSegmentationOperation,\
 					self.anatomical_id, self.lesion_mask_id = self.reOrientToRadForAllSubjects()
 				except Exception as e:
 					self.logger.error(e.message)
+					self.logger.debug(traceback.format_exc())
 			self.incrementStage()
 
 		if self.stage == 3:
@@ -104,6 +105,7 @@ class Operations(object, WMSegmentationOperation,\
 						self.runWMSegmentation(self.anatomical_id, self.lesion_mask_id)
 					except Exception as e:
 						self.logger.error(e.message)
+						self.logger.debug(traceback.format_exc())
 
 				if self.stage == 5:
 					try:
@@ -111,6 +113,7 @@ class Operations(object, WMSegmentationOperation,\
 						self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
 					except Exception as e:
 						self.logger.error(e.message)
+						self.logger.debug(traceback.format_exc())
 			else:
 				self.incrementStage(2)
 
@@ -123,6 +126,7 @@ class Operations(object, WMSegmentationOperation,\
 					self.runLesionLoadCalculation(self.anatomical_id, self.lesion_mask_id)
 				except Exception as e:
 					self.logger.error(e.message)
+					self.logger.debug(traceback.format_exc())
 			else:
 				self.incrementStage(7)
 

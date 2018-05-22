@@ -201,7 +201,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
-			# template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
+			template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
 			# self.com.runMriConvert(t1_mgz, template_brain)
 			#
 			# # perform registration to FS Space for each subject to get transformation matrix

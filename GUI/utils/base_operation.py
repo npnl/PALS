@@ -35,7 +35,7 @@ class BaseOperation():
 		self.controller.progressbar.step(value)
 
 	def updateSubjects(self, new_subjects):
-		self.subjects = new_subjects
+		self.subjects = list(set(self.subjects) - set(new_subjects))
 		self.logger.debug("Updated the subjects to " + str(new_subjects))
 
 	def incrementStage(self, count=1):

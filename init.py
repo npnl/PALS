@@ -140,7 +140,6 @@ class MainWindow(tk.Tk):
 	def pasteAll(self, event):
 		clipboard = self.clipboard_get()
 		clipboard = clipboard.replace("\n", "\\n")
-
 		try:
 			start = event.widget.index("sel.first")
 			end = event.widget.index("sel.last")

@@ -1,9 +1,8 @@
 .DS_Store
 *.pyc
-ROIs/*
-GUI/data/*
+data/*
 .ipynb_checkpoints/
 *.ipynb
-GUI/song.wav
+song.wav
 ROIs.zip
-GUI/logs/*
+logs/*

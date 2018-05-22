@@ -144,11 +144,6 @@ class Commands(object):
 		output, ret_code = self.startExecution(cmd)
 		return output
 
-	def runPlayer(self, input_directory):
-		cmd = 'mplayer %s'%(input_directory)
-		self.startExecution(cmd)
-
-
 if __name__ == '__main__':
 	com = Commands()
 	com.runFslMath("/Users/amit/WorkPro/Lily/data/OUTPUTS_FS/subjC/Intermediate_Files/Original_Files/subjC*T1*.nii.gz",0,0.2849162011173184,"/Users/amit/WorkPro/Lily/data/OUTPUTS_FS/subjC/Intermediate_Files/subjC_T1")

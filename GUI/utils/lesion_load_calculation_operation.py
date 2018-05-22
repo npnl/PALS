@@ -193,7 +193,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		fs_roi_paths = self.controller.fs_roi_paths
 
 		max_lesions = 0
-		all_subjects_info = []
+		subject_info_all = []
 
 		for subject in self.subjects:
 			subject_info = [subject]
@@ -233,13 +233,13 @@ class LesionLoadCalculationOperation(BaseOperation):
 				output_file = os.path.join(self.getIntermediatePath(subject), '%s_aparc+aseg.nii.gz'%subject)
 				self.com.runMriConvert(seg_file, output_file)
 
-				binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s.nii.gz'%(subject, roi_name))
+				binary_file = os.path.join(self.getIntermediatePath(subject), '%s_%s.nii.gz'%(subject, roi_name))
 
 				cmd = 'fslmaths %s -thr %s -uthr %s -bin %s;'%(output_file, roi_code, roi_code, binary_file)
 				self.com.runRawCommand(cmd)
 
 				# binarize roi
-				new_binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s_bin.nii.gz'%(subject, roi_name))
+				new_binary_file = os.path.join(self.getIntermediatePath(subject), '%s_%s_bin.nii.gz'%(subject, roi_name))
 				self.com.runFslWithArgs(arg_1=binary_file, arg_2=new_binary_file, arg_3='', option='-bin')
 
 			for index, lesion_file in enumerate(lesion_files):
@@ -260,11 +260,11 @@ class LesionLoadCalculationOperation(BaseOperation):
 					roi_name = self._extractFileName(roi_name, remove_extension=True, extension_count=2)
 
 					# add the lesion and roi masks together
-					combined_lesion = os.path.join(self.getIntermediatePath(subject), '%s_combined_lesion%d_roi%s.nii.gz'%(subject, index+1, roi_name))
+					combined_lesion = os.path.join(self.getIntermediatePath(subject), '%s_combined_lesion%d_%s.nii.gz'%(subject, index+1, roi_name))
 					self.com.runFslWithArgs(arg_1=new_binary_file, arg_2=lesion_fs_bin, arg_3=combined_lesion, option='-add')
 
 					# now that two binarized masks are added, the overlapping regions will have a value of 2 so we threshold the image to remove any region that isn't overlapping
-					overlap_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s_lesion%d_overlap.nii.gz'%(subject, roi_name, index+1))
+					overlap_file = os.path.join(self.getIntermediatePath(subject), '%s_%s_lesion%d_overlap.nii.gz'%(subject, roi_name, index+1))
 					self.com.runFslWithArgs(arg_1=combined_lesion, arg_2=overlap_file, arg_3='', option='-thr 1.9')
 
 					lesion_load_volume = self.com.runBrainVolume(overlap_file)
@@ -275,7 +275,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 					subject_info.append(lesion_load_volume)
 					subject_info.append(percent_overlap)
 
-					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', 'roi%s'%roi_name, '%s_LL.png'%subject)
+					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', '%s'%roi_name, '%s_LL.png'%subject)
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, reg_brain_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
@@ -290,9 +290,9 @@ class LesionLoadCalculationOperation(BaseOperation):
 			header.append('Lesion%s_Volume_FSSpace'%str(lesion_counter+1))
 			for roi in roi_list:
 				roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
-				header.append('roi%s_Volume'%(roi_name))
-				header.append('Lesion%s_roi%s_lesionload'%(str(lesion_counter+1), roi_name))
-				header.append('Lesion%s_roi%s_PercentOverlap'%(str(lesion_counter+1), roi_name))
+				header.append('%s_Volume'%(roi_name))
+				header.append('Lesion%s_%s_lesionload'%(str(lesion_counter+1), roi_name))
+				header.append('Lesion%s_%s_PercentOverlap'%(str(lesion_counter+1), roi_name))
 
 		# Write data to the csv file
 		subject_info_with_header = [header] + subject_info_all

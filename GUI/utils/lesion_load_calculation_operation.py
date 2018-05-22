@@ -123,13 +123,13 @@ class LesionLoadCalculationOperation(BaseOperation):
 				cmd = 'flirt -in %s -applyxfm -init %s -out %s -paddingsize 0.0 -interp trilinear -ref %s'%(lesion_file, reg_file, lesion_ss_file, reg_brain_file)
 				self.com.runRawCommand(cmd)
 
-				ss_lesion_volume = self.com.runBrainVolume(lesion_file)
-				subject_info.append(ss_lesion_volume)
-
 				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s%d_%s_bin.nii.gz'%(subject, lesion_mask_id, counter+1, space))
 				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
 				lesion_bin = lesion_ss_file_output
+				ss_lesion_volume = self.com.runBrainVolume(lesion_bin)
+				subject_info.append(ss_lesion_volume)
+
 				cog = self.com.runFslStats(lesion_bin, '-C')
 
 				for roi_file in roi_list:
@@ -147,7 +147,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 					lesion_load = self.com.runBrainVolume(output_file_2)
 					percent_overlap = (lesion_load * 1.0) / roi_volume
 
-					image_output_path = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name, subject + '_LL.png')
+					image_output_path = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name, subject + '_lesion' + str(counter+1) + '_LL.png')
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s %s %s -cm blue -a 50 %s -cm copper -a 40'%(cog, image_output_path, reg_brain_file + '.nii.gz', lesion_bin, roi_file)
 					self.com.runRawCommand(cmd)
 

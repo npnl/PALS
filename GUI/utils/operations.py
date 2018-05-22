@@ -259,6 +259,12 @@ class Operations(object, WMSegmentationOperation,\
 		roi_paths = self._getRoiFilePaths(all_rois, FS_CT_Map)[0]
 		roi_paths = self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
 		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)[0]
+
+		# Add additional ROIs that user provided
+		roi_paths += self.controller.default_custom_rois
+
+		roi_paths = list(set(roi_paths))
+
 		self.controller.default_roi_paths = roi_paths
 		return roi_paths
 

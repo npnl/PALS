@@ -84,6 +84,7 @@ class MainWindow(tk.Tk):
 		self.default_corticospinal_tract_roi = all_rois[0]
 		self.default_freesurfer_cortical_roi = all_rois[1]
 		self.default_freesurfer_subcortical_roi =  all_rois[2]
+		self.default_custom_rois = []
 		self.default_roi_paths = None
 
 		#FreeSurfer Rois

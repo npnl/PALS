@@ -4,7 +4,8 @@ from datetime import datetime
 from shutil import copyfile, rmtree
 from threading import Thread
 
-from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_Map
+from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_CT_Map
+from pages.stores.rois import FreesurferSubCorticalROINamesToFileMapping as FS_SCT_Map
 from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
 from commands import Commands
 
@@ -252,15 +253,24 @@ class Operations(object, WMSegmentationOperation,\
 
 	def _getDefaultROIsPaths(self):
 		all_rois = self.controller.default_corticospinal_tract_roi\
-					+ self.controller.default_freesurfer_cortical_roi
-		roi_paths = self._getRoiFilePaths(all_rois, FS_Map)[0]
+					+ self.controller.default_freesurfer_cortical_roi\
+					+ self.controller.default_freesurfer_subcortical_roi
+
+		roi_paths = self._getRoiFilePaths(all_rois, FS_CT_Map)[0]
+		roi_paths = self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
 		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)[0]
 		self.controller.default_roi_paths = roi_paths
 		return roi_paths
 
 	def _getFSROIsPaths(self):
-		fs_roi_options = self.controller.freesurfer_cortical_roi
-		fs_roi_paths, fs_roi_codes = self._getRoiFilePaths(fs_roi_options, FS_Map)
+		fs_roi_options = self.controller.freesurfer_cortical_roi\
+						+ self.controller.freesurfer_subcortical_roi
+		fs_roi_paths, fs_roi_codes = self._getRoiFilePaths(fs_roi_options, FS_CT_Map)
+		fs_roi_paths_s, fs_roi_codes_s = self._getRoiFilePaths(fs_roi_options, FS_SCT_Map)
+
+		fs_roi_paths += fs_roi_paths_s
+		fs_roi_codes += fs_roi_codes_s
+
 		self.controller.fs_roi_paths = fs_roi_paths
 		self.controller.fs_roi_codes = fs_roi_codes
 		return fs_roi_paths

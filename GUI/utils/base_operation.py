@@ -1,5 +1,6 @@
 import os
 import ntpath
+from datetime import datetime
 from shutil import copyfile, rmtree
 
 class BaseOperation():
@@ -9,14 +10,20 @@ class BaseOperation():
 			raise TypeError('Base operation may not be instantiated')
 		return object.__new__(cls, *args, **kwargs)
 
+	def createUniqueDir(self):
+		if self.unique_dir_name == None:
+			self.unique_dir_name =  os.path.join(datetime.now().strftime('PALS_Output_%H_%M_%d_%m_%Y'))
+		if (not os.path.exists(self.getBaseDirectory())) and len(self.output_directory) > 0:
+			os.makedirs(self.getBaseDirectory())
+
 	def getProjectDirectory(self):
 		return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 	def getBaseDirectory(self):
-		return self.output_directory
+		return os.path.join(self.output_directory, self.unique_dir_name)
 
 	def getSubjectPath(self, subject):
-		return os.path.join(self.output_directory, subject)
+		return os.path.join(self.getBaseDirectory(), subject)
 
 	def getIntermediatePath(self, subject):
 		return os.path.join(self.getSubjectPath(subject), self.INTERMEDIATE_FILES)

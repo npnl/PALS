@@ -1,5 +1,6 @@
 import os
 import ntpath
+from datetime import datetime
 from shutil import copyfile, rmtree
 from threading import Thread
 
@@ -46,6 +47,8 @@ class Operations(object, WMSegmentationOperation,\
 		self.input_directory = self.controller.sv_input_dir.get()
 		self.output_directory = self.controller.sv_output_dir.get()
 		self.output_directories = []
+		self.unique_dir_name = None
+		self.createUniqueDir()
 
 		self.INTERMEDIATE_FILES = 'Intermediate_Files'
 		self.ORIGINAL_FILES = 'Original_Files'

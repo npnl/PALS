@@ -91,6 +91,7 @@ class MainWindow(tk.Tk):
 		self.freesurfer_cortical_roi = all_rois[1]
 		self.freesurfer_subcortical_roi =  all_rois[2]
 		self.fs_roi_paths = None
+		self.fs_roi_codes = None
 
 		#User ROIs
 		self.user_rois = []

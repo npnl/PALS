@@ -236,27 +236,30 @@ class Operations(object, WMSegmentationOperation,\
 
 	def _getRoiFilePaths(self, roi_options, mapping):
 		roi_paths = []
+		roi_codes = []
 		for roi in roi_options:
 			if roi.get():
 				roi_name = roi.name
 				if roi_name in mapping:
 					roi_file = mapping[roi_name][1]
+					roi_codes.append(mapping[roi_name][0])
 					full_path = os.path.join(os.getcwd(), 'ROIs', roi_file)
 					roi_paths.append(full_path)
-		return roi_paths
+		return (roi_paths, roi_codes)
 
 	def _getDefaultROIsPaths(self):
 		all_rois = self.controller.default_corticospinal_tract_roi\
 					+ self.controller.default_freesurfer_cortical_roi
-		roi_paths = self._getRoiFilePaths(all_rois, FS_Map)
-		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)
+		roi_paths = self._getRoiFilePaths(all_rois, FS_Map)[0]
+		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)[0]
 		self.controller.default_roi_paths = roi_paths
 		return roi_paths
 
 	def _getFSROIsPaths(self):
 		fs_roi_options = self.controller.freesurfer_cortical_roi
-		fs_roi_paths = self._getRoiFilePaths(fs_roi_options, FS_Map)
+		fs_roi_paths, fs_roi_codes = self._getRoiFilePaths(fs_roi_options, FS_Map)
 		self.controller.fs_roi_paths = fs_roi_paths
+		self.controller.fs_roi_codes = fs_roi_codes
 		return fs_roi_paths
 
 	def _getUserROIsPaths(self):

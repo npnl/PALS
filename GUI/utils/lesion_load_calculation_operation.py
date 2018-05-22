@@ -189,7 +189,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		if self.controller.b_ll_calculation.get() == False or\
 			self.controller.b_freesurfer_rois.get() == False or self.skip: return False
 
-		roi_codes = self.controller.fs_roi_paths
+		roi_codes = self.controller.fs_roi_codes
 		max_lesions = 0
 		all_subjects_info = []
 
@@ -232,7 +232,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 				binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%d.nii.gz'%(subject, roi_code))
 
-				cmd = 'fslmaths %s -thr %d -uthr %d -bin %s;'%(output_file, roi_code, roi_code, binary_file)
+				cmd = 'fslmaths %s -thr %s -uthr %s -bin %s;'%(output_file, roi_code, roi_code, binary_file)
 				self.com.runRawCommand(cmd)
 
 				# binarize roi

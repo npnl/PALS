@@ -323,7 +323,7 @@ class Operations(object, WMSegmentationOperation,\
 			if self.controller.b_freesurfer_rois.get():
 				self._createDirectory('FS', parent=['QC_LesionLoad'])
 				for fs_roi_path in self._getFSROIsPaths():
-					roi_name = self._extractFileName(fs_roi_path)
+					roi_name = self._extractFileName(fs_roi_path, remove_extension=True, extension_count=2)
 					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'FS'])
 				self._createDirectory('FS', parent=['QC_Registrations'])
 			else:

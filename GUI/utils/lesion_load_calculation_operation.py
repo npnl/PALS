@@ -190,6 +190,8 @@ class LesionLoadCalculationOperation(BaseOperation):
 			self.controller.b_freesurfer_rois.get() == False or self.skip: return False
 
 		roi_codes = self.controller.fs_roi_codes
+		fs_roi_paths = self.controller.fs_roi_paths
+
 		max_lesions = 0
 		all_subjects_info = []
 
@@ -226,22 +228,23 @@ class LesionLoadCalculationOperation(BaseOperation):
 			reg_brain_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.nii.gz'%subject)
 
 			# extract all ROIs for each subj
-			for roi_code in roi_codes:
+			for roi_code, roi_path in zip(roi_codes, fs_roi_paths):
+				roi_name = self._extractFileName(roi_path, remove_extension=True, extension_count=2)
 				output_file = os.path.join(self.getIntermediatePath(subject), '%s_aparc+aseg.nii.gz'%subject)
 				self.com.runMriConvert(seg_file, output_file)
 
-				binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%d.nii.gz'%(subject, roi_code))
+				binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s.nii.gz'%(subject, roi_name))
 
 				cmd = 'fslmaths %s -thr %s -uthr %s -bin %s;'%(output_file, roi_code, roi_code, binary_file)
 				self.com.runRawCommand(cmd)
 
 				# binarize roi
-				new_binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%d_bin.nii.gz'%(subject, roi_code))
+				new_binary_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s_bin.nii.gz'%(subject, roi_name))
 				self.com.runFslWithArgs(arg_1=binary_file, arg_2=new_binary_file, arg_3='', option='-bin')
 
 			for index, lesion_file in enumerate(lesion_files):
 				lesion_fs = os.path.join(self.getIntermediatePath(subject), '%s_lesion%d_FS.nii.gz'%(subject, index+1))
-				lesion_fs_bin = os.path.join(self.getIntermediatePath(subject), '%s_lesion%d_FS_bin.nii.gz')
+				lesion_fs_bin = os.path.join(self.getIntermediatePath(subject), '%s_lesion%d_FS_bin.nii.gz'%(subject, index+1))
 
 				# perform transformation on lesion mask, then binarize the mask
 				cmd = 'flirt -in %s -init %s -ref %s -out %s -applyxfm;'%(lesion_file, xfm_inverse_file, template_brain, lesion_fs)
@@ -253,13 +256,15 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 				cog = self.com.runFslStats(lesion_fs_bin, '-C')
 
-				for roi_code in roi_codes:
+				for roi_code, roi_name in zip(roi_codes, fs_roi_paths):
+					roi_name = self._extractFileName(roi_name, remove_extension=True, extension_count=2)
+
 					# add the lesion and roi masks together
-					combined_lesion = os.path.join(self.getIntermediatePath(subject), '%s_combined_lesion%d_roi%d.nii.gz'%(subject, index+1, roi_code))
+					combined_lesion = os.path.join(self.getIntermediatePath(subject), '%s_combined_lesion%d_roi%s.nii.gz'%(subject, index+1, roi_name))
 					self.com.runFslWithArgs(arg_1=new_binary_file, arg_2=lesion_fs_bin, arg_3=combined_lesion, option='-add')
 
 					# now that two binarized masks are added, the overlapping regions will have a value of 2 so we threshold the image to remove any region that isn't overlapping
-					overlap_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%d_lesion%d_overlap.nii.gz'%(subject, roi_code, index+1))
+					overlap_file = os.path.join(self.getIntermediatePath(subject), '%s_roi%s_lesion%d_overlap.nii.gz'%(subject, roi_name, index+1))
 					self.com.runFslWithArgs(arg_1=combined_lesion, arg_2=overlap_file, arg_3='', option='-thr 1.9')
 
 					lesion_load_volume = self.com.runBrainVolume(overlap_file)
@@ -270,13 +275,13 @@ class LesionLoadCalculationOperation(BaseOperation):
 					subject_info.append(lesion_load_volume)
 					subject_info.append(percent_overlap)
 
-					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', 'roi%d'%roi_code, '%s_LL.png'%subject)
+					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', 'roi%s'%roi_name, '%s_LL.png'%subject)
 					cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, reg_brain_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
 			subject_info_all.append(subject_info)
 
-		self._writeToCSV2(subject_info_all, max_lesions, roi_codes, space)
+		self._writeToCSV2(subject_info_all, max_lesions, fs_roi_paths, space)
 
 
 	def _writeToCSV2(self, subject_info_all, max_lesions, roi_list, space):

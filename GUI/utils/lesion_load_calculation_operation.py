@@ -39,7 +39,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				if self.stage == 10:
 					self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
 				if self.stage == 11:
-					self.runLesionLoadCalculationFS(space)
+					self.runLesionLoadCalculationFS(space, anatomical_id, lesion_mask_id)
 					self.incrementStage()
 			else:
 				self.incrementStage(2)
@@ -183,7 +183,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			self.printQCPageUrl('QC for ROIs', html_file_path, pause=False)
 
 
-	def runLesionLoadCalculationFS(self, space):
+	def runLesionLoadCalculationFS(self, space, anatomical_id, lesion_mask_id):
 		# Skip this step if user did not ask to perform this operation
 		# Skip if user does not selected any free surfer rois
 		if self.controller.b_ll_calculation.get() == False or\
@@ -196,7 +196,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		for subject in self.subjects:
 			subject_info = [subject]
 
-			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject)
+			anatomical_file_path, lesion_files = self._setSubjectSpecificPaths_1(subject, anatomical_id, lesion_mask_id)
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
 			# template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)

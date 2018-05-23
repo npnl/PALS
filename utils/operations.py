@@ -409,6 +409,7 @@ class Operations(object, WMSegmentationOperation,\
 				# flag subject
 				return False
 
+
 		# at this point, only subjects that have files all in the same orientation are retained
 		# now change all files from neurological -> radiological
 
@@ -421,13 +422,13 @@ class Operations(object, WMSegmentationOperation,\
 			if self.controller.b_brain_extraction.get():
 				output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_bet_id.get() + '_rad')
 				self.com.runFslSwapDim(original_bet_file, output_file_path)
-				self.com.runFslOrient(rad_bet_file, args='-swaporient')
+				self.com.runFslOrient(output_file_path, args='-swaporient')
 				rad_bet_file = output_file_path + '.nii.gz'
 
 			if self.controller.b_wm_segmentation.get():
 				output_file_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad')
 				self.com.runFslSwapDim(original_wm_file, output_file_path)
-				self.com.runFslOrient(rad_wm_file, args='-swaporient')
+				self.com.runFslOrient(output_file_path, args='-swaporient')
 				rad_wm_file = output_file_path + '.nii.gz'
 
 			for index, original_lesion_file in enumerate(original_lesion_files):

@@ -38,13 +38,13 @@ class MainWindow(tk.Tk):
 		self.b_wm_correction = BooleanVar(self)
 		self.b_ll_calculation = BooleanVar(self)
 		self.b_visual_qc = BooleanVar(self)
-		self.b_quality_control = BooleanVar(self)
+		self.b_pause_for_qc = BooleanVar(self)
 
 		self.b_radiological_convention.set(False)
 		self.b_wm_correction.set(False)
 		self.b_ll_calculation.set(False)
 		self.b_visual_qc.set(False)
-		self.b_quality_control.set(True)
+		self.b_pause_for_qc.set(True)
 
 		#Directory Input Page
 		self.sv_input_dir = StringVar(self)

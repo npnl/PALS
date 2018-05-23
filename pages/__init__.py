@@ -1,6 +1,5 @@
 from welcome_page import WelcomePage
 from directory_input import DirectoryInputPage
-from pause_options_input import PauseOptionsInputPage
 from running_operations import RunningOperationsPage
 from white_matter_input import WhiteMatterInputPage
 from lesion_load_input import LesionLoadCalculationInputPage

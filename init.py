@@ -13,7 +13,6 @@ from datetime import datetime
 from pages import WelcomePage
 from pages import SettingsInput
 from pages import DirectoryInputPage
-from pages import PauseOptionsInputPage
 from pages import RunningOperationsPage
 from pages import WhiteMatterInputPage
 from pages import LesionLoadCalculationInputPage

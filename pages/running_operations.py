@@ -8,7 +8,6 @@ except ImportError:
 
 
 from base_input import BaseInputPage
-from executor import Worker
 import webbrowser, os
 import traceback
 from functools import partial

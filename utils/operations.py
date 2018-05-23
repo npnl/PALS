@@ -306,8 +306,6 @@ class Operations(object, WMSegmentationOperation,\
 				# the following takes all of the user input ROIs and binarizes
 				# them; placing them in "/ROI_binarized" directory
 				for user_roi_path in self._getUserROIsPaths():
-					#roi_name = self._extractFileName(user_roi_path)
-
 					roi_name = self._extractFileName(user_roi_path, remove_extension=True, extension_count=2)
 
 					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'custom'])
@@ -319,10 +317,6 @@ class Operations(object, WMSegmentationOperation,\
 
 				#get fullpath of all binarized user input ROIs
 				user_rois_output_paths = self._getPathOfFiles(roi_output_directory, *params)
-
-				# for user_roi_output_path in user_rois_output_paths:
-				# 	roi_name = self._extractFileName(user_roi_output_path)
-				# 	self._createDirectory(roi_name, parent=['QC_LesionLoad', 'custom'])
 
 				self._createDirectory('custom', parent=['QC_Registrations'])
 

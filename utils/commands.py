@@ -88,14 +88,10 @@ class Commands(object):
 
 	def runFslMathToCheckInSameSpace(self, wm_mask_file, lesion_file, output_file):
 		# fslmaths "${WM_MASK}" -sub ${LesionFiles[0]} "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_corrWM
-		# cmd = 'fslmaths %s -sub %s %s'%(wm_mask_file, lesion_file, output_file)
-		# return self.startExecution(cmd)
 		return self.runFslWithArgs(wm_mask_file, lesion_file, output_file, '-sub') == ''
 
 	def runFslMultiply(self, anatomical_file_path, corrected_wm_file, output_file):
 		# fslmaths $ANATOMICAL -mul "${corrWM}" "$SUBJECTOPDIR"/Intermediate_Files/"${SUBJ}"_NormRangeWM;
-		# cmd = 'fslmaths %s -mul %s %s;'%(anatomical_file_path, corrected_wm_file, output_file)
-		# self.startExecution(cmd)
 		self.runFslWithArgs(anatomical_file_path, corrected_wm_file, output_file, '-mul')
 
 	def runFslWithArgs(self, arg_1, arg_2, arg_3, option):

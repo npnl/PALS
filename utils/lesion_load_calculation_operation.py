@@ -4,8 +4,6 @@ from base_operation import BaseOperation
 
 class LesionLoadCalculationOperation(BaseOperation):
 	def runLesionLoadCalculation(self, anatomical_id, lesion_mask_id):
-		#standard_brain = self.controller.sv_user_brain_template.get()
-		#template_brain = os.path.join(self.controller.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 		if self.stage in (6, 7):
 			if self.controller.b_own_rois.get() == True:
 				space = 'custom'
@@ -202,21 +200,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 			((t1_mgz, seg_file), bet_brain_file, wm_mask_file) = self._setSubjectSpecificPaths_2(subject)
 
 			template_brain = os.path.join(self.getIntermediatePath(subject), '%s_FST1.nii.gz'%subject)
-			# self.com.runMriConvert(t1_mgz, template_brain)
-			#
-			# # perform registration to FS Space for each subject to get transformation matrix
-			# reg_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.xfm'%subject)
-			# reg_brain_file= os.path.join(self.getIntermediatePath(subject), '%s_T12FS.nii.gz'%subject)
-			# cmd = 'flirt -in %s -ref %s -omat %s -out %s;'%(anatomical_file_path, template_brain, reg_file, reg_brain_file)
-			# self.com.runRawCommand(cmd)
-			#
-			# output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
-			# self.com.runFslEyes(reg_brain_file, output_image_path=output_image_path, options='')
-			#
-			# # invert transformation matrix
-			# xfm_inverse_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS_inv.xfm'%subject)
-			# cmd = 'convert_xfm -omat %s %s;'%(xfm_inverse_file, reg_file)
-			# self.com.runRawCommand(cmd)
 
 			lesion_files_count = len(lesion_files)
 

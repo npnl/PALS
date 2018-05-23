@@ -8,12 +8,8 @@ except ImportError:
 import tkFileDialog
 import os
 
-from threading import Thread
-import subprocess
-
 from utils import isValidPath
 from base_input import BaseInputPage
-from executor import Worker
 
 class WhiteMatterInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -89,10 +85,3 @@ class WhiteMatterInputPage(BaseInputPage, object):
 		else:
 			super(WhiteMatterInputPage, self).moveToNextPage()
 
-	def executeCommand(self):
-		self.worker = Worker()
-		self.thread_name = self.worker.execute('python testScript.py', self.output, self)
-		print self.thread_name
-
-	def stopCommand(self):
-		self.worker.stop(self.thread_name)

@@ -8,12 +8,8 @@ except ImportError:
 import tkFileDialog
 import os
 
-from threading import Thread
-import subprocess
-
 from utils import isValidPath
 from base_input import BaseInputPage
-from executor import Worker
 
 class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -84,11 +80,3 @@ class WelcomePage(BaseInputPage, object):
 		print controller.sv_input_dir.get()
 		print controller.sv_output_dir.get()
 		print controller.run_normalize_status.get()
-
-	def executeCommand(self):
-		self.worker = Worker()
-		self.thread_name = self.worker.execute('python testScript.py', self.output, self)
-		print self.thread_name
-
-	def stopCommand(self):
-		self.worker.stop(self.thread_name)

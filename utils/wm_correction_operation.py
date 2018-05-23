@@ -4,6 +4,7 @@ from base_operation import BaseOperation
 
 class WMCorrectionOperation(BaseOperation):
 	def runWMCorrection(self, anatomical_id, lesion_mask_id):
+		self.logger.info('Lesion correction has been initiated.')
 		max_lesions = 0
 		subject_info_all = []
 		for subject in self.subjects:
@@ -86,7 +87,7 @@ class WMCorrectionOperation(BaseOperation):
 		html_file_path = generateQCPage('Lesions', image_files_base)
 		self.printQCPageUrl('WM Correction', html_file_path)
 
-		self.logger.info('White Matter correction completed for all subjects')
+		self.logger.info('Lesion correction completed for all subjects')
 		lesion_mask_id = 'WMAdjusted'
 		return lesion_mask_id
 

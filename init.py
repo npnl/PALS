@@ -178,6 +178,9 @@ class MainWindow(tk.Tk):
 			pages = [SettingsInput]
 		return pages
 
+	def getProjectDirectory(self):
+		return os.path.dirname(os.path.realpath(__file__))
+
 	def checkFslInstalled(self, path=''):
 		commands = ['fslmaths', 'fsleyes', 'mri_convert', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
 		flag = True

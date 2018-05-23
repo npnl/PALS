@@ -143,7 +143,7 @@ class Operations(object, WMSegmentationOperation,\
 		if self.skip and self.reset_from_ui:
 			self.callback.resetAll()
 		elif self.stage != 14:
-			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1)) 
+			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
 
 
 	def createQCPage(self):
@@ -359,7 +359,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.subjects.sort()
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
-		lesion_mask_id = '_rad_reorient'
+		lesion_mask_id = [self.controller.sv_lesion_mask_id.get(),'_rad_reorient']
 
 		return anatomical_id, lesion_mask_id
 

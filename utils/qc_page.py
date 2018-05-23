@@ -47,12 +47,12 @@ def generateQCPage(page_type, images_dir):
 					  var pom = document.createElement('a');
 					  pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(subjects_passed));
 					  pom.setAttribute('download', filename);
-					
+
 					  pom.style.display = 'none';
 					  document.body.appendChild(pom);
-					
+
 					  pom.click();
-					
+
 					  document.body.removeChild(pom);
 					}
 					</script>"""
@@ -80,7 +80,7 @@ def generateQCPage(page_type, images_dir):
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
 			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, _extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'
-			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial> Flag subject</FONT></center><br><br></td>'%subject + '\n'
+			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%subject + '\n'
 		else:
 			output += '<tr>' + '\n'
 			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(_extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'

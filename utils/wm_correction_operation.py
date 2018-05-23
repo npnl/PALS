@@ -79,7 +79,7 @@ class WMCorrectionOperation(BaseOperation):
 			header.append('Lesion%s_Percent_Removed'%lesion_num)
 
 		# Write data to the csv file
-		subject_info_with_header = header + subject_info_all
+		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_database.csv'))
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')

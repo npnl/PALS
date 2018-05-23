@@ -36,6 +36,7 @@ class BaseOperation():
 
 	def updateSubjects(self, new_subjects):
 		self.subjects = list(set(self.subjects) - set(new_subjects))
+		self.subjects.sort()
 		self.logger.debug("Updated the subjects to " + str(new_subjects))
 
 	def incrementStage(self, count=1):
@@ -43,6 +44,8 @@ class BaseOperation():
 		self.updateProgressBar((100.0/self.total_stages))
 
 	def printQCPageUrl(self, operation_name, html_path, pause=True):
+		if pause and not self.controller.b_quality_control.get():
+			self.incrementStage()
 		pause = pause and self.controller.b_quality_control.get()
 		self.callback.pause(operation_name, html_path, pause)
 

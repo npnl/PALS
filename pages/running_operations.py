@@ -124,7 +124,6 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.stop.config(state="normal")
 		self.resetClickCounter()
 		if self.start['text'] == 'Continue Execution':
-			print "Text is Continue"
 			self.operation.incrementStage()
 		self.operation.startThreads(self)
 

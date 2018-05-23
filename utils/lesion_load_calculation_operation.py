@@ -5,7 +5,7 @@ from base_operation import BaseOperation
 class LesionLoadCalculationOperation(BaseOperation):
 	def runLesionLoadCalculation(self, anatomical_id, lesion_mask_id):
 		#standard_brain = self.controller.sv_user_brain_template.get()
-		#template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
+		#template_brain = os.path.join(self.controller.getProjectDirectory(), 'ROIs', 'MNI_FS_T1.nii.nii.gz')
 		if self.stage in (6, 7):
 			if self.controller.b_own_rois.get() == True:
 				space = 'custom'
@@ -22,7 +22,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 		if self.stage in (8, 9):
 			if self.controller.b_default_rois.get() == True:
 				space = 'MNI152'
-				template_brain = os.path.join(self.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
+				template_brain = os.path.join(self.controller.getProjectDirectory(), 'ROIs', 'MNI152_T1_2mm_brain.nii.gz')
 				if self.stage == 8:
 					self.runReg(template_brain, space, anatomical_id, lesion_mask_id)
 				if self.stage == 9:

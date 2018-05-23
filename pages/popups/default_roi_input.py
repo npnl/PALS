@@ -51,7 +51,7 @@ class DefaultROIInputPopup(Toplevel, object):
 		self.selected_count.set(str(len(self.controller.default_custom_rois)) + ' selected')
 
 	def chooseFiles(self):
-		current_dir = os.getcwd()
+		current_dir = os.path.join(self.controller.getProjectDirectory(), 'ROIs')
 		self.update()
 		chosen_files =  tkFileDialog.askopenfilenames(parent=self, initialdir = current_dir, title='Select the location of ROIs')
 		chosen_files = self.controller.splitlist(chosen_files)

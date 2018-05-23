@@ -227,6 +227,7 @@ class Operations(object, WMSegmentationOperation,\
 				os.makedirs(output_directory)
 				input_directory = os.path.join(base_input_directory, directory)
 				self._createOriginalFiles(input_directory, output_directory)
+		self.subjects.sort()
 
 
 	def _createDirectory(self, path, parent=[''], relative=True, drop_existing=True):
@@ -247,7 +248,7 @@ class Operations(object, WMSegmentationOperation,\
 				if roi_name in mapping:
 					roi_file = mapping[roi_name][1]
 					roi_codes.append(mapping[roi_name][0])
-					full_path = os.path.join(os.getcwd(), 'ROIs', roi_file)
+					full_path = os.path.join(self.controller.getProjectDirectory(), 'ROIs', roi_file)
 					roi_paths.append(full_path)
 		return (roi_paths, roi_codes)
 
@@ -341,8 +342,6 @@ class Operations(object, WMSegmentationOperation,\
 					roi_name = self._extractFileName(fs_roi_path, remove_extension=True, extension_count=2)
 					self._createDirectory(roi_name, parent=['QC_LesionLoad', 'FS'])
 				self._createDirectory('FS', parent=['QC_Registrations'])
-			else:
-				self.logger.info('None of the ROI options selected')
 		self.logger.info('ROIs directory created successfully')
 
 	def reOrientToRadForAllSubjects(self):
@@ -357,6 +356,7 @@ class Operations(object, WMSegmentationOperation,\
 				new_subjects.append(subject)
 		self.logger.info('Reorient to radiological has been completed for all subjects.')
 		self.subjects = new_subjects
+		self.subjects.sort()
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
 		lesion_mask_id = '_rad_reorient'
@@ -453,16 +453,6 @@ class Operations(object, WMSegmentationOperation,\
 			self.com.runFslOrient2Std(lesion_file, output_path)
 
 		return True
-
-	def getTemplateBrainROIS(self):
-		parent_dir =  os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-		template_roi_dir = os.path.join(parent_dir, 'ROIs')
-		template_rois = None
-		for item in os.listdir(template_roi_dir):
-			if item.startswith('MNI152_T1_2mm_brain'):
-				template_rois = os.path.join(template_roi_dir, item)
-				break
-		return template_rois
 
 def isValidPath(filePath):
 	if os.path.exists(filePath):

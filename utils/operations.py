@@ -56,23 +56,29 @@ class Operations(object, WMSegmentationOperation,\
 		self.anatomical_id = None
 		self.lesion_mask_id = None
 
+	def isMajorOperationSelected(self):
+		return self.controller.b_radiological_convention.get()\
+				or self.controller.b_wm_correction.get()\
+				or self.controller.b_ll_calculation.get()
 
 	def startExecution(self):
 		self.skip = False
 		if self.stage == 0:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
-
 			self.controller.progressbar['value'] = 0
 			self.initialiseConstants()
-			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
-			self.createROIDirectories()
-			self.runGzip()
-			self.binarizeLesionFilesForAll()
+
+			if self.isMajorOperationSelected():
+				self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
+				self.createROIDirectories()
+				self.runGzip()
+				self.binarizeLesionFilesForAll()
+			else:
+				self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			self.incrementStage()
 
 		if self.stage == 1:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
-
 			self.anatomical_id = self.controller.sv_t1_id.get()
 			self.lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 			self.incrementStage()
@@ -147,27 +153,29 @@ class Operations(object, WMSegmentationOperation,\
 
 
 	def createQCPage(self):
-
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
-		os.makedirs(imgaes_dir)
+		os.makedirs(images_dir)
 
 		for subject in self.subjects:
+			subject_input_path = os.path.join(self.input_directory, subject)
+			params = (subject, self.anatomical_id, '.nii.gz')
+			anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)[0]
 
-			anatomical_file_path,lesion_files=self._setSubjectSpecificPaths_1(subject, self.anatomical_id, self.lesion_mask_id)
+			params = (subject, self.lesion_mask_id, '.nii.gz')
+			lesion_files = self._getPathOfFiles(subject_input_path, *params)
 
-			for counter,lesion in enumerate(lesion_files):
-
-				cog = self.com.runFslStats(lesion, '-C')
+			for counter, lesion_file in enumerate(lesion_files):
+				cog = self.com.runFslStats(lesion_file, '-C')
 				x,y,z=cog.split(' ')
 				x=int(x)
 				y=int(y)
 				z=int(z)
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
-				self.com.runFslEyes2(anatomical_file_path, lesion_file, x, y, z, output_image_path)
+				self.com.runFslEyes2(anatomical_file_path, lesion_file, '', x, y, z, output_image_path)
 
 		html_file_path = generateQCPage('Lesions', images_dir)
-		self.printQCPageUrl('createQCPage', html_file_path)
+		self.printQCPageUrl('createQCPage', html_file_path, pause=False)
 		self.logger.info('QC Page generation completed')
 
 
@@ -232,12 +240,14 @@ class Operations(object, WMSegmentationOperation,\
 		anatomical_id = (anatomical_id + '_intNorm')
 		return anatomical_id
 
-	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory):
+	def createOutputSubjectDirectories(self, base_input_directory, base_output_directory, only_iterate=False):
 		if self.skip: return False
 		all_input_directories = os.listdir(base_input_directory)
 		for directory in all_input_directories:
 			if os.path.isdir(os.path.join(base_input_directory, directory)):
 				self.subjects.append(directory)
+				if only_iterate:
+					continue
 				output_directory = os.path.join(base_output_directory, directory)
 				if os.path.exists(output_directory):
 					rmtree(output_directory)

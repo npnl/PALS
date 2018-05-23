@@ -147,8 +147,25 @@ class Operations(object, WMSegmentationOperation,\
 
 
 	def createQCPage(self):
+
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		os.makedirs(imgaes_dir)
+
+		for subject in self.subjects:
+
+			anatomical_file_path,lesion_files=self._setSubjectSpecificPaths_1(subject, self.anatomical_id, self.lesion_mask_id)
+
+			for counter,lesion in enumerate(lesion_files):
+
+				cog = self.com.runFslStats(lesion, '-C')
+				x,y,z=cog.split(' ')
+				x=int(x)
+				y=int(y)
+				z=int(z)
+
+				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
+				self.com.runFslEyes2(anatomical_file_path, lesion_file, x, y, z, output_image_path)
+
 		html_file_path = generateQCPage('Lesions', images_dir)
 		self.printQCPageUrl('createQCPage', html_file_path)
 		self.logger.info('QC Page generation completed')
@@ -291,7 +308,7 @@ class Operations(object, WMSegmentationOperation,\
 		if self.skip: return False
 		self.logger.info('Creating Directories')
 		if self.controller.b_wm_correction.get():
-			self._createDirectory('QC_Lesions')
+			self._createDirectory('QC_LesionCorrection')
 			if not self.controller.b_wm_segmentation.get(): self._createDirectory('QC_WMSegmentations')
 		if self.controller.b_wm_correction.get() or self.controller.b_ll_calculation.get():
 			if not self.controller.b_brain_extraction.get(): self._createDirectory('QC_BrainExtractions')
@@ -342,15 +359,21 @@ class Operations(object, WMSegmentationOperation,\
 		if not self.controller.b_radiological_convention.get() or self.skip: return False
 		self.logger.info('Reorient to radiological module initiated.')
 		new_subjects = []
+		failed_subjects = []
 		for subject in self.subjects:
 			keepSubject = self._reOrientToRadForSubject(subject)
 			if not keepSubject:
+				failed_subjects.append(subject)
 				self.logger.info('The subject contains error. Check that files are in the same orientation for subject [%s]', subject)
 			else:
 				new_subjects.append(subject)
 		self.logger.info('Reorient to radiological has been completed for all subjects.')
 		self.subjects = new_subjects
 		self.subjects.sort()
+
+		if len(failed_subjects) > 0:
+			with open(os.path.join(self.getBaseDirectory(), 'check_subj_orientations.txt'), 'w') as f:
+				f.write('\n'.join(failed_subjects))
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
 		lesion_mask_id = [self.controller.sv_lesion_mask_id.get(),'_rad_reorient']

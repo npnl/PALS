@@ -64,7 +64,7 @@ class WMCorrectionOperation(BaseOperation):
 				y=int(y)
 				z=int(z)
 
-				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_WMAdjLesion%d.png'%(subject, counter+1))
+				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_LesionCorrection', '%s_WMAdjLesion%d.png'%(subject, counter+1))
 				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, x, y, z, output_image_path)
 		subject_info_all.append(subject_info)
 
@@ -82,7 +82,7 @@ class WMCorrectionOperation(BaseOperation):
 		subject_info_with_header = [header] + subject_info_all
 		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_database.csv'))
 
-		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
+		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionCorrection')
 		html_file_path = generateQCPage('Lesions', image_files_base)
 		self.printQCPageUrl('WM Correction', html_file_path)
 

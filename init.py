@@ -154,12 +154,12 @@ class MainWindow(tk.Tk):
 		if not os.path.exists(logs_dir):
 			os.makedirs(logs_dir)
 		logging.basicConfig(level=logging.DEBUG,
-					format='%(levelname)s %(message)s',
+					format='%(asctime)s %(levelname)s %(message)s',
 					filename=os.path.join(logs_dir, datetime.now().strftime('logfile_%H_%M_%d_%m_%Y.log')),
 					filemode='w')
 		console = logging.StreamHandler()
 		console.setLevel(logging.INFO)
-		formatter = logging.Formatter('%(levelname)-8s %(message)s')
+		formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 		console.setFormatter(formatter)
 		logging.getLogger('').addHandler(console)
 		self.logger = logging.getLogger(__name__)

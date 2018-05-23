@@ -147,7 +147,7 @@ class Operations(object, WMSegmentationOperation,\
 
 
 	def createQCPage(self):
-
+		self.logger.info('Visual QC module has been initiated.')
 		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
 		os.makedirs(imgaes_dir)
 

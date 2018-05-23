@@ -50,7 +50,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 
 	def runReg(self, template_brain, space, anatomical_id, lesion_mask_id):
-		self.logger.info('Performing registration...')
+		self.logger.info('Registration to either default or user-input ROI space has been initiated.')
 
 		if space == 'MNI152' or space == 'custom':
 			#same template brain for all subject; passed in as template_brain
@@ -93,11 +93,13 @@ class LesionLoadCalculationOperation(BaseOperation):
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		html_file_path = generateQCPage('Registration', image_files_base)
 		self.printQCPageUrl('runReg', html_file_path)
+		self.logger.info('Registration to either default or user-input ROI space has been completed for all subjects.')
 
 
 	def _runLesionLoadCalculationHelper(self, space, roi_list, anatomical_id, lesion_mask_id):
 		all_subjects_info = []
 		max_lesions = 0
+		self.logger.info('Lesion load calculation for either default or user-input ROIs has been initiated.')
 
 		for subject in self.subjects:
 			subject_info = [subject]
@@ -155,6 +157,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 			all_subjects_info.append(subject_info)
 		self._writeToCSV(all_subjects_info, max_lesions, roi_list, space)
+		self.logger.info('Lesion load calculation for either default or user-input ROIs has been completed for all subjects.')
 
 	def _writeToCSV(self, subject_info_all, max_lesions, roi_list, space):
 		header = ['Subject']
@@ -182,6 +185,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 
 	def runLesionLoadCalculationFS(self, space, anatomical_id, lesion_mask_id):
+		self.logger.info('Lesion load calculation for Freesurfer ROIs has been initiated.')
 		# Skip this step if user did not ask to perform this operation
 		# Skip if user does not selected any free surfer rois
 		if self.controller.b_ll_calculation.get() == False or\
@@ -265,7 +269,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			subject_info_all.append(subject_info)
 
 		self._writeToCSV2(subject_info_all, max_lesions, fs_roi_paths, space)
-
+		self.logger.info('Lesion load calculation for Freesurfer ROIs has been completed for all subjects.')
 
 	def _writeToCSV2(self, subject_info_all, max_lesions, roi_list, space):
 		header = ['Subject']

@@ -9,7 +9,7 @@ import tkFileDialog
 import os
 
 from utils import isValidPath
-from base_input import BaseInputPage
+from base_input import *
 
 class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -26,12 +26,14 @@ class WelcomePage(BaseInputPage, object):
 
 		lb_radiological_convention = Label(lf_main, text="1. Reorient to Radiological Convention")
 		lb_radiological_convention.grid(row=0, column=0, sticky="W", pady=3)
+		createToolTip(lb_radiological_convention, 'Tool tip for Reorient to Radiological Convention')
 
 		chk_radiological_convention = Checkbutton(lf_main, variable=controller.b_radiological_convention)
 		chk_radiological_convention.grid(row=0, column=97, sticky='W', pady=3)
 
 		lb_wm_correction = Label(lf_main, text="2. White Matter Intensity Correction")
 		lb_wm_correction.grid(row=1, column=0, sticky="W", pady=3)
+		createToolTip(lb_wm_correction, 'Tool tip for White Matter Intensity Correction')
 
 		chk_wm_correction = Checkbutton(lf_main, variable=controller.b_wm_correction)
 		chk_wm_correction.grid(row=1, column=97, sticky='W', pady=3)
@@ -39,6 +41,7 @@ class WelcomePage(BaseInputPage, object):
 
 		lb_lesion_load = Label(lf_main, text="3. Lesion Load Calculation")
 		lb_lesion_load.grid(row=2, column=0,  sticky="W", pady=3)
+		createToolTip(lb_lesion_load, 'Tool tip for Lesion Load Calculation')
 
 		chk_ll_calculation = Checkbutton(lf_main, variable=controller.b_ll_calculation)
 		chk_ll_calculation.grid(row=2, column=97, sticky='W', pady=3)

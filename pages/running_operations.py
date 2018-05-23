@@ -7,7 +7,7 @@ except ImportError:
 	from tkinter import *
 
 
-from base_input import BaseInputPage
+from base_input import *
 import webbrowser, os
 import traceback
 from functools import partial

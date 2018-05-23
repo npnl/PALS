@@ -9,7 +9,7 @@ import tkFileDialog
 import os
 
 from utils import isValidPath
-from base_input import BaseInputPage
+from base_input import *
 
 class WhiteMatterInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):

@@ -93,7 +93,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space)
 		html_file_path = generateQCPage('Registration', image_files_base)
-		self.printQCPageUrl('runReg', html_file_path)
+		self.printQCPageUrl('Registrations', html_file_path)
 		self.logger.info('Registration to either default or user-input ROI space has been completed for all subjects.')
 
 
@@ -182,7 +182,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
 			image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name)
 			html_file_path = generateQCPage('LL_%s'%(roi_name), image_files_base)
-			self.printQCPageUrl('QC for ROIs', html_file_path, pause=False)
+			self.printQCPageUrl('%s-Lesion Load'%roi_name, html_file_path, pause=False)
 
 
 	def runLesionLoadCalculationFS(self, space, anatomical_id, lesion_mask_id):

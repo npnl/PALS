@@ -2,8 +2,8 @@ import os
 from qc_page import generateQCPage
 from base_operation import BaseOperation
 
-class WMCorrectionOperation(BaseOperation):
-	def runWMCorrection(self, anatomical_id, lesion_mask_id):
+class LesionCorrectionOperation(BaseOperation):
+	def runLesionCorrection(self, anatomical_id, lesion_mask_id):
 		self.logger.info('Lesion correction has been initiated.')
 		max_lesions = 0
 		subject_info_all = []
@@ -40,7 +40,7 @@ class WMCorrectionOperation(BaseOperation):
 			for counter, lesion_file in enumerate(lesion_files):
 				# calculate original and white matter adjusted lesion volumes
 				original_lesion_vol = self.com.runBrainVolume(lesion_file)
-				skip_subject, corrected_lesion_volume, wm_adjusted_lesion = self._wmCorrection(subject, counter+1, wm_mean, anatomical_file_path, lesion_file)
+				skip_subject, corrected_lesion_volume, wm_adjusted_lesion = self._lesionCorrection(subject, counter+1, wm_mean, anatomical_file_path, lesion_file)
 				if skip_subject:
 					self.logger.log('Check Image Orientations for T1 and Lesion Mask. Skipping Subject: ' + subject)
 					subject_info.append('Skipped')
@@ -85,14 +85,14 @@ class WMCorrectionOperation(BaseOperation):
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionCorrection')
 		html_file_path = generateQCPage('Lesions', image_files_base)
-		self.printQCPageUrl('WM Correction', html_file_path)
+		self.printQCPageUrl('Lesion Correction', html_file_path)
 
 		self.logger.info('Lesion correction completed for all subjects')
 		lesion_mask_id = 'WMAdjusted'
 		return lesion_mask_id
 
 
-	def _wmCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
+	def _lesionCorrection(self, subject, lesion_counter, wm_mean, anatomical_file_path, lesion_file):
 
 		rm_percentage = self.controller.percent_intensity / 100.0
 		voxel_range = (rm_percentage * 255)/2.0

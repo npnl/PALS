@@ -13,12 +13,12 @@ from qc_page import generateQCPage
 
 from base_operation import BaseOperation
 from wm_segmentation_operation import WMSegmentationOperation
-from wm_correction_operation import WMCorrectionOperation
+from wm_correction_operation import LesionCorrectionOperation
 from brain_extraction_operation import BrainExtractionOperation
 from lesion_load_calculation_operation import LesionLoadCalculationOperation
 
 class Operations(object, WMSegmentationOperation,\
-				WMCorrectionOperation, BrainExtractionOperation,\
+				LesionCorrectionOperation, BrainExtractionOperation,\
 				LesionLoadCalculationOperation):
 	def __init__(self, controller):
 		self.controller = controller
@@ -117,7 +117,7 @@ class Operations(object, WMSegmentationOperation,\
 				if self.stage == 5:
 					try:
 						self.anatomical_id = self.normaliseT1Intensity(self.anatomical_id)
-						self.lesion_mask_id = self.runWMCorrection(self.anatomical_id, self.lesion_mask_id)
+						self.lesion_mask_id = self.runLesionCorrection(self.anatomical_id, self.lesion_mask_id)
 					except Exception as e:
 						self.logger.error(e.message)
 						self.logger.debug(traceback.format_exc())

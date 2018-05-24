@@ -67,7 +67,7 @@ class Operations(object, WMSegmentationOperation,\
 		if self.stage == 0:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 0
-			self.updateGUI('Selected operations initiated')
+			self.controller.updateGUI('Selected operations initiated')
 			self.initialiseConstants()
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():

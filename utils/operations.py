@@ -69,10 +69,12 @@ class Operations(object, WMSegmentationOperation,\
 			self.controller.progressbar['value'] = 0
 			self.controller.updateGUI('Selected operations initiated')
 			self.initialiseConstants()
+			self.controller.updateGUI('Checking for necessary files in all subject directories')
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():
 				self.incrementStage(14)
 			else:
+				self.controller.updateGUI('All subjects have necessary files')
 				self.incrementStage()
 
 		if self.stage == 1:
@@ -151,7 +153,7 @@ class Operations(object, WMSegmentationOperation,\
 
 		if self.skip and self.reset_from_ui:
 			self.callback.resetAll()
-			self.controller.updateGUI('PALS is reset to pereform all operation from scratch')
+			self.controller.updateGUI('PALS is reset to perform all operation from scratch')
 
 		elif self.stage < 14:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))

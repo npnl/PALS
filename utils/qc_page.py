@@ -20,7 +20,7 @@ def generateQCPage(page_type, images_dir):
 	output += 'margin: auto;' + '\n'
 	output += '}' + '\n'
 
-	output += 'button[type=submit] {' + '\n'
+	output += 'button[type=button] {' + '\n'
 	output += 'width: 20em; height: 3em;' + '\n'
 	output += '}' + '\n'
 
@@ -35,6 +35,12 @@ def generateQCPage(page_type, images_dir):
 	output += '</style>' + '\n'
 
 	output += """<script language="Javascript" >
+
+					function markSubject(subject_id){
+						var sub_check_box = document.getElementById(subject_id);
+						sub_check_box.checked = ! sub_check_box.checked;
+					};
+
 					function download(filename) {
 					  var all_checked_boxes = document.getElementsByClassName('subject_checkbox');
 					  var subjects_passed = ''
@@ -79,15 +85,15 @@ def generateQCPage(page_type, images_dir):
 
 		if page_type == 'Lesions':
 			output += '<tr>' + '\n'
-			output += '<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(lesion_num, _extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'
-			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%subject + '\n'
+			output += """<td><FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=3> %s </FONT><div class="container"><img src="%s" height="600" onclick="markSubject('%s')"></div>"""%(lesion_num, _extractFileName(image_path, remove_extension=False), subject) + '\n'
+			output += '<center><input id="%s" class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%(subject, subject) + '\n'
 		else:
 			output += '<tr>' + '\n'
-			output += '<td><div class="container"><a href="file:%s"><img src="%s" height="600" ></a></div>'%(_extractFileName(image_path, remove_extension=False), _extractFileName(image_path, remove_extension=False)) + '\n'
-			output += '<center><input class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%subject + '\n'
+			output += """<td><div class="container"><img src="%s" height="600" onclick="markSubject('%s')"></div>"""%(_extractFileName(image_path, remove_extension=False), subject) + '\n'
+			output += '<center><input id="%s" class="subject_checkbox" type="checkbox" name="status" value="%s"><FONT COLOR=WHITE SIZE=3 FACE="Geneva, Arial"> Flag subject</FONT></center><br><br></td>'%(subject, subject) + '\n'
 
 		output += '</table>' + '\n'
-	output += '<button type="submit" class="btn">Submit</button><br></br>' + '\n'
+	output += """<button type="button" class="btn" onclick="download('selected_subjects.txt')">Submit</button><br></br>""" + '\n'
 	output += '</form>' + '\n'
 	output += '</body>' + '\n'
 	output += '</html>\n' + '\n'

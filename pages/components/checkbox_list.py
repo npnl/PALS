@@ -5,10 +5,14 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
+from entry_placeholder import EntryWithPlaceholder
+import difflib
+
 class CheckboxList(object):
 	def __init__(self, parent, controller, title, options, row, column, columnspan=1, user_agreed=None):
 		self.options = options
 		self.select_all_selected = BooleanVar()
+		self.sv_search_string = StringVar()
 
 		self.lf_options = LabelFrame(parent, text=title, padx=15, font='Helvetica 14 bold')
 		self.lf_options.grid(row=row+1, column=column, columnspan=columnspan, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
@@ -42,14 +46,27 @@ class CheckboxList(object):
 		self.frame_buttons.grid_rowconfigure(0, weight=1)
 		self.frame_buttons.grid_columnconfigure(0, weight=1)
 
+		self.en_search = EntryWithPlaceholder(self.frame_buttons, placeholder="Search String", textvariable = self.sv_search_string, width = 20)
+		self.en_search.grid(row=row+1, column=0, sticky="W", padx=3, pady=3)
 
-		row += 1
+		self.en_search.bind('<KeyRelease>', self.showSearchResults)
+
+
+		row += 2
+		self.labels_chk = []
+		self.option_dict = {}
+		self.option_names = []
 		for option in options:
 			lb_option = Label(self.frame_buttons, text=option.name)
 			lb_option.grid(row=row, column=0, sticky='w', pady=3)
 
 			chk_option = Checkbutton(self.frame_buttons, variable=option.holder)
 			chk_option.grid(row=row, column=1, sticky='e', pady=3, padx=(0, 10))
+
+			self.labels_chk.append([lb_option, chk_option])
+			self.option_dict[option.name] = option
+			self.option_names.append(option.name)
+
 			row += 1
 
 		self.user_agreed = user_agreed
@@ -59,6 +76,27 @@ class CheckboxList(object):
 
 	# def mouseWheel(self, event):
 	# 	self.canvas.yview_scroll(-1*(event.delta/120), "units")
+
+	def reAssignValues(self, name_order_list):
+		if len(labels_chk) != len(name_order_list):
+			return
+		for index, name in enumerate(name_order_list):
+			self.labels_chk[index][0].config(text=name)
+			self.labels_chk[index][0].update()
+			self.labels_chk[index][1].config(variable=self.option_dict[name].holder)
+			self.labels_chk[index][1].update()
+
+	def showSearchResults(self, *args):
+		search_term = self.sv_search_string.get()
+		if len(search_term) > 3:
+			name_order_list = self.fuzzySearch(search_term)
+			self.reAssignValues(name_order_list)
+		if len(search_term) == 0:
+			self.reAssignValues(self.option_names)
+
+	def fuzzySearch(self, search_term):
+		return sorted(self.option_names, key=lambda z: difflib.SequenceMatcher(None, z, search_term).ratio(), reverse=True)
+
 
 	def userAgreementChange(self, *args):
 		self.toggleChildren()

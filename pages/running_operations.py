@@ -49,8 +49,11 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.lf_subject_file.grid_rowconfigure(0, weight=1)
 		self.lf_subject_file.grid_columnconfigure(0, weight=1)
 
-		select = tk.Button(self.lf_subject_file, text='Select', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
-		select.grid(row=0, column=91, sticky='W', padx=5, pady=3)
+		self.select = tk.Button(self.lf_subject_file, text='Select', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
+		self.select.grid(row=0, column=91, sticky='W', padx=5, pady=3)
+
+		self.continue_with_all_sub = tk.Button(self.lf_subject_file, text='Continue with all subjects', command=lambda : self.continueWithAllSub())
+		self.continue_with_all_sub.grid(row=0, column=92, sticky='W', padx=5, pady=3)
 
 		en_input_dir = Entry(self.lf_subject_file, textvariable=controller.selected_subjects, width = 50)
 		en_input_dir.grid(row=0, column=0, columnspan=90, sticky="W", pady=3)
@@ -99,6 +102,10 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.disableChildren(self.lf_subject_file.winfo_children())
 		self.resetClickCounter()
 
+	def continueWithAllSub(self):
+		self.need_subjects_file = False
+		self.executeCommand()
+
 	def executeCommand(self):
 		if self.start['text'] == 'Continue Execution' and self.need_subjects_file:
 			selected_subjects_file_path  = self.controller.selected_subjects.get()
@@ -111,7 +118,6 @@ class RunningOperationsPage(BaseInputPage, object):
 				self.downloaded_file_path = os.path.dirname(selected_subjects_file_path)
 				self.controller.selected_subjects.set('')
 				self.operation.updateSubjects(new_subjects)
-				self.disableChildren(self.lf_subject_file.winfo_children())
 				self.setRequiredInputError('')
 			except Exception as e:
 				self.controller.logger.error(e.message)
@@ -119,6 +125,7 @@ class RunningOperationsPage(BaseInputPage, object):
 				self.setRequiredInputError('Please input the file downloaded from the qc page.')
 				return False
 
+		self.disableChildren(self.lf_subject_file.winfo_children())
 		self.start.config(state="disabled")
 		# self.btn_prev.config(state="disabled")
 		self.stop.config(state="normal")

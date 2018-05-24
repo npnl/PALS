@@ -10,6 +10,7 @@ import os
 
 from utils import isValidPath
 from base_input import *
+from popups import QCPopup
 
 class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -62,12 +63,22 @@ class WelcomePage(BaseInputPage, object):
 		lb_opt_sout = Label(self, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step. Uncheck to opt out of pausing.", padx=10)
 		lb_opt_sout.grid(row=self.starting_row+4, column=0, columnspan=96, sticky="W", padx=20, pady=(20, 10))
 
-		chk_out_out = Checkbutton(self, variable=controller.b_pause_for_qc)
-		chk_out_out.grid(row=self.starting_row+4, column=97, sticky='W', pady=(20, 10))
+		self.chk_out_out = Checkbutton(self, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
+		self.chk_out_out.grid(row=self.starting_row+4, column=97, sticky='W', pady=(20, 10))
 
 
 	def setFrameTitle(self):
 		self.title.set('Welcome to PALS!')
+
+
+	def pauseQCPopup(self):
+		if not self.controller.b_pause_for_qc.get():
+			qc_popup = QCPopup(self.controller)
+			qc_popup.grab_set()
+			self.chk_out_out["state"] = "disabled" 
+			self.controller.wait_window(qc_popup)
+			self.chk_out_out["state"] = "normal"
+			qc_popup.grab_release()
 
 
 	def moveToNextPage(self):

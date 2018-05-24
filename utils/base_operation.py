@@ -37,7 +37,7 @@ class BaseOperation():
 	def updateSubjects(self, new_subjects):
 		self.subjects = list(set(self.subjects) - set(new_subjects))
 		self.subjects.sort()
-		self.logger.debug("Updated the subjects to " + str(new_subjects))
+		self.logger.debug("Updated the subjects to " + str(self.subjects))
 
 	def incrementStage(self, count=1):
 		self.stage += count

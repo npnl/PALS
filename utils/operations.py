@@ -65,6 +65,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.skip = False
 
 		if self.stage == 0:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 0
 			self.initialiseConstants()
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
@@ -296,8 +297,8 @@ class Operations(object, WMSegmentationOperation,\
 		all_input_directories = os.listdir(base_input_directory)
 		for directory in all_input_directories:
 			if os.path.isdir(os.path.join(base_input_directory, directory)):
-				self.subjects.append(directory)
 				if only_iterate:
+					self.subjects.append(directory)
 					continue
 				output_directory = os.path.join(base_output_directory, directory)
 				if os.path.exists(output_directory):

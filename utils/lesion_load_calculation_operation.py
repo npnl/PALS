@@ -47,6 +47,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			html_file_path = generateQCPage('Registration', image_files_base)
 			self.logger.info('Lesion Load Calculation completed for all subjects')
 			self.printQCPageUrl('LL Calculation', html_file_path, pause=False)
+			self.incrementStage()
 
 
 	def runReg(self, template_brain, space, anatomical_id, lesion_mask_id):

@@ -120,7 +120,7 @@ class RunningOperationsPage(BaseInputPage, object):
 				return False
 
 		self.start.config(state="disabled")
-		self.btn_prev.config(state="disabled")
+		# self.btn_prev.config(state="disabled")
 		self.stop.config(state="normal")
 		self.resetClickCounter()
 		if self.start['text'] == 'Continue Execution':

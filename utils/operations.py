@@ -75,8 +75,6 @@ class Operations(object, WMSegmentationOperation,\
 
 		if self.stage == 1:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
-			self.initialiseConstants()
-
 			if self.isMajorOperationSelected():
 				self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory())
 				self.createROIDirectories()

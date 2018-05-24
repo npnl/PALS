@@ -23,7 +23,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.move_back = False
 		self.need_subjects_file = False
 
-		self.downloaded_file_path = ''
+		self.downloaded_file_path = '~/Downloads'
 
 		self.operation = Operations(self.controller)
 
@@ -85,6 +85,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 	def moveToPrevPage(self):
 		if self.userAgreed():
+			self.resetAll()
 			super(RunningOperationsPage, self).moveToPrevPage()
 
 	def resetUI(self):
@@ -148,7 +149,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.config(state="disabled")
 		self.btn_prev.config(state="normal")
 		self.stop.config(state="disabled")
-		self.output.insert(END, '\nAll Operation completed. You can now close the application')
+		self.controller.updateGUI('All Operation completed. You can now close the application')
 		self.resetClickCounter()
 		if data:
 			self.insertHyperLink(operation_name, data)

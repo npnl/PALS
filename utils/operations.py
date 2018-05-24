@@ -53,8 +53,8 @@ class Operations(object, WMSegmentationOperation,\
 		self.INTERMEDIATE_FILES = 'Intermediate_Files'
 		self.ORIGINAL_FILES = 'Original_Files'
 
-		self.anatomical_id = None
-		self.lesion_mask_id = None
+		self.anatomical_id = self.controller.sv_t1_id.get()
+		self.lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 
 	def isMajorOperationSelected(self):
 		return self.controller.b_radiological_convention.get()\
@@ -63,9 +63,18 @@ class Operations(object, WMSegmentationOperation,\
 
 	def startExecution(self):
 		self.skip = False
+
 		if self.stage == 0:
-			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 0
+			self.initialiseConstants()
+			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
+			if not self.checkAllSubjectInputs():
+				self.incrementStage(14)
+			else:
+				self.incrementStage()
+
+		if self.stage == 1:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.initialiseConstants()
 
 			if self.isMajorOperationSelected():
@@ -73,14 +82,6 @@ class Operations(object, WMSegmentationOperation,\
 				self.createROIDirectories()
 				self.runGzip()
 				self.binarizeLesionFilesForAll()
-			else:
-				self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
-			self.incrementStage()
-
-		if self.stage == 1:
-			self.logger.debug("Stage currently executing is %d"%self.stage)
-			self.anatomical_id = self.controller.sv_t1_id.get()
-			self.lesion_mask_id = self.controller.sv_lesion_mask_id.get()
 			self.incrementStage()
 
 		if self.stage == 2:
@@ -143,13 +144,71 @@ class Operations(object, WMSegmentationOperation,\
 				self.createQCPage()
 			else:
 				self.incrementStage()
+
+		if self.stage >= 14:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 100
 			self.callback.finished('all', '')
 
 		if self.skip and self.reset_from_ui:
 			self.callback.resetAll()
-		elif self.stage != 14:
+			self.controller.updateGUI('PALS is reset to pereform all operation from scratch')
+
+		elif self.stage != 15:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
+
+	def checkAllSubjectInputs(self):
+		errors = []
+		flag = True
+		for subject in self.subjects:
+			subject_input_path = os.path.join(self.input_directory, subject)
+			try:
+				anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
+			except:
+				errors.append('Subject [%s] is missing either an anatomical or lesion mask file'%subject)
+				flag = False
+
+			if self.controller.b_brain_extraction.get():
+				params = (subject, self.controller.sv_bet_id.get(), '.nii.gz')
+				try:
+					bet_brain_file = self._getPathOfFiles(subject_input_path, *params)[0]
+				except:
+					self.controller.b_brain_extraction.set(False)
+					errors.append('Subject [%s] is missing Brain file. PALS will run the Brain Extraction'%subject)
+
+			if self.controller.b_wm_segmentation.get():
+				params = (subject, self.controller.sv_wm_id.get(), '.nii.gz')
+				try:
+					wm_mask_file = self._getPathOfFiles(subject_input_path, *params)[0]
+				except:
+					self.controller.b_wm_segmentation.set(False)
+					errors.append('Subject [%s] is missing White Matter mask file. PALS will run the White Matter Segmentation'%subject)
+			
+			if self.controller.b_freesurfer_rois.get():
+				try:
+					params = ('T1', '', '.mgz')
+					t1_mgz = self._getPathOfFiles(subject_input_path, *params)[0]
+					params = ('aparc+aseg', '', '.mgz')
+					seg_file = self._getPathOfFiles(subject_input_path, *params)[0]
+				except:
+					self.controller.b_freesurfer_rois.set(False)
+					errors.append('Subject [%s] is missing aparc+aseg.mgz/T1.mgz file. PALS will not run Lesionload calculation on Free Surfer ROIs'%subject)
+
+		errors = '\n'.join(errors)
+
+		self.controller.updateGUI(errors)
+		return flag
+
+
+	def getT1NLesionFromInput(self, subject):
+		subject_input_path = os.path.join(self.input_directory, subject)
+		params = (subject, self.anatomical_id, '.nii.gz')
+		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)[0]
+
+		params = (subject, self.lesion_mask_id, '.nii.gz')
+		lesion_files = self._getPathOfFiles(subject_input_path, *params)
+
+		return anatomical_file_path, lesion_files
 
 
 	def createQCPage(self):
@@ -158,13 +217,7 @@ class Operations(object, WMSegmentationOperation,\
 		os.makedirs(images_dir)
 
 		for subject in self.subjects:
-			subject_input_path = os.path.join(self.input_directory, subject)
-			params = (subject, self.anatomical_id, '.nii.gz')
-			anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)[0]
-
-			params = (subject, self.lesion_mask_id, '.nii.gz')
-			lesion_files = self._getPathOfFiles(subject_input_path, *params)
-
+			anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
 			for counter, lesion_file in enumerate(lesion_files):
 				cog = self.com.runFslStats(lesion_file, '-C')
 				x,y,z=cog.split(' ')
@@ -300,11 +353,17 @@ class Operations(object, WMSegmentationOperation,\
 	def _getFSROIsPaths(self):
 		fs_roi_options = self.controller.freesurfer_cortical_roi\
 						+ self.controller.freesurfer_subcortical_roi
-		fs_roi_paths, fs_roi_codes = self._getRoiFilePaths(fs_roi_options, FS_CT_Map)
-		fs_roi_paths_s, fs_roi_codes_s = self._getRoiFilePaths(fs_roi_options, FS_SCT_Map)
 
-		fs_roi_paths += fs_roi_paths_s
-		fs_roi_codes += fs_roi_codes_s
+		if self.controller.b_freesurfer_rois.get():
+			fs_roi_paths, fs_roi_codes = self._getRoiFilePaths(fs_roi_options, FS_CT_Map)
+			fs_roi_paths_s, fs_roi_codes_s = self._getRoiFilePaths(fs_roi_options, FS_SCT_Map)
+
+			fs_roi_paths += fs_roi_paths_s
+			fs_roi_codes += fs_roi_codes_s
+
+		else:
+			fs_roi_paths = []
+			fs_roi_codes = []
 
 		self.controller.fs_roi_paths = fs_roi_paths
 		self.controller.fs_roi_codes = fs_roi_codes

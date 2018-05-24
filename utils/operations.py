@@ -140,8 +140,7 @@ class Operations(object, WMSegmentationOperation,\
 
 			if self.controller.b_visual_qc.get() and self.skip == False:
 				self.createQCPage()
-			else:
-				self.incrementStage()
+			self.incrementStage()
 
 		if self.stage >= 14:
 			self.logger.debug("Stage currently executing is %d"%self.stage)

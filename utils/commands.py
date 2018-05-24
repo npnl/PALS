@@ -7,7 +7,7 @@ class Commands(object):
 		self.parent = parent
 		self.display = parent.display
 
-	def startExecution(self, cmd):
+	def startExecution(self, cmd, show_error=True):
 		self.running = True
 		msg = "Running [%s]"%cmd
 		self.logger.debug(msg)
@@ -19,7 +19,7 @@ class Commands(object):
 				break
 			output += stdout_line
 		self.running_process.stdout.close()
-		if return_code != 0:
+		if return_code != 0 and show_error:
 			output = 'Something went wrong.'
 			self.parent.updateGUI(output)
 		if len(output.strip()) > 0:
@@ -36,7 +36,7 @@ class Commands(object):
 	def runGzip(self, input_directory):
 		input_directory = os.path.join(input_directory, '*.nii')
 		cmd = "gzip %s"%(input_directory)
-		output, ret_code = self.startExecution(cmd)
+		output, ret_code = self.startExecution(cmd, show_error=False)
 		if ret_code != 0:
 			self.logger.error('File was not zipped.')
 

@@ -67,6 +67,7 @@ class Operations(object, WMSegmentationOperation,\
 		if self.stage == 0:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 0
+			self.updateGUI('Selected operations initiated')
 			self.initialiseConstants()
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():
@@ -152,7 +153,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.callback.resetAll()
 			self.controller.updateGUI('PALS is reset to pereform all operation from scratch')
 
-		elif self.stage != 15:
+		elif self.stage < 14:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
 
 	def checkAllSubjectInputs(self):
@@ -162,6 +163,7 @@ class Operations(object, WMSegmentationOperation,\
 			subject_input_path = os.path.join(self.input_directory, subject)
 			try:
 				anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
+				_ = lesion_files[0]
 			except:
 				errors.append('Subject [%s] is missing either an anatomical or lesion mask file'%subject)
 				flag = False

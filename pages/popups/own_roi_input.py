@@ -10,6 +10,7 @@ import tkFileDialog
 from ..components import InputFieldList
 from ..components import EntryWithPlaceholder
 from ..stores import NameVarStore
+from ..components import createToolTip
 
 from utils import isValidPath
 
@@ -28,12 +29,15 @@ class OwnROIInputPopup(Toplevel, object):
 
 		lb_select_dir = Label(self, text="Indicate the path to the template brain for your ROIs.", font=('Helvetica', 13, 'bold'))
 		lb_select_dir.grid(row=1, column=0, columnspan=100, sticky='W')
+		createToolTip(lb_select_dir, self.controller.desc.select_dir)
 
 		en_select_dir = EntryWithPlaceholder(self, placeholder="Path to standard brain template (Required field)", textvariable = self.controller.sv_user_brain_template, width = 50)
 		en_select_dir.grid(row=2, column=0, sticky="W", padx=10, pady=3)
+		createToolTip(en_select_dir, self.controller.desc.select_dir)
 
 		button = tk.Button(self, text='Browse', command=lambda : self.chooseDir(self, self.controller, self.controller.sv_user_brain_template, 'Standard brain template', en_select_dir))
 		button.grid(row=2, column=0, sticky="E", padx=5, pady=3)
+		createToolTip(button, self.controller.desc.select_dir)
 
 		option_heading= 'Regions of Interest'
 		ch_list_harvard = InputFieldList(self, self.controller, option_heading, self.inputs, row=3, column=0)

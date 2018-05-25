@@ -148,10 +148,10 @@ class BaseOperation():
 					 "%s_Reg_brain_MNI152.nii.gz",\
 					 "%s_T12FS.nii.gz",\
 					 "%s" + ("%s_rad_reorient.nii.gz"%(self.anatomical_id)),\
-					 "%slesion*_FS_bin.nii.gz",\
-					 "%slesion*_MNI152_bin.nii.gz",\
-					 "%slesion*_custom*",\
-					 "%slesion*_rad_reorient.nii.gz",\
+					 "%s_lesion*_FS_bin.nii.gz",\
+					 "%s_lesion*_MNI152_bin.nii.gz",\
+					 "%s_lesion*_custom*",\
+					 "%s_lesion*_rad_reorient.nii.gz",\
 					 "%s*overlap*"
 					 ]
 			try:

@@ -48,7 +48,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.lf_subject_file.grid(row=self.starting_row+3, column=0, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		self.lf_subject_file.grid_rowconfigure(0, weight=1)
 		self.lf_subject_file.grid_columnconfigure(0, weight=1)
-		createToolTip(self.lf_subject_file, '')
+		createToolTip(self.lf_subject_file, self.controller.desc.subject_file)
 
 		self.lb_subject_file = Label(self.lf_subject_file, text="Select flagged subjects textfile", font='Helvetica 13 bold')
 		self.lb_subject_file.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)

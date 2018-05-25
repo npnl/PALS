@@ -44,19 +44,23 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.hyperlink = HyperlinkManager(self.output)
 
 
-		self.lf_subject_file = LabelFrame(self, text='Selected Subjects File Path', padx=15, font='Helvetica 14 bold')
+		self.lf_subject_file = LabelFrame(self, text='Visual QC', padx=15, font='Helvetica 14 bold')
 		self.lf_subject_file.grid(row=self.starting_row+3, column=0, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		self.lf_subject_file.grid_rowconfigure(0, weight=1)
 		self.lf_subject_file.grid_columnconfigure(0, weight=1)
+		createToolTip(self.lf_subject_file, '')
 
-		self.select = tk.Button(self.lf_subject_file, text='Select', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
-		self.select.grid(row=0, column=91, sticky='W', padx=5, pady=3)
+		self.lb_subject_file = Label(self.lf_subject_file, text="Select flagged subjects textfile", font='Helvetica 13 bold')
+		self.lb_subject_file.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
+
+		self.select = tk.Button(self.lf_subject_file, text='Browse', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
+		self.select.grid(row=1, column=91, sticky='W', padx=5, pady=3)
 
 		self.continue_with_all_sub = tk.Button(self.lf_subject_file, text='Continue with all subjects', command=lambda : self.continueWithAllSub())
-		self.continue_with_all_sub.grid(row=0, column=92, sticky='W', padx=5, pady=3)
+		self.continue_with_all_sub.grid(row=1, column=92, sticky='W', padx=5, pady=3)
 
 		en_input_dir = Entry(self.lf_subject_file, textvariable=controller.selected_subjects, width = 50)
-		en_input_dir.grid(row=0, column=0, columnspan=90, sticky="W", pady=3)
+		en_input_dir.grid(row=1, column=0, columnspan=90, sticky="W", pady=3)
 
 
 		self.controller.display = self.output
@@ -82,7 +86,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 	def userAgreed(self):
 		if self.move_back: return True
-		self.setRequiredInputError('Warning: All the progress will be lost. If you wish to continue, press the button again')
+		self.setRequiredInputError('Warning: All progress will be lost. If you wish to continue, press the button again.')
 		self.move_back = True
 		return False
 
@@ -122,7 +126,7 @@ class RunningOperationsPage(BaseInputPage, object):
 			except Exception as e:
 				self.controller.logger.error(e.message)
 				self.controller.logger.error(traceback.format_exc())
-				self.setRequiredInputError('Please input the file downloaded from the qc page.')
+				self.setRequiredInputError('Please import the textfile downloaded from the QC page.')
 				return False
 
 		self.disableChildren(self.lf_subject_file.winfo_children())
@@ -156,7 +160,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.config(state="disabled")
 		self.btn_prev.config(state="normal")
 		self.stop.config(state="disabled")
-		self.controller.updateGUI('All Operation completed. You can now close the application')
+		self.controller.updateGUI('All operations completed. You may now close the application.')
 		self.resetClickCounter()
 		if data:
 			self.insertHyperLink(operation_name, data)
@@ -168,7 +172,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 	def toggleChildren(self):
 		self.disableChildren(self.lf_subject_file.winfo_children())
-		
+
 	def disableChildren(self, childList):
 		for child in childList:
 			try:
@@ -190,7 +194,3 @@ class RunningOperationsPage(BaseInputPage, object):
 				child.configure(state='normal')
 			except:
 				pass
-
-
-
-

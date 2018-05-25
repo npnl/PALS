@@ -65,6 +65,7 @@ class Operations(object, WMSegmentationOperation,\
 		self.skip = False
 
 		if self.stage == 0:
+			self.logUserChoices()
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 0
 			self.controller.updateGUI('Selected operations initiated')

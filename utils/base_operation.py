@@ -136,3 +136,43 @@ class BaseOperation():
 			wm_mask_file = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_wm_id.get() + '_rad_reorient.nii.gz')
 
 		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
+
+	def logSelectedROINames(self, property_name, rois):
+		roi_names = [x.name for x in rois if x.get()]
+		log_line = property_name.ljust(60) + " :  " + str(roi_names)
+		self.logger.debug(log_line)
+
+
+	def logUserChoices(self):
+		selection_mapping = {}
+		selection_mapping['01. Radiological convention'] = self.controller.b_radiological_convention
+		selection_mapping['02. White Matter Correction'] = self.controller.b_wm_correction
+		selection_mapping['03. Lesion Load Calculation'] = self.controller.b_ll_calculation
+		selection_mapping['04. Visual QC'] = self.controller.b_visual_qc
+		selection_mapping['05. Pause for QC'] = self.controller.b_pause_for_qc
+		selection_mapping['06. Input Directory'] = self.controller.sv_input_dir
+		selection_mapping['07. Output Directory'] = self.controller.sv_output_dir
+		selection_mapping['08. Anatomical Identifier'] = self.controller.sv_t1_id
+		selection_mapping['09. Lesion Mask Identifier'] = self.controller.sv_lesion_mask_id
+		selection_mapping['10. Is in same anatomical space'] = self.controller.b_same_anatomical_space
+		selection_mapping['11. Is Brain Extraction Already Performed'] = self.controller.b_brain_extraction
+		selection_mapping['12. Is White Matter Segmentation Already Performed'] = self.controller.b_wm_segmentation
+		selection_mapping['13. Brain Extraction Identifier'] = self.controller.sv_bet_id
+		selection_mapping['14. White Matter Identifier'] = self.controller.sv_wm_id
+		selection_mapping['15. Percent Intensity'] = self.controller.sv_percent
+		selection_mapping['16. Default ROIs selected'] = self.controller.b_default_rois
+		selection_mapping['17. FreeSurfer ROIs selected'] = self.controller.b_freesurfer_rois
+		selection_mapping['18. Own ROIs selected'] = self.controller.b_own_rois
+
+		default_roi = self.controller.default_corticospinal_tract_roi + self.controller.default_freesurfer_cortical_roi + self.controller.default_freesurfer_subcortical_roi
+		fs_rois = self.controller.freesurfer_cortical_roi + self.controller.freesurfer_subcortical_roi
+
+		self.logger.debug('\n')
+		for key in sorted(selection_mapping):
+			log_line = key.ljust(60) + " :  " + str(selection_mapping[key].get())
+			self.logger.debug(log_line)
+		
+		self.logSelectedROINames("19. Default ROIs List", default_roi)
+		self.logSelectedROINames("20. FreeSurfer ROIs List", fs_rois)
+		
+		self.logger.debug('\n')

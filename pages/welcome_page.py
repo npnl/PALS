@@ -29,7 +29,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_radiological_convention.grid(row=0, column=0, sticky="W", pady=3)
 		createToolTip(lb_radiological_convention, self.controller.desc.rad_reorient)
 
-		chk_radiological_convention = Checkbutton(lf_main, variable=controller.b_radiological_convention)
+		chk_radiological_convention = Checkbutton(lf_main, variable=controller.b_radiological_convention, command=self.setOne)
 		chk_radiological_convention.grid(row=0, column=97, sticky='W', pady=3)
 		createToolTip(chk_radiological_convention, self.controller.desc.rad_reorient)
 
@@ -37,7 +37,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_wm_correction.grid(row=1, column=0, sticky="W", pady=3)
 		createToolTip(lb_wm_correction, self.controller.desc.wm_correction)
 
-		chk_wm_correction = Checkbutton(lf_main, variable=controller.b_wm_correction)
+		chk_wm_correction = Checkbutton(lf_main, variable=controller.b_wm_correction, command=self.setOne)
 		chk_wm_correction.grid(row=1, column=97, sticky='W', pady=3)
 		createToolTip(chk_wm_correction, self.controller.desc.wm_correction)
 
@@ -45,7 +45,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_lesion_load.grid(row=2, column=0,  sticky="W", pady=3)
 		createToolTip(lb_lesion_load,  self.controller.desc.lesion_load)
 
-		chk_ll_calculation = Checkbutton(lf_main, variable=controller.b_ll_calculation)
+		chk_ll_calculation = Checkbutton(lf_main, variable=controller.b_ll_calculation, command=self.setOne)
 		chk_ll_calculation.grid(row=2, column=97, sticky='W', pady=3)
 		createToolTip(chk_ll_calculation, self.controller.desc.lesion_load)
 
@@ -58,7 +58,7 @@ class WelcomePage(BaseInputPage, object):
 		lb_visual_qc.grid(row=0, column=0, sticky="W", pady=3)
 		createToolTip(lb_visual_qc, self.controller.desc.visual_qc)
 
-		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc)
+		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc, command=self.setTwo)
 		chk_visual_qc.grid(row=0, column=97, sticky='W', pady=3)
 		createToolTip(chk_visual_qc,self.controller.desc.visual_qc)
 
@@ -82,6 +82,17 @@ class WelcomePage(BaseInputPage, object):
 			self.chk_out_out["state"] = "normal"
 			qc_popup.grab_release()
 
+	def setOne(self):
+		if self.controller.b_radiological_convention.get()\
+			or self.controller.b_ll_calculation.get()\
+			or self.controller.b_wm_correction.get():
+			self.controller.b_visual_qc.set(False)
+
+	def setTwo(self):
+		if self.controller.b_visual_qc.get():
+			self.controller.b_radiological_convention.set(False)
+			self.controller.b_ll_calculation.set(False)
+			self.controller.b_wm_correction.set(False)
 
 	def moveToNextPage(self):
 		if self.controller.b_radiological_convention.get() \

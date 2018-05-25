@@ -18,6 +18,8 @@ class QCPopup(Toplevel, object):
 		btn_cancel = Button(self, text='Cancel', command=lambda: self.cleanup(True))
 		btn_cancel.grid(row=2, column=100, sticky='e')
 
+		self.protocol('WM_DELETE_WINDOW', lambda: self.cleanup(True))
+
 
 	def cleanup(self, decision):
 		self.controller.b_pause_for_qc.set(decision)

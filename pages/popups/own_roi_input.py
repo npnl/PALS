@@ -21,6 +21,7 @@ class OwnROIInputPopup(Toplevel, object):
 		self.grid_columnconfigure(0, weight=1)
 
 		self.inputs = []
+		self.status = StringVar(self)
 		self.controller = controller
 
 		Label(self, text='Import ROIs', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
@@ -37,17 +38,19 @@ class OwnROIInputPopup(Toplevel, object):
 		option_heading= 'Regions of Interest'
 		ch_list_harvard = InputFieldList(self, self.controller, option_heading, self.inputs, row=3, column=0)
 
+		Label(self, text='', textvariable=self.status, fg="red").grid(row=299, column=0, columnspan=100, sticky='nwes',)
+
 		btn_ok = Button(self, text='OK', command=self.cleanup)
 		btn_ok.grid(row=300, column=0, sticky='e')
 
 	def cleanup(self):
 		if not isValidPath(self.controller.sv_user_brain_template.get()):
-			print "Not a valid path."
+			self.status.set("A valid brain template path is required.")
 			return
 
 		for sv in self.inputs:
 			if not isValidPath(sv.get().strip()):
-				print "Not a valid path."
+				self.status.set("ROI path is invalid : " + sv.get())
 				return
 			else:
 				print "Path is valid."

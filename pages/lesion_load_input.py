@@ -83,10 +83,18 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 
 
 	def moveToNextPage(self):
-		if True:
-			super(LesionLoadCalculationInputPage, self).moveToNextPage()
+		if self.controller.b_brain_extraction.get() and len(self.controller.sv_bet_id.get()) == 0:
+			self.setRequiredInputError('Provide the skull-stripped brain identifier.')
 		else:
-			self.setRequiredInputError('Please select at least one operation')
+			if self.controller.b_ll_calculation.get():
+				if self.controller.b_default_rois.get()\
+					or self.controller.b_own_rois.get()\
+					or self.controller.b_freesurfer_rois.get():
+					super(LesionLoadCalculationInputPage, self).moveToNextPage()
+				else:
+					self.setRequiredInputError('Select at least one ROI')
+			else:
+				super(LesionLoadCalculationInputPage, self).moveToNextPage()
 
 	def checkIfAtleastOneSelected(self, options_list):
 		for option in options_list:

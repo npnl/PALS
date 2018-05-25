@@ -12,7 +12,7 @@ class BaseOperation():
 
 	def createUniqueDir(self):
 		if self.unique_dir_name == None:
-			self.unique_dir_name =  os.path.join(datetime.now().strftime('PALS_Output_%H_%M_%d_%m_%Y'))
+			self.unique_dir_name =  os.path.join(datetime.now().strftime('PALS_Output_%Y_%m_%d_%H_%M'))
 		if (not os.path.exists(self.getBaseDirectory())) and len(self.output_directory) > 0:
 			os.makedirs(self.getBaseDirectory())
 

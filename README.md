@@ -37,7 +37,6 @@ Clone this github repository:
 
 ```
 git clone https://github.com/npnl/PALS.git
-
 ```
 
 Install python dependencies
@@ -77,7 +76,6 @@ Open up your terminal and navigate to the directory containing PALS source code.
 ```
 cd /PATH/TO/PALS
 python2.7 run_pals.py
-
 ```
 This will open up the PALS GUI.
 

@@ -103,6 +103,7 @@ class BaseOperation():
 			lesion_files = self._getPathOfFiles(self.getOriginalPath(subject), *params)
 
 		lesion_files = [x for x in lesion_files if 'custom' not in x.lower()]
+		lesion_files = [x for x in lesion_files if 'mni152' not in x.lower()]
 		lesion_files = [x for x in lesion_files if 'upper' not in x.lower()]
 		lesion_files = [x for x in lesion_files if 'lower' not in x.lower()]
 

@@ -81,7 +81,7 @@ class LesionCorrectionOperation(BaseOperation):
 
 		# Write data to the csv file
 		subject_info_with_header = [header] + subject_info_all
-		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_database.csv'))
+		self.com.runAppendToCSV(subject_info_with_header, os.path.join(self.getBaseDirectory(), 'lesion_correction_database.csv'))
 
 		image_files_base = os.path.join(self.getBaseDirectory(), 'QC_LesionCorrection')
 		html_file_path = generateQCPage('Lesions', image_files_base)

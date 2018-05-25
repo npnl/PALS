@@ -78,7 +78,7 @@ class CheckboxList(object):
 	# 	self.canvas.yview_scroll(-1*(event.delta/120), "units")
 
 	def reAssignValues(self, name_order_list):
-		if len(labels_chk) != len(name_order_list):
+		if len(self.labels_chk) != len(name_order_list):
 			return
 		for index, name in enumerate(name_order_list):
 			self.labels_chk[index][0].config(text=name)
@@ -145,5 +145,3 @@ class CheckboxList(object):
 		flag = self.select_all_selected.get()
 		for option in self.options:
 			option.set(flag)
-
-

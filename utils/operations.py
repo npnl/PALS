@@ -185,7 +185,7 @@ class Operations(object, WMSegmentationOperation,\
 				except:
 					self.controller.b_wm_segmentation.set(False)
 					errors.append('Subject [%s] is missing White Matter mask file. PALS will run the White Matter Segmentation'%subject)
-			
+
 			if self.controller.b_freesurfer_rois.get():
 				try:
 					params = ('T1', '', '.mgz')
@@ -448,7 +448,7 @@ class Operations(object, WMSegmentationOperation,\
 				f.write('\n'.join(failed_subjects))
 
 		anatomical_id = (self.controller.sv_t1_id.get() + '_rad_reorient')
-		lesion_mask_id = [self.controller.sv_lesion_mask_id.get(),'_rad_reorient']
+		lesion_mask_id = ['lesion','_rad_reorient']
 
 		return anatomical_id, lesion_mask_id
 
@@ -539,7 +539,7 @@ class Operations(object, WMSegmentationOperation,\
 
 		for index, lesion_file in enumerate(rad_lesion_files):
 			# if white matter correction will be performed, then the lesions are in the intermediate_files directory because there will be new lesion files output from WM corr
-			output_path = os.path.join(self.getIntermediatePath(subject), subject + '_' + self.controller.sv_lesion_mask_id.get() + str(index + 1) + '_rad_reorient')
+			output_path = os.path.join(self.getIntermediatePath(subject), subject + '_lesion' + str(index + 1) + '_rad_reorient')
 			self.com.runFslOrient2Std(lesion_file, output_path)
 
 		return True

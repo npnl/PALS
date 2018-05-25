@@ -124,7 +124,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 				cmd = 'flirt -in %s -applyxfm -init %s -out %s -paddingsize 0.0 -interp trilinear -ref %s'%(lesion_file, reg_file, lesion_ss_file, reg_brain_file)
 				self.com.runRawCommand(cmd)
 
-				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_%s_bin.nii.gz'%(lesion_name, space))
+				lesion_ss_file_output = os.path.join(self.getIntermediatePath(subject), '%s_lesion%d_%s_bin.nii.gz'%(subject,counter+1, space))
 				self.com.runFslBinarize(lesion_ss_file, lesion_ss_file_output)
 
 				lesion_bin = lesion_ss_file_output

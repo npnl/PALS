@@ -6,6 +6,7 @@ except ImportError:
 	from tkinter import *
 
 import re
+import textwrap
 
 class ToolTip(object):
 
@@ -14,6 +15,10 @@ class ToolTip(object):
 		self.tipwindow = None
 		self.id = None
 		self.x = self.y = 0
+
+	def formatText(self, sentence):
+		return textwrap.fill(sentence, 70)
+
 
 	def showtip(self, text):
 		"Display text in tooltip window"
@@ -33,7 +38,7 @@ class ToolTip(object):
 					   "help", "noActivates")
 		except TclError:
 			pass
-		label = Label(tw, text=self.text, justify=LEFT,
+		label = Label(tw, text=self.formatText(self.text), justify=LEFT,
 					  background="#ffffe0", relief=SOLID, borderwidth=1,
 					  font=("tahoma", "12", "normal"))
 		label.pack(ipadx=1)

@@ -16,7 +16,7 @@ class WelcomePage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
 
-		lb_main = Label(self, text="Please select the modules you would like to perform", font='Helvetica 14 bold')
+		lb_main = Label(self, text="Please select the modules you would like to perform:", font='Helvetica 14 bold')
 		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky='W')
 
 		lf_main = LabelFrame(self, text='Main Modules', padx=15, font='Helvetica 14 bold')
@@ -27,26 +27,27 @@ class WelcomePage(BaseInputPage, object):
 
 		lb_radiological_convention = Label(lf_main, text="1. Reorient to Radiological Convention")
 		lb_radiological_convention.grid(row=0, column=0, sticky="W", pady=3)
-		createToolTip(lb_radiological_convention, 'Tool tip for Reorient to Radiological Convention')
+		createToolTip(lb_radiological_convention, '')
 
 		chk_radiological_convention = Checkbutton(lf_main, variable=controller.b_radiological_convention)
 		chk_radiological_convention.grid(row=0, column=97, sticky='W', pady=3)
+		createToolTip(chk_radiological_convention, '')
 
-		lb_wm_correction = Label(lf_main, text="2. White Matter Intensity Correction")
+		lb_wm_correction = Label(lf_main, text="2. Lesion Correction for Healthy White Matter Voxels")
 		lb_wm_correction.grid(row=1, column=0, sticky="W", pady=3)
-		createToolTip(lb_wm_correction, 'Tool tip for White Matter Intensity Correction')
+		createToolTip(lb_wm_correction, '')
 
 		chk_wm_correction = Checkbutton(lf_main, variable=controller.b_wm_correction)
 		chk_wm_correction.grid(row=1, column=97, sticky='W', pady=3)
-		createToolTip(chk_wm_correction, 'Lorem Ipsum')
+		createToolTip(chk_wm_correction, '')
 
 		lb_lesion_load = Label(lf_main, text="3. Lesion Load Calculation")
 		lb_lesion_load.grid(row=2, column=0,  sticky="W", pady=3)
-		createToolTip(lb_lesion_load, 'Tool tip for Lesion Load Calculation')
+		createToolTip(lb_lesion_load, '')
 
 		chk_ll_calculation = Checkbutton(lf_main, variable=controller.b_ll_calculation)
 		chk_ll_calculation.grid(row=2, column=97, sticky='W', pady=3)
-		createToolTip(chk_ll_calculation, 'Lorem Ipsum')
+		createToolTip(chk_ll_calculation, '')
 
 		lf_visual_qc = LabelFrame(self, text='Stand Alone Module', padx=15, font='Helvetica 14 bold')
 		lf_visual_qc.grid(row=self.starting_row+3, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
@@ -55,10 +56,11 @@ class WelcomePage(BaseInputPage, object):
 
 		lb_visual_qc = Label(lf_visual_qc, text="4. Perform Visual Quality Control only")
 		lb_visual_qc.grid(row=0, column=0, sticky="W", pady=3)
+		createToolTip(lb_visual_qc,'')
 
 		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc)
 		chk_visual_qc.grid(row=0, column=97, sticky='W', pady=3)
-
+		createToolTip(chk_visual_qc,'')
 
 		lb_opt_sout = Label(self, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step. Uncheck to opt out of pausing.", padx=10)
 		lb_opt_sout.grid(row=self.starting_row+4, column=0, columnspan=96, sticky="W", padx=20, pady=(20, 10))
@@ -75,7 +77,7 @@ class WelcomePage(BaseInputPage, object):
 		if not self.controller.b_pause_for_qc.get():
 			qc_popup = QCPopup(self.controller)
 			qc_popup.grab_set()
-			self.chk_out_out["state"] = "disabled" 
+			self.chk_out_out["state"] = "disabled"
 			self.controller.wait_window(qc_popup)
 			self.chk_out_out["state"] = "normal"
 			qc_popup.grab_release()
@@ -88,7 +90,7 @@ class WelcomePage(BaseInputPage, object):
 			or self.controller.b_visual_qc.get():
 			super(WelcomePage, self).moveToNextPage()
 		else:
-			self.setRequiredInputError('Select atleast one operation')
+			self.setRequiredInputError('Select at least one operation.')
 
 
 	def checkValues(self, controller):

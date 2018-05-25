@@ -16,51 +16,67 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 
 		self.chk_default_rois = None
 
+		lb_main = Label(self, text="Please indicate the following.", font='Helvetica 14 bold')
+		lb_main.grid(row=self.starting_row, column=0, columnspan=100, sticky='W')
+
+		lb_main2 = Label(self, text="PALS will run FSL brain extraction (BET) if it has not already been performed. \n", font='Helvetica 14')
+		lb_main2.grid(row=self.starting_row+1, column=0, columnspan=100, sticky='W')
 
 		lf_brain_ext = tk.LabelFrame(self, text='Brain Extraction', padx=15, font='Helvetica 14 bold')
-		lf_brain_ext.grid(row=self.starting_row+1, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
+		lf_brain_ext.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		lf_brain_ext.grid_rowconfigure(0, weight=1)
 		lf_brain_ext.grid_columnconfigure(0, weight=1)
 
 
-		lb_brain_extraction = Label(lf_brain_ext, text="Have you performed skull-stripping?") #.grid(row=self.starting_row+2, sticky=W)
+		lb_brain_extraction = Label(lf_brain_ext, text="Has brain extraction already been performed on all subjects?") #.grid(row=self.starting_row+2, sticky=W)
 		lb_brain_extraction.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
+		createToolTip(lb_brain_extraction, '')
 
-		lb_bet_identifier = Label(lf_brain_ext, text="Please indicate your skull-stripped brain identifier (e.g., 'Brain')") #.grid(row=self.starting_row+2, sticky=W)
+		lb_bet_identifier = Label(lf_brain_ext, text="Skull-stripped brain identifier") #.grid(row=self.starting_row+2, sticky=W)
 		lb_bet_identifier.grid(row=1, column=0, columnspan=40, sticky="W", pady=(3, 20))
+		createToolTip(lb_bet_identifier, '')
 
 		en_bet_identifier = Entry(lf_brain_ext, textvariable=controller.sv_bet_id, width = 20)
 		en_bet_identifier.config(state='disabled')
 		en_bet_identifier.grid(row=1, column=41, columnspan=50, sticky="W", pady=(3, 20))
+		createToolTip(en_bet_identifier, '')
 
 		chk_brain_extraction = tk.Checkbutton(lf_brain_ext, variable=controller.b_brain_extraction, command=lambda : self.setEntryState(en_bet_identifier, self.controller.b_brain_extraction))
 		chk_brain_extraction.grid(row=0, column=41, sticky='W', pady=3)
+		createToolTip(chk_brain_extraction, '')
 
-
-		lf_lesion_load = tk.LabelFrame(self, text='Calculate Lesion Load (Check all that apply)', padx=15, font='Helvetica 14 bold')
-		lf_lesion_load.grid(row=self.starting_row+2, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
+		lf_lesion_load = tk.LabelFrame(self, text='Calculate Lesion Load', padx=15, font='Helvetica 14 bold')
+		lf_lesion_load.grid(row=self.starting_row+3, column=0, columnspan=100, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		lf_lesion_load.grid_rowconfigure(0, weight=1)
 		lf_lesion_load.grid_columnconfigure(0, weight=1)
 
+		lb_lesion_load = Label(lf_lesion_load, text="Select all that apply.", font='Helvetica 13 bold')
+		lb_lesion_load.grid(row=0, column=0, columnspan=100, sticky='W')
 
-		lb_default_rois = Label(lf_lesion_load, text="Use default regions of interest") #.grid(row=self.starting_row+2, sticky=W)
-		lb_default_rois.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
+		lb_default_rois = Label(lf_lesion_load, text="Choose from default regions of interest") #.grid(row=self.starting_row+2, sticky=W)
+		lb_default_rois.grid(row=1, column=0, columnspan=40, sticky="W", pady=3)
+		createToolTip(lb_default_rois, '')
 
+		## why is just this chk button self.check? why not just chk?
 		self.chk_default_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_default_rois, command=lambda: self.showDefaultROIPopup())
-		self.chk_default_rois.grid(row=0, column=41, sticky='W', pady=3)
+		self.chk_default_rois.grid(row=1, column=41, sticky='W', pady=3)
+		createToolTip(self.chk_default_rois, '')
 
-		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific Freesurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
-		lb_subject_specific.grid(row=1, column=0, columnspan=40, sticky="W", pady=3)
-
-		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_freesurfer_rois, command=lambda: self.freesurferROIPopup())
-		chk_subject_specific.grid(row=1, column=41, sticky='W', pady=3)
-
-		lb_own_rois= Label(lf_lesion_load, text="Use my own regions of interest") #.grid(row=self.starting_row+2, sticky=W)
-		lb_own_rois.grid(row=2, column=0, columnspan=40, sticky="W", pady=(3, 20))
+		lb_own_rois= Label(lf_lesion_load, text="Import my own regions of interest") #.grid(row=self.starting_row+2, sticky=W)
+		lb_own_rois.grid(row=2, column=0, columnspan=40, sticky="W", pady=3)
+		createToolTip(lb_own_rois, '')
 
 		chk_own_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_own_rois, command=lambda: self.showOwnROIPopup())
-		chk_own_rois.grid(row=2, column=41, sticky='W', pady=(3, 20))
+		chk_own_rois.grid(row=2, column=41, sticky='W', pady=3)
+		createToolTip(chk_own_rois, '')
 
+		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific Freesurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
+		lb_subject_specific.grid(row=3, column=0, columnspan=40, sticky="W", pady=(3,20))
+		createToolTip(lb_subject_specific, '')
+
+		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_freesurfer_rois, command=lambda: self.freesurferROIPopup())
+		chk_subject_specific.grid(row=3, column=41, sticky='W', pady=(3,20))
+		createToolTip(chk_subject_specific, '')
 
 	def setFrameTitle(self):
 		self.title.set('Lesion Load Calculation')
@@ -100,7 +116,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		if self.controller.b_own_rois.get():
 			roi_popup = OwnROIInputPopup(self.controller)
 			roi_popup.grab_set()
-			self.chk_default_rois["state"] = "disabled" 
+			self.chk_default_rois["state"] = "disabled"
 			self.controller.wait_window(roi_popup)
 			self.chk_default_rois["state"] = "normal"
 			roi_popup.grab_release()

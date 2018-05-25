@@ -136,8 +136,8 @@ class Commands(object):
 		cmd = 'mri_convert --in_type mgz --out_type nii --out_orientation RAS %s %s >/dev/null;'%(t1_mgz, fs_t1)
 		self.startExecution(cmd)
 
-	def runRawCommand(self, cmd):
-		output, ret_code = self.startExecution(cmd)
+	def runRawCommand(self, cmd, show_error=True):
+		output, ret_code = self.startExecution(cmd, show_error)
 		return output
 
 if __name__ == '__main__':

@@ -137,6 +137,34 @@ class BaseOperation():
 
 		return ((t1_mgz, seg_file), bet_brain_file, wm_mask_file)
 
+
+	def moveOutputFiles(self):
+		for subject in self.subjects:
+			intermediate_path = self.getIntermediatePath(subject)
+			subject_path = self.getSubjectPath(subject)
+			
+			files = ["%s_Reg_brain_MNI152.nii.gz",\
+					 "%s_Reg_brain_custom.nii.gz",\
+					 "%s_Reg_brain_MNI152.nii.gz",\
+					 "%s_T12FS.nii.gz",\
+					 "%s" + ("%s_rad_reorient.nii.gz"%(self.anatomical_id)),\
+					 "%slesion*_FS_bin.nii.gz",\
+					 "%slesion*_MNI152_bin.nii.gz",\
+					 "%slesion*_custom*",\
+					 "%slesion*_rad_reorient.nii.gz",\
+					 "%s*overlap*"
+					 ]
+			try:
+				for file_name in files:
+					file_path = os.path.join(intermediate_path, file_name%subject)
+					cmd = "mv %s %s"%(file_path, subject_path)
+					self.com.runRawCommand(cmd, show_error=False)
+			except:
+				pass
+
+
+
+
 	def logSelectedROINames(self, property_name, rois):
 		roi_names = [x.name for x in rois if x.get()]
 		log_line = property_name.ljust(60) + " :  " + str(roi_names)

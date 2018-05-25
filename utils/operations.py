@@ -39,7 +39,7 @@ class Operations(object, WMSegmentationOperation,\
 	def resetOperations(self):
 		self.stage = 0
 		self.callback = None
-		self.total_stages = 14
+		self.total_stages = 15
 		self.reset_from_ui = False
 
 	def initialiseConstants(self):
@@ -147,7 +147,15 @@ class Operations(object, WMSegmentationOperation,\
 				self.createQCPage()
 			self.incrementStage()
 
-		if self.stage >= 14:
+		if self.stage == 14:
+			self.logger.debug("Stage currently executing is %d"%self.stage)
+			try:
+				self.moveOutputFiles()
+			except:
+				pass
+			self.incrementStage()
+
+		if self.stage >= 15:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 100
 			self.callback.finished('all', '')
@@ -156,7 +164,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.callback.resetAll()
 			self.controller.updateGUI('PALS is reset to perform all operation from scratch')
 
-		elif self.stage < 14:
+		elif self.stage < 15:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
 
 	def checkAllSubjectInputs(self):

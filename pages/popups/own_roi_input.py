@@ -23,31 +23,34 @@ class OwnROIInputPopup(Toplevel, object):
 		self.inputs = []
 		self.controller = controller
 
-		Label(self, text='Select all that apply', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
+		Label(self, text='Import ROIs', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
 
-		en_select_dir = EntryWithPlaceholder(self, placeholder="Path of Standard brain template (Required field)", textvariable = self.controller.sv_user_brain_template, width = 50)
-		en_select_dir.grid(row=1, column=0, sticky="W", padx=10, pady=3)
+		lb_select_dir = Label(self, text="Indicate the path to the template brain for your ROIs.", font=('Helvetica', 13, 'bold'))
+		lb_select_dir.grid(row=1, column=0, columnspan=100, sticky='W')
 
-		button = tk.Button(self, text='Select', command=lambda : self.chooseDir(self, self.controller, self.controller.sv_user_brain_template, 'Standard brain template', en_select_dir))
-		button.grid(row=1, column=0, sticky="E", padx=5, pady=3)
+		en_select_dir = EntryWithPlaceholder(self, placeholder="Path to standard brain template (Required field)", textvariable = self.controller.sv_user_brain_template, width = 50)
+		en_select_dir.grid(row=2, column=0, sticky="W", padx=10, pady=3)
 
-		option_heading= 'Harvard-Oxford Corticospinal Tract'
-		ch_list_harvard = InputFieldList(self, self.controller, option_heading, self.inputs, row=2, column=0)
+		button = tk.Button(self, text='Browse', command=lambda : self.chooseDir(self, self.controller, self.controller.sv_user_brain_template, 'Standard brain template', en_select_dir))
+		button.grid(row=2, column=0, sticky="E", padx=5, pady=3)
 
-		btn_ok = Button(self, text='Ok', command=self.cleanup)
+		option_heading= 'Regions of Interest'
+		ch_list_harvard = InputFieldList(self, self.controller, option_heading, self.inputs, row=3, column=0)
+
+		btn_ok = Button(self, text='OK', command=self.cleanup)
 		btn_ok.grid(row=300, column=0, sticky='e')
 
 	def cleanup(self):
 		if not isValidPath(self.controller.sv_user_brain_template.get()):
-			print "Not a valid path"
+			print "Not a valid path."
 			return
 
 		for sv in self.inputs:
 			if not isValidPath(sv.get().strip()):
-				print "Not a valid path"
+				print "Not a valid path."
 				return
 			else:
-				print "Yes valid path"
+				print "Path is valid."
 
 		self.controller.user_rois = [NameVarStore(self.controller, index, default_value=sv.get().strip()) for index, sv in enumerate(self.inputs)]
 		self.destroy()
@@ -55,6 +58,6 @@ class OwnROIInputPopup(Toplevel, object):
 	def chooseDir(self, parent, controller, place_holder, message, entry):
 		current_dir = os.getcwd()
 		parent.update()
-		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Select the location of ' + message)
+		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Indicate the location of ' + message)
 		place_holder.set(chosen_file)
 		entry['fg'] = entry.default_fg_color

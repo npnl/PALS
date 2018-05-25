@@ -17,9 +17,9 @@ class DefaultROIInputPopup(Toplevel, object):
 		self.selected_count = StringVar()
 
 
-		Label(self, text='Select all that apply', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
+		Label(self, text='Select any ROI(s)', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
 
-		option_heading= 'Harvard-Oxford Corticospinal Tract'
+		option_heading= 'Corticospinal Tracts'
 		ch_list_harvard = CheckboxList(self, controller, option_heading, controller.default_corticospinal_tract_roi, row=1, column=0)
 
 		option_heading= 'FreeSurfer Cortical Regions of Interest'
@@ -28,13 +28,13 @@ class DefaultROIInputPopup(Toplevel, object):
 		option_heading= 'FreeSurfer Sub-Cortical Regions of Interest'
 		ch_list_freesurfer_sub = CheckboxList(self, controller, option_heading, controller.default_freesurfer_subcortical_roi, row=2, column=0, columnspan=2)
 
-		btn_custom = Button(self, text='Select ROIs', command=self.selectCustomROIs)
+		btn_custom = Button(self, text='Additional ROIs', command=self.selectCustomROIs)
 		btn_custom.grid(row=299, column=0, sticky='w')
 
 		lb_count = Label(self, textvariable=self.selected_count)
 		lb_count.grid(row=299, column=1, sticky='e')
 
-		btn_ok = Button(self, text='Ok', command=self.cleanup)
+		btn_ok = Button(self, text='OK', command=self.cleanup)
 		btn_ok.grid(row=300, column=1, sticky='e')
 
 		self.updateSelectCount()
@@ -48,7 +48,7 @@ class DefaultROIInputPopup(Toplevel, object):
 		self.controller.logger.debug("Custom ROIs selected : " + str(self.controller.default_custom_rois))
 
 	def updateSelectCount(self):
-		self.selected_count.set(str(len(self.controller.default_custom_rois)) + ' selected')
+		self.selected_count.set(str(len(self.controller.default_custom_rois)) + ' additional ROIs selected.')
 
 	def chooseFiles(self):
 		current_dir = os.path.join(self.controller.getProjectDirectory(), 'ROIs')
@@ -56,4 +56,3 @@ class DefaultROIInputPopup(Toplevel, object):
 		chosen_files =  tkFileDialog.askopenfilenames(parent=self, initialdir = current_dir, title='Select the location of ROIs')
 		chosen_files = self.controller.splitlist(chosen_files)
 		return chosen_files
-

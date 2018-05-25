@@ -53,7 +53,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lb_lesion_load = Label(lf_lesion_load, text="Select all that apply.", font='Helvetica 13 bold')
 		lb_lesion_load.grid(row=0, column=0, columnspan=100, sticky='W')
 
-		lb_default_rois = Label(lf_lesion_load, text="Choose from default regions of interest") #.grid(row=self.starting_row+2, sticky=W)
+		lb_default_rois = Label(lf_lesion_load, text="Select regions of interest included in PALS") #.grid(row=self.starting_row+2, sticky=W)
 		lb_default_rois.grid(row=1, column=0, columnspan=40, sticky="W", pady=3)
 		createToolTip(lb_default_rois, '')
 
@@ -70,7 +70,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		chk_own_rois.grid(row=2, column=41, sticky='W', pady=3)
 		createToolTip(chk_own_rois, '')
 
-		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific Freesurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
+		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific FreeSurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
 		lb_subject_specific.grid(row=3, column=0, columnspan=40, sticky="W", pady=(3,20))
 		createToolTip(lb_subject_specific, '')
 

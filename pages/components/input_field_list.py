@@ -22,7 +22,7 @@ class InputFieldList(object):
 
 		row = 0
 
-		lb_select_all = Label(lf_options, text='Select Number of inputs', font='Helvetica 13 bold')
+		lb_select_all = Label(lf_options, text='Indicate number of inputs', font='Helvetica 13 bold')
 		lb_select_all.grid(row=row, column=0, sticky="W", pady=3)
 
 		options_count_list = tuple(list(range(14)))
@@ -51,7 +51,7 @@ class InputFieldList(object):
 		self.canvas.bind('<Configure>', self.frameWidth)
 		self.frame_inputs.bind("<Configure>", self.resize)
 
-		lb_text_area = Label(lf_options, text='Or paste paths(one per line) in text area give below', font='Helvetica 13 bold')
+		lb_text_area = Label(lf_options, text='Or paste paths (one per line) in text area given below.', font='Helvetica 13 bold')
 		lb_text_area.grid(row=row, column=0, sticky="W", pady=3)
 
 		self.sv_bulk_input = StringVar()
@@ -98,7 +98,7 @@ class InputFieldList(object):
 			en_path = Entry(self.frame_inputs, textvariable=sv_path, width = 50)
 			en_path.grid(row=row, column=1, sticky="W", pady=3)
 
-			btn_select = Button(self.frame_inputs, text='Select', command=lambda place_holder=sv_path: self.chooseDir(self.parent, self.controller, place_holder, 'input directory'))
+			btn_select = Button(self.frame_inputs, text='Browse', command=lambda place_holder=sv_path: self.chooseDir(self.parent, self.controller, place_holder, 'input directory'))
 			btn_select.grid(row=row, column=2, sticky='E', padx=5, pady=3)
 			self.input_array.append(sv_path)
 			row += 1
@@ -106,7 +106,7 @@ class InputFieldList(object):
 	def chooseDir(self, parent, controller, place_holder, message):
 		current_dir = os.getcwd()
 		parent.update()
-		chosen_dir =  tkFileDialog.askopenfilename(parent=parent, initialdir = current_dir, title='Select the location of ' + message)
+		chosen_dir =  tkFileDialog.askopenfilename(parent=parent, initialdir = current_dir, title='Indicate the location of ' + message)
 		place_holder.set(chosen_dir)
 
 	def frameWidth(self, event):
@@ -115,5 +115,3 @@ class InputFieldList(object):
 
 	def resize(self, event):
 		self.canvas.configure(scrollregion=self.canvas.bbox("all"), width=600, height=190)
-
-

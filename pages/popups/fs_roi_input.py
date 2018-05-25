@@ -16,7 +16,7 @@ class FSROIInputPopup(Toplevel, object):
 
 		Label(self, text='Select all that apply', font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=(0, 20), sticky=W+E+N+S)
 
-		lb_option = Label(self, text='Each subject directory contains an aparc+aseg.mgz file')
+		lb_option = Label(self, text='Each subject directory contains an aparc+aseg.mgz and T1.mgz file')
 		lb_option.grid(row=1, column=0, sticky='w', pady=3)
 
 		chk_option = Checkbutton(self, variable=self.user_agreed)
@@ -30,11 +30,10 @@ class FSROIInputPopup(Toplevel, object):
 		options_freesurfer_sub = [ NameVarStore(controller, 'Label_%d'%x) for x in range(15)]
 		ch_list_freesurfer_sub = CheckboxList(self, controller, option_heading, controller.freesurfer_subcortical_roi, row=1, column=1, user_agreed=self.user_agreed)
 
-		btn_ok = Button(self, text='Ok', command=self.cleanup)
+		btn_ok = Button(self, text='OK', command=self.cleanup)
 		btn_ok.grid(row=300, column=1, sticky='e')
 
 
 
 	def cleanup(self):
 		self.destroy()
-

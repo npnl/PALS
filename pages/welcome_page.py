@@ -25,7 +25,7 @@ class WelcomePage(BaseInputPage, object):
 		lf_main.grid_columnconfigure(0, weight=1)
 
 
-		lb_radiological_convention = Label(lf_main, text="1. Reorient to Radiological Convention")
+		lb_radiological_convention = Label(lf_main, text="1. Reorient to radiological convention")
 		lb_radiological_convention.grid(row=0, column=0, sticky="W", pady=3)
 		createToolTip(lb_radiological_convention, self.controller.desc.rad_reorient)
 
@@ -33,7 +33,7 @@ class WelcomePage(BaseInputPage, object):
 		chk_radiological_convention.grid(row=0, column=97, sticky='W', pady=3)
 		createToolTip(chk_radiological_convention, self.controller.desc.rad_reorient)
 
-		lb_wm_correction = Label(lf_main, text="2. Lesion Correction for Healthy White Matter Voxels")
+		lb_wm_correction = Label(lf_main, text="2. Lesion correction for white matter voxels")
 		lb_wm_correction.grid(row=1, column=0, sticky="W", pady=3)
 		createToolTip(lb_wm_correction, self.controller.desc.wm_correction)
 
@@ -41,7 +41,7 @@ class WelcomePage(BaseInputPage, object):
 		chk_wm_correction.grid(row=1, column=97, sticky='W', pady=3)
 		createToolTip(chk_wm_correction, self.controller.desc.wm_correction)
 
-		lb_lesion_load = Label(lf_main, text="3. Lesion Load Calculation")
+		lb_lesion_load = Label(lf_main, text="3. Lesion load calculation")
 		lb_lesion_load.grid(row=2, column=0,  sticky="W", pady=3)
 		createToolTip(lb_lesion_load,  self.controller.desc.lesion_load)
 
@@ -54,7 +54,7 @@ class WelcomePage(BaseInputPage, object):
 		lf_visual_qc.grid_rowconfigure(0, weight=1)
 		lf_visual_qc.grid_columnconfigure(0, weight=1)
 
-		lb_visual_qc = Label(lf_visual_qc, text="4. Perform Visual Quality Control only")
+		lb_visual_qc = Label(lf_visual_qc, text="4. Perform visual quality control only")
 		lb_visual_qc.grid(row=0, column=0, sticky="W", pady=3)
 		createToolTip(lb_visual_qc, self.controller.desc.visual_qc)
 

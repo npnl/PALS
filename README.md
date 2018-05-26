@@ -31,7 +31,7 @@ For first-time users, PALS will ask for the directory path to FSL binaries.
 Give examples
 ``` -->
 
-### Install:
+### Install
 
 Clone this github repository:
 
@@ -58,7 +58,7 @@ This will open up the PALS GUI.
 
 To use PALS, the user must first use a method of their choice to generate initial lesion masks for their dataset.
 
-## Data Structure:
+## Data Structure
 
 ![Image of PALS Data Structure](images/data_structure.jpg)
 

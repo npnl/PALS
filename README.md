@@ -47,9 +47,7 @@ pip install -r requirements.txt
 ---
 
 
-## Instructions
-
-### Run:
+## Run
 Open up your terminal and navigate to the directory containing PALS source code.
 
 ```
@@ -60,25 +58,25 @@ This will open up the PALS GUI.
 
 To use PALS, the user must first use a method of their choice to generate initial lesion masks for their dataset.
 
-### Data Structure:
+## Data Structure:
 
 ![Image of PALS Data Structure](images/data_structure.jpg)
 
-#### Inputs
+### Inputs
 
-##### Required:
+__Required:__  
 PALS requires the user to provide an Input Directory with separate Subject Directories containing:
 
 * Subject's T1-weighted anatomical image file (nifti)
 * Subject's lesion mask file (nifti)
 
-##### Optional:
+__Optional:__
 * Subject's skull-stripped brain file (nifti)
 * Subject's white matter segmentation file (nifti)
 * Subject's FreeSurfer T1 file (T1.mgz)
 * Subject's FreeSurfer cortical/subcortical parcellation file (aparc+aseg.mgz)
 
-#### Outputs
+### Outputs
 
 PALS output files and directories will vary depending on the options selected (e.g., *QC_BrainExtractions* for the brain extraction step.)
 
@@ -88,25 +86,25 @@ __QC Directories__
 __Subject Directories__  
 A separate directory will be created for each subject, each of which will contain a __*Intermediate_Files*__ subdirectory.
 
-__*Intermediate_Files*__ will store all outputs from intermediary processing steps. __*Intermediate_Files*__ will also contain a subdirectory called __*Original_Files*__.
+* __*Intermediate_Files*__ will store all outputs from intermediary processing steps. __*Intermediate_Files*__ will also contain a subdirectory called __*Original_Files*__.
 
-__*Original_Files*__ will contain a copy of all input files for that subject.
+* __*Original_Files*__ will contain a copy of all input files for that subject.
 
 outputs from __reorient__ module:   
-*subjX_T1_rad_reorient.nii.gz* - subject's original T1 brain file in radiological convention  
-*subjX_lesion1_rad_reorient.nii.gz* - subject's original lesion mask in radiological convention
+>__subjX_T1_rad_reorient.nii.gz__ - subject's original T1 brain file in radiological convention  
+>__subjX_lesion1_rad_reorient.nii.gz__ - subject's original lesion mask in radiological convention
 
 outputs from __lesion correction__ module:  
-*subjX_WMAdjusted_lesion1.nii.gz* - subject's corrected lesion mask with white matter voxels removed
+>__subjX_WMAdjusted_lesion1.nii.gz__ - subject's corrected lesion mask with white matter voxels removed
 
 outputs from __lesion load__ module:  
-⋅⋅⋅*subjX_Reg_Brain_MNI.152.nii.gz* - subject's brain registered to MNI space  
-⋅⋅⋅*subjX_Reg_Brain_custom.152.nii.gz* - subject's brain registered to user-input template space  
-*subjX_T12FS.nii.gz* - subject's brain registered to FreeSurfer space  
-*subjX_lesion1_MNI152_bin.nii.gz* - subject's first lesion mask registered to MNI space  
-*subjX_lesion1_custom_bin.nii.gz* - subject's first lesion mask registered to user-input template space   
-*subjX_lesion1_FS_bin.nii.gz* - subject's first lesion mask registered to FreeSurfer space  
-*subjX_roi_name_lesion1_overlap.nii.gz* - subject's lesion-ROI overlap file (one for each ROI)
+>__subjX_Reg_Brain_MNI.152.nii.gz__ - subject's brain registered to MNI space  
+>__subjX_Reg_Brain_custom.152.nii.gz__ - subject's brain registered to user-input template space  
+>__subjX_T12FS.nii.gz__ - subject's brain registered to FreeSurfer space  
+>__subjX_lesion1_MNI152_bin.nii.gz__ - subject's first lesion mask registered to MNI space  
+>__subjX_lesion1_custom_bin.nii.gz__ - subject's first lesion mask registered to user-input template space   
+>__subjX_lesion1_FS_bin.nii.gz__ - subject's first lesion mask registered to FreeSurfer space  
+>__subjX_roi_name_lesion1_overlap.nii.gz__ - subject's lesion-ROI overlap file (one for each ROI)
 
 __Databases__:
 For the lesion correction and lesion load calculation modules, separate CSV files will be created, containing information for all subjects about number of voxels removed and amount of lesion-roi overlap, respectively.

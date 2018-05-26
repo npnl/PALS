@@ -86,29 +86,29 @@ __QC Directories__
   A new quality control directory will be created for each intermediary step taken. Each QC directory will contain screenshots for each subject, and a single HTML page for easy visual quality inspection.
 
 __Subject Directories__  
-  A separate directory will be created for each subject, each of which will contain a __*Intermediate_Files*__ subdirectory.
+A separate directory will be created for each subject, each of which will contain a __*Intermediate_Files*__ subdirectory.
 
-  __*Intermediate_Files*__ will store all outputs from intermediary processing steps. __*Intermediate_Files*__ will also contain a subdirectory called __*Original_Files*__.
+__*Intermediate_Files*__ will store all outputs from intermediary processing steps. __*Intermediate_Files*__ will also contain a subdirectory called __*Original_Files*__.
 
-  __*Original_Files*__ will contain a copy of all input files for that subject.
+__*Original_Files*__ will contain a copy of all input files for that subject.
 
-  outputs from __reorient__ module:   
-    *subjX_T1_rad_reorient.nii.gz* - subject's original T1 brain file in radiological convention  
-    *subjX_lesion1_rad_reorient.nii.gz* - subject's original lesion mask in radiological convention
+outputs from __reorient__ module:   
+*subjX_T1_rad_reorient.nii.gz* - subject's original T1 brain file in radiological convention  
+*subjX_lesion1_rad_reorient.nii.gz* - subject's original lesion mask in radiological convention
 
-  outputs from __lesion correction__ module:  
-    *subjX_WMAdjusted_lesion1.nii.gz* - subject's corrected lesion mask with white matter voxels removed
+outputs from __lesion correction__ module:  
+*subjX_WMAdjusted_lesion1.nii.gz* - subject's corrected lesion mask with white matter voxels removed
 
-  outputs from __lesion load__ module:  
-    *subjX_Reg_Brain_MNI.152.nii.gz* - subject's brain registered to MNI space  
-    *subjX_Reg_Brain_custom.152.nii.gz* - subject's brain registered to user-input template space  
-    *subjX_T12FS.nii.gz* - subject's brain registered to FreeSurfer space  
-    *subjX_lesion1_MNI152_bin.nii.gz* - subject's first lesion mask registered to MNI space  
-    *subjX_lesion1_custom_bin.nii.gz* - subject's first lesion mask registered to user-input template space   
-    *subjX_lesion1_FS_bin.nii.gz* - subject's first lesion mask registered to FreeSurfer space  
-    *subjX_roi_name_lesion1_overlap.nii.gz* - subject's lesion-ROI overlap file (one for each ROI)
+outputs from __lesion load__ module:  
+⋅⋅⋅*subjX_Reg_Brain_MNI.152.nii.gz* - subject's brain registered to MNI space  
+⋅⋅⋅*subjX_Reg_Brain_custom.152.nii.gz* - subject's brain registered to user-input template space  
+*subjX_T12FS.nii.gz* - subject's brain registered to FreeSurfer space  
+*subjX_lesion1_MNI152_bin.nii.gz* - subject's first lesion mask registered to MNI space  
+*subjX_lesion1_custom_bin.nii.gz* - subject's first lesion mask registered to user-input template space   
+*subjX_lesion1_FS_bin.nii.gz* - subject's first lesion mask registered to FreeSurfer space  
+*subjX_roi_name_lesion1_overlap.nii.gz* - subject's lesion-ROI overlap file (one for each ROI)
 
-##### Databases:
+__Databases__:
 For the lesion correction and lesion load calculation modules, separate CSV files will be created, containing information for all subjects about number of voxels removed and amount of lesion-roi overlap, respectively.
 
 

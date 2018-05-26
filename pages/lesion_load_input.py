@@ -81,6 +81,11 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 	def setFrameTitle(self):
 		self.title.set('Lesion Load Calculation')
 
+	def onShowFrame(self, event):
+		super(LesionLoadCalculationInputPage, self).onShowFrame(event)
+		if not self.controller.b_ll_calculation.get():
+			super(LesionLoadCalculationInputPage, self).moveToNextPage(is_parent=False)
+
 
 	def moveToNextPage(self):
 		if self.controller.b_brain_extraction.get() and len(self.controller.sv_bet_id.get()) == 0:

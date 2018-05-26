@@ -54,12 +54,15 @@ class BaseInputPage(tk.Frame):
 			error_msg = 'Please provide correct input in all the above fields'
 		self.setStatusMessage(error_msg)
 
-	def moveToNextPage(self):
+	def moveToNextPage(self, is_parent=True):
+		if is_parent:
+			self.controller.pushFrameToStack(self.frame_number)
 		self.controller.show_frame(self.frame_number + 1)
 		self.setStatusMessage(self.empty_status)
 
 	def moveToPrevPage(self):
-		self.controller.show_frame(self.frame_number-1)
+		parent_frame_number = self.controller.getParentFrame()
+		self.controller.show_frame(parent_frame_number)
 		self.setStatusMessage(self.empty_status)
 
 	def chooseDir(self, parent, controller, place_holder, message):

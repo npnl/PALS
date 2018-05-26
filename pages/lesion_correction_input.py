@@ -75,6 +75,10 @@ class LesionCorrInputPage(BaseInputPage, object):
 		en_percent.grid(row=self.starting_row+5, column=61, columnspan=40, sticky="E", pady=(10, 20))
 		createToolTip(en_percent, self.controller.desc.percent)
 
+	def onShowFrame(self, event):
+		super(LesionCorrInputPage, self).onShowFrame(event)
+		if not self.controller.b_wm_correction.get():
+			super(LesionCorrInputPage, self).moveToNextPage(is_parent=False)
 
 	def setFrameTitle(self):
 		self.title.set('Lesion Correction')

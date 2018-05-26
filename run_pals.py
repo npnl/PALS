@@ -119,6 +119,7 @@ class MainWindow(tk.Tk):
 		container.grid_rowconfigure(0, weight=1)
 		container.grid_columnconfigure(0, weight=1)
 		self.frames = {}
+		self.parent_frames_stack = []
 
 		frame_number = 0
 		for PageType in self.getApplicationPages():
@@ -139,6 +140,15 @@ class MainWindow(tk.Tk):
 
 	def selectAll(self, event):
 		event.widget.tag_add("sel","1.0","end")
+
+	def pushFrameToStack(self, frame_number):
+		self.parent_frames_stack.append(frame_number)
+
+	def getParentFrame(self):
+		try:
+			return self.parent_frames_stack.pop()
+		except:
+			return 0
 
 	def pasteAll(self, event):
 		clipboard = self.clipboard_get()
@@ -172,8 +182,9 @@ class MainWindow(tk.Tk):
 		if frame_number >= len(self.frames) or frame_number < 0:
 			return
 		frame = self.frames[frame_number]
-		frame.event_generate("<<ShowFrame>>")
 		frame.tkraise()
+		frame.update()
+		frame.event_generate("<<ShowFrame>>")
 
 	def getApplicationPages(self):
 		pages = [WelcomePage, DirectoryInputPage, LesionCorrInputPage, LesionLoadCalculationInputPage, RunningOperationsPage]

@@ -1,6 +1,8 @@
 class Descriptions(object):
 	def __init__(self):
 		# for welcome page
+		self.license = "PALS Copyright (C) 2018 *This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions; see <http://www.gnu.org/licenses/>."
+
 		self.rad_reorient = "This module will check that all subject inputs are in the same orientation, flag subjects that have mismatched input orientations, and convert all remaining inputs to radiological convention. This is recommended for all datasets, and especially for multi-site data."
 
 		self.wm_correction = "This module is for manually segmented lesions. This aims to correct for intact white matter voxels that may have been inadvertently included in a manually segmented mask by removing voxels in the lesion mask that are within the intensity range of a white matter mask."

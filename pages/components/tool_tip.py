@@ -17,7 +17,7 @@ class ToolTip(object):
 		self.x = self.y = 0
 
 	def formatText(self, sentence):
-		wrapped = textwrap.fill(sentence, 70).replace('*NOTE', '\n*NOTE')
+		wrapped = textwrap.fill(sentence, 70).replace('*', '\n')
 		return wrapped
 
 

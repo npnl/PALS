@@ -16,14 +16,9 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 ### Prerequisites
 
 * Linux or Mac OS
-
 * [Python 2.7](https://www.python.org/download/releases/2.7/)
-
 * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
-
-* [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes)
-
-  Separate installation of FSLeyes is necessary only if a version of FSL older than 5.0.10 is installed.
+  * If using a version of FSL older than 5.0.10, separate installion of [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) is necessary.
 
 For first-time users, PALS will ask for the directory path to FSL binaries.
 

@@ -17,6 +17,7 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 
 * Linux or Mac OS
 * [Python 2.7](https://www.python.org/download/releases/2.7/)
+* [pip](https://pip.pypa.io/en/stable/installing/)
 * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
   * If using a version of FSL older than 5.0.10, separate installion of [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) is necessary.
 

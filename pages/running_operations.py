@@ -31,39 +31,41 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)
 
 		self.stop = tk.Button(self, text='Stop Execution', state="disabled", command=lambda : self.terminateCommand())
-		self.stop.grid(row=self.starting_row, column=1, sticky='E', padx=5, pady=3)
+		self.stop.grid(row=self.starting_row, column=2, sticky='E', padx=5, pady=3)
 
 		self.progressbar = ttk.Progressbar(self)
 		self.progressbar.configure(mode='determinate', max=100)
-		self.progressbar.grid(row=self.starting_row+1, column=0, columnspan=2, sticky='ew', padx=10, pady=10)
+		self.progressbar.grid(row=self.starting_row+1, column=0, columnspan=3, sticky='ew', padx=10, pady=10)
 
 		self.controller.progressbar = self.progressbar
 
 		self.output = Text(self, height=15, width=100)
-		self.output.grid(row=self.starting_row+2, columnspan=2, sticky='ew', padx=10)
+		self.output.grid(row=self.starting_row+2, column=0, columnspan=3, sticky='ew', padx=10)
 		self.hyperlink = HyperlinkManager(self.output)
 
 
 		self.lf_subject_file = LabelFrame(self, text='Visual QC', padx=15, font='Helvetica 14 bold')
-		self.lf_subject_file.grid(row=self.starting_row+3, column=0, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
+		self.lf_subject_file.grid(row=self.starting_row+3, column=0, columnspan=3, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		self.lf_subject_file.grid_rowconfigure(0, weight=1)
-		self.lf_subject_file.grid_columnconfigure(0, weight=1)
+		self.lf_subject_file.grid_columnconfigure(4, weight=1)
 		createToolTip(self.lf_subject_file, self.controller.desc.subject_file)
 
 		self.lb_subject_file = Label(self.lf_subject_file, text="Select flagged subjects textfile", font='Helvetica 13 bold')
-		self.lb_subject_file.grid(row=0, column=0, columnspan=40, sticky="W", pady=3)
+		self.lb_subject_file.grid(row=0, column=0, sticky="W", pady=3)
 
 		self.select = tk.Button(self.lf_subject_file, text='Browse', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
-		self.select.grid(row=1, column=91, sticky='W', padx=5, pady=3)
+		self.select.grid(row=1, column=1, sticky='W', padx=5, pady=3)
 
 		self.continue_with_all_sub = tk.Button(self.lf_subject_file, text='Continue with all subjects', command=lambda : self.continueWithAllSub())
-		self.continue_with_all_sub.grid(row=1, column=92, sticky='W', padx=5, pady=3)
+		self.continue_with_all_sub.grid(row=1, column=2, sticky='W', padx=5, pady=3)
 
-		en_input_dir = Entry(self.lf_subject_file, textvariable=controller.selected_subjects, width = 50)
-		en_input_dir.grid(row=1, column=0, columnspan=90, sticky="W", pady=3)
+		en_input_dir = Entry(self.lf_subject_file, textvariable=controller.selected_subjects, width = 47)
+		en_input_dir.grid(row=1, column=0, sticky="W", pady=3)
 
 
 		self.controller.display = self.output
+
+		self.showNavigationBtns()
 
 
 	def setFrameTitle(self):

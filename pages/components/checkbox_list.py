@@ -21,11 +21,16 @@ class CheckboxList(object):
 
 		row = 0
 
-		lb_select_all = Label(self.lf_options, text='Select all', font='Helvetica 13 bold')
-		lb_select_all.grid(row=row, column=0, sticky="W", pady=3)
+		wrapper = Frame(self.lf_options)
+		wrapper.grid(row=row, column=0, sticky='WE')
+		wrapper.grid_rowconfigure(0, weight=1)
+		wrapper.grid_columnconfigure(2, weight=1)
 
-		self.chk_select_all = tk.Checkbutton(self.lf_options, variable=self.select_all_selected, command=lambda: self.selectAllOptions())
-		self.chk_select_all.grid(row=row, column=1, sticky='W', pady=3)
+		lb_select_all = Label(wrapper, text='Select all', font='Helvetica 13 bold')
+		lb_select_all.grid(row=0, column=1, sticky="W", pady=3)
+
+		self.chk_select_all = Checkbutton(wrapper, variable=self.select_all_selected, command=lambda: self.selectAllOptions())
+		self.chk_select_all.grid(row=0, column=0, sticky='W', pady=3)
 
 		row += 1
 
@@ -44,10 +49,10 @@ class CheckboxList(object):
 		self.frame_buttons.bind("<Configure>", self.resize)
 
 		self.frame_buttons.grid_rowconfigure(0, weight=1)
-		self.frame_buttons.grid_columnconfigure(0, weight=1)
+		self.frame_buttons.grid_columnconfigure(2, weight=1)
 
 		self.en_search = EntryWithPlaceholder(self.frame_buttons, placeholder="Search String", textvariable = self.sv_search_string, width = 20)
-		self.en_search.grid(row=row+1, column=0, sticky="W", padx=3, pady=3)
+		self.en_search.grid(row=row+1, column=0, columnspan=2, sticky="W", padx=3, pady=3)
 
 		self.en_search.bind('<KeyRelease>', self.showSearchResults)
 
@@ -58,10 +63,10 @@ class CheckboxList(object):
 		self.option_names = []
 		for option in options:
 			lb_option = Label(self.frame_buttons, text=option.name)
-			lb_option.grid(row=row, column=0, sticky='w', pady=3)
+			lb_option.grid(row=row, column=1, sticky='w', pady=3)
 
 			chk_option = Checkbutton(self.frame_buttons, variable=option.holder)
-			chk_option.grid(row=row, column=1, sticky='e', pady=3, padx=(0, 10))
+			chk_option.grid(row=row, column=0, sticky='W', pady=3)
 
 			self.labels_chk.append([lb_option, chk_option])
 			self.option_dict[option.name] = option

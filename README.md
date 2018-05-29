@@ -21,7 +21,7 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
   * If using a version of FSL older than 5.0.10, separate installion of [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) is necessary.
 
-For first-time users, PALS will ask for the directory path to FSL binaries.
+For first-time users, PALS might ask for the directory path to FSL binaries.
 
 <!-- ```
 Give examples
@@ -33,6 +33,11 @@ Clone this github repository:
 
 ```
 git clone https://github.com/npnl/PALS.git
+```
+
+Install `python-tk`
+```
+sudo apt-get install python-tk
 ```
 
 Install python dependencies

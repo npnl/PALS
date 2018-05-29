@@ -71,8 +71,6 @@ class BaseOperation():
 		intermediate_path = self.getIntermediatePath(subject)
 		params = (subject, anatomical_id, '.nii.gz')
 
-		print "The params are : ", params
-
 		if self.controller.b_radiological_convention.get():
 			try:
 				anatomical_file_path = self._getPathOfFiles(self.getSubjectPath(subject), *params)[0]
@@ -90,8 +88,6 @@ class BaseOperation():
 		else:
 			params = (subject, lesion_mask_id, '.nii.gz')
 		lesion_files = self._getPathOfFiles(intermediate_path, *params)
-		if type(lesion_mask_id) == type([]):
-			print lesion_files
 
 		## put in a check here; if there are no T1 and/or lesion files, then set the path to the Original_Files directory.
 		if not os.path.exists(anatomical_file_path):

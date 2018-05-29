@@ -174,9 +174,14 @@ class Operations(object, WMSegmentationOperation,\
 			subject_input_path = os.path.join(self.input_directory, subject)
 			try:
 				anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
+				_ = anatomical_file_path[0]
+			except:
+				errors.append('Subject [%s] is missing the anatomical file'%subject)
+				flag = False
+			try:
 				_ = lesion_files[0]
 			except:
-				errors.append('Subject [%s] is missing either an anatomical or lesion mask file'%subject)
+				errors.append('Subject [%s] is missing the lesion mask file'%subject)
 				flag = False
 
 			if self.controller.b_brain_extraction.get():
@@ -214,7 +219,7 @@ class Operations(object, WMSegmentationOperation,\
 	def getT1NLesionFromInput(self, subject):
 		subject_input_path = os.path.join(self.input_directory, subject)
 		params = (subject, self.anatomical_id, '.nii.gz')
-		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)[0]
+		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)
 
 		params = (subject, self.lesion_mask_id, '.nii.gz')
 		lesion_files = self._getPathOfFiles(subject_input_path, *params)
@@ -237,7 +242,7 @@ class Operations(object, WMSegmentationOperation,\
 				z=int(z)
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
-				self.com.runFslEyes2(anatomical_file_path, lesion_file, '', x, y, z, output_image_path)
+				self.com.runFslEyes2(anatomical_file_path[0], lesion_file, '', x, y, z, output_image_path)
 
 		html_file_path = generateQCPage('Lesions', images_dir)
 		self.printQCPageUrl('createQCPage', html_file_path, pause=False)

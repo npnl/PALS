@@ -54,8 +54,6 @@ class OwnROIInputPopup(Toplevel, object):
 			if not isValidPath(sv.get().strip()):
 				self.status.set("ROI path is invalid : " + sv.get())
 				return
-			else:
-				print "Path is valid."
 
 		self.controller.user_rois = [NameVarStore(self.controller, index, default_value=sv.get().strip()) for index, sv in enumerate(self.inputs)]
 		self.destroy()

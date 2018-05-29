@@ -51,11 +51,15 @@ class WelcomePage(BaseInputPage, object):
 		chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc, command=self.setTwo)
 		chk_visual_qc.grid(row=0, column=0, sticky='W', pady=3)
 
-		lb_opt_out = Label(self, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step.\nUncheck to opt out of pausing.", justify="left", padx=10)
-		lb_opt_out.grid(row=self.starting_row+4, column=1, columnspan=2, sticky="W", pady=(20, 10))
 
-		self.chk_out_out = Checkbutton(self, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
-		self.chk_out_out.grid(row=self.starting_row+4, column=0, sticky='W', padx=20, pady=(20, 10))
+		wrapper = Frame(self)
+		wrapper.grid(row=self.starting_row+4, column=0, columnspan=3, sticky='w', padx=20, pady=(20, 10))
+
+		lb_opt_out = Label(wrapper, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step.\nUncheck to opt out of pausing.", justify="left")
+		lb_opt_out.grid(row=0, column=1, sticky="W")
+
+		self.chk_out_out = Checkbutton(wrapper, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
+		self.chk_out_out.grid(row=0, column=0, sticky='W')
 
 		self.showNavigationBtns()
 

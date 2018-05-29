@@ -12,7 +12,7 @@ import webbrowser, os
 import traceback
 from functools import partial
 from .components import HyperlinkManager
-
+from .components import createToolTip
 from utils import Operations
 
 

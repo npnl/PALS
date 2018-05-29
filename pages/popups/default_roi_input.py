@@ -9,7 +9,7 @@ import os
 import tkFileDialog
 from ..components import CheckboxList
 from ..stores import NameVarStore
-from ..components import createToolTip
+from ..components import ButtonToolTip
 
 class DefaultROIInputPopup(Toplevel, object):
 	def __init__(self, controller):
@@ -29,9 +29,8 @@ class DefaultROIInputPopup(Toplevel, object):
 		option_heading= 'FreeSurfer Sub-Cortical Regions of Interest'
 		ch_list_freesurfer_sub = CheckboxList(self, controller, option_heading, controller.default_freesurfer_subcortical_roi, row=2, column=0, columnspan=2)
 
-		btn_custom = Button(self, text='Select additional ROIs', command=self.selectCustomROIs)
+		btn_custom = ButtonToolTip(self, text='Select additional ROIs', command=self.selectCustomROIs, tool_tip_text=self.controller.desc.btn_custom)
 		btn_custom.grid(row=299, column=0, sticky='w')
-		createToolTip(btn_custom, self.controller.desc.btn_custom)
 
 		lb_count = Label(self, textvariable=self.selected_count)
 		lb_count.grid(row=299, column=1, sticky='e')

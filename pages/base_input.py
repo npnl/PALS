@@ -7,7 +7,7 @@ except ImportError:
 
 import os
 import tkFileDialog
-from pages.components import createToolTip
+from .components import LabelToolTip
 
 class BaseInputPage(tk.Frame):
 	def __init__(self, parent, controller, frame_number):

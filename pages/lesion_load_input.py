@@ -28,22 +28,18 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lf_brain_ext.grid_columnconfigure(3, weight=1)
 
 
-		lb_brain_extraction = Label(lf_brain_ext, text="Has brain extraction already been performed on all subjects?") #.grid(row=self.starting_row+2, sticky=W)
+		lb_brain_extraction = LabelToolTip(lf_brain_ext, text="Has brain extraction already been performed on all subjects?", tool_tip_text=self.controller.desc.brain_ext)
 		lb_brain_extraction.grid(row=0, column=1, columnspan=2, sticky="W", pady=3)
-		createToolTip(lb_brain_extraction, self.controller.desc.brain_ext)
 
-		lb_bet_identifier = Label(lf_brain_ext, text="Skull-stripped brain identifier") #.grid(row=self.starting_row+2, sticky=W)
+		lb_bet_identifier = LabelToolTip(lf_brain_ext, text="Skull-stripped brain identifier", tool_tip_text=self.controller.desc.bet_identifier)
 		lb_bet_identifier.grid(row=1, column=1, sticky="W", pady=(3, 20))
-		createToolTip(lb_bet_identifier, self.controller.desc.bet_identifier)
 
 		en_bet_identifier = Entry(lf_brain_ext, textvariable=controller.sv_bet_id, width = 20)
 		en_bet_identifier.config(state='disabled')
 		en_bet_identifier.grid(row=1, column=2, sticky="W", pady=(3, 20))
-		createToolTip(en_bet_identifier, self.controller.desc.bet_identifier)
 
 		chk_brain_extraction = tk.Checkbutton(lf_brain_ext, variable=controller.b_brain_extraction, command=lambda : self.setEntryState(en_bet_identifier, self.controller.b_brain_extraction))
 		chk_brain_extraction.grid(row=0, column=0, sticky='W', pady=3)
-		createToolTip(chk_brain_extraction, self.controller.desc.brain_ext)
 
 		lf_lesion_load = tk.LabelFrame(self, text='Calculate Lesion Load', padx=15, font='Helvetica 14 bold')
 		lf_lesion_load.grid(row=self.starting_row+3, column=0, columnspan=3, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
@@ -53,29 +49,23 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		lb_lesion_load = Label(lf_lesion_load, text="Select all that apply.", font='Helvetica 13 bold')
 		lb_lesion_load.grid(row=0, column=0, columnspan=2, sticky='W')
 
-		lb_default_rois = Label(lf_lesion_load, text="Select regions of interest included in PALS") #.grid(row=self.starting_row+2, sticky=W)
+		lb_default_rois = LabelToolTip(lf_lesion_load, text="Select regions of interest included in PALS", tool_tip_text=self.controller.desc.default_rois)
 		lb_default_rois.grid(row=1, column=1, sticky="W", pady=3)
-		createToolTip(lb_default_rois, self.controller.desc.default_rois)
 
 		self.chk_default_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_default_rois, command=lambda: self.showDefaultROIPopup())
 		self.chk_default_rois.grid(row=1, column=0, sticky='W', pady=3)
-		createToolTip(self.chk_default_rois, self.controller.desc.default_rois)
 
-		lb_own_rois= Label(lf_lesion_load, text="Import my own regions of interest") #.grid(row=self.starting_row+2, sticky=W)
+		lb_own_rois= LabelToolTip(lf_lesion_load, text="Import my own regions of interest", tool_tip_text=self.controller.desc.own_rois)
 		lb_own_rois.grid(row=2, column=1, sticky="W", pady=3)
-		createToolTip(lb_own_rois, self.controller.desc.own_rois)
 
 		chk_own_rois = tk.Checkbutton(lf_lesion_load, variable=controller.b_own_rois, command=lambda: self.showOwnROIPopup())
 		chk_own_rois.grid(row=2, column=0, sticky='W', pady=3)
-		createToolTip(chk_own_rois, self.controller.desc.own_rois)
 
-		lb_subject_specific= Label(lf_lesion_load, text="Use subject-specific FreeSurfer segmentations") #.grid(row=self.starting_row+2, sticky=W)
+		lb_subject_specific= LabelToolTip(lf_lesion_load, text="Use subject-specific FreeSurfer segmentations", tool_tip_text=self.controller.desc.subject_specific)
 		lb_subject_specific.grid(row=3, column=1, sticky="W", pady=(3,20))
-		createToolTip(lb_subject_specific, self.controller.desc.subject_specific)
 
 		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_freesurfer_rois, command=lambda: self.freesurferROIPopup())
 		chk_subject_specific.grid(row=3, column=0, sticky='W', pady=(3,20))
-		createToolTip(chk_subject_specific, self.controller.desc.subject_specific)
 
 		self.showNavigationBtns()
 

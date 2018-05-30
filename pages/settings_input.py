@@ -16,6 +16,7 @@ class SettingsInput(BaseInputPage, object):
 		lb_input = Label(self, text=self.controller.sv_fsl_binaries_msg.get())
 		lb_input.grid(row=self.starting_row+1, column=0, sticky="W", pady=3)
 
+		self.showNavigationBtns()
 
 	def setFrameTitle(self):
 		self.title.set('Please indicate the following:')

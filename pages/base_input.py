@@ -7,37 +7,47 @@ except ImportError:
 
 import os
 import tkFileDialog
-from pages.components import createToolTip
+from .components import LabelToolTip
 
 class BaseInputPage(tk.Frame):
 	def __init__(self, parent, controller, frame_number):
 		tk.Frame.__init__(self, parent)
 		self.bind("<<ShowFrame>>", self.onShowFrame)
+		self.grid_rowconfigure(1000, weight=1)
+		self.grid_columnconfigure(0, weight=1)
+		self.grid_columnconfigure(1, weight=1)
+		self.grid_columnconfigure(2, weight=1)
+		# self.grid_columnconfigure(4, weight=1)
 
 		self.title = StringVar(self)
 		self.status = StringVar(self)
 		self.frame_number = frame_number
 		self.controller = controller
 		self.parent = parent
-		self.starting_row = 2
+		self.starting_row = 1
 
 		self.empty_status = ' '*80
 
-		Label(self, text='', textvariable=self.title, font=("Helvetica", 23, 'bold')).grid(row=0, columnspan=100, pady=20, sticky=W+E+N+S)
-
-		last_row = 1000
-		Label(self, text='', textvariable=self.status, fg="red").grid(row=last_row, column=0, columnspan=100, sticky='nwes',)
-
-		if frame_number > 0:
-			self.btn_prev = tk.Button(self, text='< Back', command=lambda : self.moveToPrevPage())
-			self.btn_prev.grid(row=last_row+1, column=0, columnspan=50, sticky='W')
-
-		self.btn_next = tk.Button(self, text='Next >', command=lambda : self.moveToNextPage())
-		self.btn_next.grid(row=last_row+1, column=51, columnspan=50, sticky='E')
-
+		lb_title = Label(self, text='', textvariable=self.title, font=("Helvetica", 23, 'bold'), pady=20)
+		lb_title.grid(row=0, columnspan=3, sticky=W+E)
 
 		self.setFrameTitle()
 		self.setStatusMessage(self.empty_status)
+
+	def showNavigationBtns(self):
+		last_row = 1000
+
+		empty = Frame(self)
+		empty.grid(row=last_row, column=0, columnspan=3, sticky=W+E+N+S)
+
+		Label(self, text='', textvariable=self.status, fg="red").grid(row=last_row+1, column=0, columnspan=3, sticky='nwes',)
+
+		if self.frame_number > 0:
+			self.btn_prev = tk.Button(self, text='< Back', command=lambda : self.moveToPrevPage())
+			self.btn_prev.grid(row=last_row+1, column=0, sticky='W')
+
+		self.btn_next = tk.Button(self, text='Next >', command=lambda : self.moveToNextPage())
+		self.btn_next.grid(row=last_row+1, column=2, columnspan=2, sticky='E')
 
 	def onShowFrame(self, event):
 		self.setFrameTitle()

@@ -16,16 +16,13 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 ### Prerequisites
 
 * Linux or Mac OS
-
 * [Python 2.7](https://www.python.org/download/releases/2.7/)
-
+* [pip](https://pip.pypa.io/en/stable/installing/)
 * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
+  * If using a version of FSL older than 5.0.10, separate installion of [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) is necessary.
+* [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall)
 
-* [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes)
-
-  Separate installation of FSLeyes is necessary only if a version of FSL older than 5.0.10 is installed.
-
-For first-time users, PALS will ask for the directory path to FSL binaries.
+First-time users may be asked to specify a directory path to FSL and/or FreeSurfer binaries (see instructions for [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup) and [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/MacOsInstall#SetupandConfiguration) setup).
 
 <!-- ```
 Give examples
@@ -37,6 +34,11 @@ Clone this github repository:
 
 ```
 git clone https://github.com/npnl/PALS.git
+```
+
+Install `python-tk`
+```
+sudo apt-get install python-tk
 ```
 
 Install python dependencies

@@ -1,0 +1,5 @@
+argparse==1.2.1
+html5lib==0.999
+pathlib==1.0.1
+urllib3==1.7.1
+fsleyes==0.22.6

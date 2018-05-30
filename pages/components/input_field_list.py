@@ -8,6 +8,7 @@ except ImportError:
 import os
 import tkFileDialog
 from tool_tip import createToolTip
+from label_tool_tip import LabelToolTip
 
 class InputFieldList(object):
 	def __init__(self, parent, controller, title, input_array, row, column, columnspan=1):
@@ -52,9 +53,8 @@ class InputFieldList(object):
 		self.canvas.bind('<Configure>', self.frameWidth)
 		self.frame_inputs.bind("<Configure>", self.resize)
 
-		lb_text_area = Label(lf_options, text='Or paste paths (one per line) in text area given below.', font='Helvetica 13 bold')
+		lb_text_area = LabelToolTip(lf_options, text='Or paste paths (one per line) in text area given below.', font='Helvetica 13 bold', tool_tip_text=self.controller.desc.frame_inputs)
 		lb_text_area.grid(row=row, column=0, sticky="W", pady=3)
-		createToolTip(lb_text_area, self.controller.desc.frame_inputs)
 
 		self.sv_bulk_input = StringVar()
 		self.sv_bulk_input.trace("w", lambda: self.bulkInputUpdate())

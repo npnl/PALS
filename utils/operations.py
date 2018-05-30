@@ -73,7 +73,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.controller.updateGUI('Checking for necessary files in all subject directories')
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():
-				self.incrementStage(14)
+				self.incrementStage(15)
 			else:
 				self.controller.updateGUI('All subjects have necessary files')
 				self.incrementStage()
@@ -170,13 +170,26 @@ class Operations(object, WMSegmentationOperation,\
 	def checkAllSubjectInputs(self):
 		errors = []
 		flag = True
+		mri_convert = True
+		if self.controller.b_ll_calculation.get() and self.controller.b_freesurfer_rois.get():
+			mri_convert =  self.controller.checkFslInstalled(bypass_mri_convert=False)
+		if not mri_convert:
+			flag = False
+			errors.append("mri_convert is not in the PATH variable. Please set it to proceed.")
 		for subject in self.subjects:
+			if not mri_convert:
+				continue
 			subject_input_path = os.path.join(self.input_directory, subject)
 			try:
 				anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
+				_ = anatomical_file_path[0]
+			except:
+				errors.append('Subject [%s] is missing the anatomical file'%subject)
+				flag = False
+			try:
 				_ = lesion_files[0]
 			except:
-				errors.append('Subject [%s] is missing either an anatomical or lesion mask file'%subject)
+				errors.append('Subject [%s] is missing the lesion mask file'%subject)
 				flag = False
 
 			if self.controller.b_brain_extraction.get():
@@ -213,10 +226,10 @@ class Operations(object, WMSegmentationOperation,\
 
 	def getT1NLesionFromInput(self, subject):
 		subject_input_path = os.path.join(self.input_directory, subject)
-		params = (subject, self.anatomical_id, '.nii.gz')
-		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)[0]
+		params = (subject, self.anatomical_id, '', '.nii')
+		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)
 
-		params = (subject, self.lesion_mask_id, '.nii.gz')
+		params = (subject, self.lesion_mask_id, '', '.nii')
 		lesion_files = self._getPathOfFiles(subject_input_path, *params)
 
 		return anatomical_file_path, lesion_files
@@ -237,7 +250,7 @@ class Operations(object, WMSegmentationOperation,\
 				z=int(z)
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
-				self.com.runFslEyes2(anatomical_file_path, lesion_file, '', x, y, z, output_image_path)
+				self.com.runFslEyes2(anatomical_file_path[0], lesion_file, '', x, y, z, output_image_path)
 
 		html_file_path = generateQCPage('Lesions', images_dir)
 		self.printQCPageUrl('createQCPage', html_file_path, pause=False)

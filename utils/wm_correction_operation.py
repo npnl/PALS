@@ -108,15 +108,15 @@ class LesionCorrectionOperation(BaseOperation):
 
 		if self.com.runFslWithArgs(anatomical_file_path, lesion_file, normRange_file, '-mul') == '':
 
-			lower_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_lower'%(subject, lesion_counter))
-			upper_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d_upper'%(subject, lesion_counter))
+			lower_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_lesion%d_lower'%(subject, lesion_counter))
+			upper_lesion = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_lesion%d_upper'%(subject, lesion_counter))
 
-			final_output_file = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_Lesion%d'%(subject, lesion_counter))
+			final_output_file = os.path.join(self.getIntermediatePath(subject), '%s_WMAdjusted_lesion%d'%(subject, lesion_counter))
 
 			self.com.runFslWithArgs(normRange_file, lower, lower_lesion, '-uthr')
 			self.com.runFslWithArgs(normRange_file, upper, upper_lesion, '-thr')
 			self.com.runFslWithArgs(upper_lesion, lower_lesion, final_output_file, '-add')
-			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_Lesion%d_bin'%(subject, lesion_counter))
+			output_bin_file = os.path.join(self.getSubjectPath(subject), '%s_WMAdjusted_lesion%d_bin'%(subject, lesion_counter))
 			self.com.runFslBinarize(final_output_file, final_output_file)
 			corrected_lesion_volume = self.com.runBrainVolume(final_output_file)
 			self.logger.info('The Corrected lesion volume is [%f]'%corrected_lesion_volume)

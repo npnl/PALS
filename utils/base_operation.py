@@ -152,6 +152,7 @@ class BaseOperation():
 					 "%s_lesion*_MNI152_bin.nii.gz",\
 					 "%s_lesion*_custom*",\
 					 "%s_lesion*_rad_reorient.nii.gz",\
+					 "%s_WMAdjusted_lesion{0...1000}.nii.gz",\
 					 "%s*overlap*"
 					 ]
 			try:

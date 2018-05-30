@@ -65,7 +65,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 		self.controller.display = self.output
 
-		self.showNavigationBtns()
+		
 
 
 	def setFrameTitle(self):

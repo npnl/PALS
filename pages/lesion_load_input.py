@@ -67,7 +67,7 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		chk_subject_specific = tk.Checkbutton(lf_lesion_load, variable=controller.b_freesurfer_rois, command=lambda: self.freesurferROIPopup())
 		chk_subject_specific.grid(row=3, column=0, sticky='W', pady=(3,20))
 
-		self.showNavigationBtns()
+		
 
 	def setFrameTitle(self):
 		self.title.set('Lesion Load Calculation')

@@ -60,7 +60,7 @@ class DirectoryInputPage(BaseInputPage, object):
 		chk_same_anatomical_space.grid(row=0, column=0, sticky='W', pady=(3, 20))
 
 
-		self.showNavigationBtns()
+		
 
 
 	def setFrameTitle(self):

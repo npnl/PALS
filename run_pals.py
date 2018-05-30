@@ -210,8 +210,10 @@ class MainWindow(tk.Tk):
 	def getProjectDirectory(self):
 		return os.path.dirname(os.path.realpath(__file__))
 
-	def checkFslInstalled(self, path=''):
-		commands = ['fslmaths', 'fsleyes', 'mri_convert', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
+	def checkFslInstalled(self, bypass_mri_convert=True):
+		commands = ['fslmaths', 'fsleyes', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
+		if not bypass_mri_convert:
+			commands += ['mri_convert']
 		flag = True
 		msg = ''
 		FNULL = open(os.devnull, 'w')

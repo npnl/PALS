@@ -73,7 +73,7 @@ class Operations(object, WMSegmentationOperation,\
 			self.controller.updateGUI('Checking for necessary files in all subject directories')
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():
-				self.incrementStage(14)
+				self.incrementStage(15)
 			else:
 				self.controller.updateGUI('All subjects have necessary files')
 				self.incrementStage()
@@ -170,7 +170,15 @@ class Operations(object, WMSegmentationOperation,\
 	def checkAllSubjectInputs(self):
 		errors = []
 		flag = True
+		mri_convert = True
+		if self.controller.b_ll_calculation.get() and self.controller.b_freesurfer_rois.get():
+			mri_convert =  self.controller.checkFslInstalled(bypass_mri_convert=False)
+		if not mri_convert:
+			flag = False
+			errors.append("mri_convert is not in the PATH variable. Please set it to proceed.")
 		for subject in self.subjects:
+			if not mri_convert:
+				continue
 			subject_input_path = os.path.join(self.input_directory, subject)
 			try:
 				anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)

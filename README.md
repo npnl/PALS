@@ -22,7 +22,7 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
   * If using a version of FSL older than 5.0.10, separate installion of [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) is necessary.
 * [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall)
 
-First-time users may be asked to specify a directory path to FSL and/or FreeSurfer binaries. (Instructions for [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup) and [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/MacOsInstall#SetupandConfiguration)).
+First-time users may be asked to specify a directory path to FSL and/or FreeSurfer binaries (see instructions for [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup) and [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/MacOsInstall#SetupandConfiguration) setup).
 
 <!-- ```
 Give examples

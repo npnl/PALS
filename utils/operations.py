@@ -226,10 +226,10 @@ class Operations(object, WMSegmentationOperation,\
 
 	def getT1NLesionFromInput(self, subject):
 		subject_input_path = os.path.join(self.input_directory, subject)
-		params = (subject, self.anatomical_id, '.nii.gz')
+		params = (subject, self.anatomical_id, '', '.nii')
 		anatomical_file_path =  self._getPathOfFiles(subject_input_path, *params)
 
-		params = (subject, self.lesion_mask_id, '.nii.gz')
+		params = (subject, self.lesion_mask_id, '', '.nii')
 		lesion_files = self._getPathOfFiles(subject_input_path, *params)
 
 		return anatomical_file_path, lesion_files

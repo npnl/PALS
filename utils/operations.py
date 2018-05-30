@@ -260,10 +260,13 @@ class Operations(object, WMSegmentationOperation,\
 	def _copyDirectories(self, source_dir, dest_dir):
 		for item in os.listdir(source_dir):
 			if os.path.isdir(os.path.join(source_dir, item)):
+				continue
 				os.makedirs(os.path.join(dest_dir, item))
 				self._copyDirecories(os.path.join(source_dir, item), os.path.join(dest_dir, item))
-			else:
+			elif item.endswith('.nii') or item.endswith('.nii.gz') or item == 'T1.mgz' or item == 'aparc+aseg.mgz':
 				copyfile(os.path.join(source_dir, item), os.path.join(dest_dir, item))
+			else:
+				pass
 
 	def _createOriginalFiles(self, source_dir, target_dir):
 		target_dir = os.path.join(target_dir, self.INTERMEDIATE_FILES, self.ORIGINAL_FILES)

@@ -69,7 +69,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 
 	def setFrameTitle(self):
-		self.title.set('Please wait')
+		self.title.set('Press Start Execution')
 
 	def onShowFrame(self, event):
 		super(RunningOperationsPage, self).onShowFrame(event)
@@ -104,6 +104,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.btn_next.config(state="disabled")
 		self.stop.config(state="disabled")
 		self.output.delete('1.0', END)
+		self.title.set('Press Start Execution')
 		self.progressbar.config(value=0)
 		self.need_subjects_file = False
 		self.disableChildren(self.lf_subject_file.winfo_children())
@@ -138,6 +139,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.resetClickCounter()
 		if self.start['text'] == 'Continue Execution':
 			self.operation.incrementStage()
+		self.title.set('Please wait')
 		self.operation.startThreads(self)
 
 	def terminateCommand(self):
@@ -149,6 +151,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		if need_pause:
 			self.start.config(state="normal")
 			self.start.config(text='Continue Execution')
+			self.title.set('Please input subject file')
 			self.btn_prev.config(state="normal")
 			self.stop.config(state="disabled")
 			self.resetClickCounter()
@@ -162,6 +165,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.start.config(state="disabled")
 		self.btn_prev.config(state="normal")
 		self.stop.config(state="disabled")
+		self.title.set('Completed')
 		self.controller.updateGUI('All operations completed. You may now close the application.')
 		self.resetClickCounter()
 		if data:

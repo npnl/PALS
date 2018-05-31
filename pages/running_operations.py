@@ -105,7 +105,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.btn_next.config(state="disabled")
 		self.stop.config(state="disabled")
 		self.output.delete('1.0', END)
-		self.title.set('Press Start Execution')
+		self.title.set("Press 'Start Execution' to begin")
 		self.progressbar.config(value=0)
 		self.need_subjects_file = False
 		self.disableChildren(self.lf_subject_file.winfo_children())
@@ -131,7 +131,7 @@ class RunningOperationsPage(BaseInputPage, object):
 			except Exception as e:
 				self.controller.logger.error(e.message)
 				self.controller.logger.error(traceback.format_exc())
-				self.setRequiredInputError('Please import correct text file downloaded from the QC page.')
+				self.setRequiredInputError('Please import correct textfile downloaded from the QC page.')
 				return False
 
 		self.disableChildren(self.lf_subject_file.winfo_children())

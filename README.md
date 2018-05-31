@@ -3,8 +3,6 @@
 
 Welcome to our github page!
 
-This page is under construction. Please use under your own discretion.
-
 ## What is PALS?
 
 PALS is a scalable and user-friendly toolbox designed to facilitate standardized analysis and ensure quality in stroke research using T1-weighted MRIs. The PALS toolbox offers four moduels integrated into a single pipeline, including (1) reorientation to radiological convention, (2) lesion correction for healthy white matter voxels, (3) lesion load calculation, and (4) visual quality control.

@@ -150,12 +150,26 @@ class BaseOperation():
 					 "%s_lesion*_MNI152_bin.nii.gz",\
 					 "%s_lesion*_custom*",\
 					 "%s_lesion*_rad_reorient.nii.gz",\
-					 "%s_WMAdjusted_lesion{0...1000}.nii.gz",\
 					 "%s*overlap*"
 					 ]
+
+			files_to_move = self._getPathOfFiles(intermediate_path, startswith_str=subject, substr='_WMAdjusted_lesion', endswith_str='.nii.gz', second_sub_str='')
+			files_to_move = [self._extractFileName(file_path, remove_extension=False) for file_path in files_to_move]
+			filtered_files = []
+			for s_file in files_to_move:
+				try:
+					index = len(subject + '_WMAdjusted_lesion')
+					_ = int(s_file[index])
+					filtered_files.append(s_file)
+				except:
+					pass
+			files += filtered_files
 			try:
 				for file_name in files:
-					file_path = os.path.join(intermediate_path, file_name%subject)
+					try:
+						file_path = os.path.join(intermediate_path, file_name%subject)
+					except:
+						file_path = os.path.join(intermediate_path, file_name)
 					cmd = "mv %s %s"%(file_path, subject_path)
 					self.com.runRawCommand(cmd, show_error=False)
 			except:

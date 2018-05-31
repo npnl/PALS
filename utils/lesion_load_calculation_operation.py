@@ -166,7 +166,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 			header.append('Lesion%s_Volume_StandardSpace'%(str(lesion_counter+1)))
 			for roi in roi_list:
 				roi_name = self._extractFileName(roi, remove_extension=True, extension_count=2)
-				header.append('Lesion%s_%s_Volume'%(str(lesion_counter+1), roi_name))
+				header.append('%s_Volume'%(roi_name))
 				header.append('Lesion%s_%s_lesionload'%(str(lesion_counter+1), roi_name))
 				header.append('Lesion%s_%s_PercentOverlap'%(str(lesion_counter+1),roi_name))
 

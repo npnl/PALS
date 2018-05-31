@@ -33,6 +33,7 @@ class BaseInputPage(tk.Frame):
 
 		self.setFrameTitle()
 		self.setStatusMessage(self.empty_status)
+		self.showNavigationBtns()
 
 	def showNavigationBtns(self):
 		last_row = 1000

@@ -63,7 +63,7 @@ class LesionCorrInputPage(BaseInputPage, object):
 		en_percent = Entry(self, textvariable=controller.sv_percent, width = 5)
 		en_percent.grid(row=self.starting_row+5, column=2, sticky="E", pady=(10, 20))
 
-		self.showNavigationBtns()
+		
 
 	def onShowFrame(self, event):
 		super(LesionCorrInputPage, self).onShowFrame(event)

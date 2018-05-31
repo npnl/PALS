@@ -61,7 +61,7 @@ class WelcomePage(BaseInputPage, object):
 		self.chk_out_out = Checkbutton(wrapper, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
 		self.chk_out_out.grid(row=0, column=0, sticky='W')
 
-		self.showNavigationBtns()
+		
 
 	def setFrameTitle(self):
 		self.title.set('Welcome to PALS!')

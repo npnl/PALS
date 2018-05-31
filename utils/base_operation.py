@@ -34,8 +34,10 @@ class BaseOperation():
 	def updateProgressBar(self, value):
 		self.controller.progressbar.step(value)
 
-	def updateSubjects(self, new_subjects):
-		self.subjects = list(set(self.subjects) - set(new_subjects))
+	def updateSubjects(self, subjects_to_drop):
+		if len(subjects_to_drop) > 0:
+			self.controller.updateGUI("Dropping subjects from further operations : " + str(subjects_to_drop))
+		self.subjects = list(set(self.subjects) - set(subjects_to_drop))
 		self.subjects.sort()
 		self.logger.debug("Updated the subjects to " + str(self.subjects))
 

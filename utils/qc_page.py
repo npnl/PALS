@@ -65,7 +65,10 @@ def generateQCPage(page_type, images_dir):
 
 	output += '</head>' + '\n'
 	output += '<body>' + '\n'
+	output += """<FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=7> QC Helper </FONT> <br>
+	<FONT COLOR=WHITE FACE="Geneva, Arial" SIZE=4> Instructions: Use this page to visually inspect outputs for each subject. Only check 'Flag subject' if the subject data output does not meet acceptable standards. </br>When you arrive at the bottom of the page, click on 'Submit'. This will create a textfile containing the subjects that you have flagged. <br> After visual inspection, return to the PALS GUI. If you wish to omit subjects that do not pass inspection, click on 'Omit flagged subjects' and locate the path to the downloaded flagged subjects file. </FONT><br><br>
 
+	"""
 
 	output += """<form onsubmit="download('selected_subjects.txt')">""" + '\n'
 

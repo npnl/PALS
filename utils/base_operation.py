@@ -155,15 +155,12 @@ class BaseOperation():
 
 			files_to_move = self._getPathOfFiles(intermediate_path, startswith_str=subject, substr='_WMAdjusted_lesion', endswith_str='.nii.gz', second_sub_str='')
 			files_to_move = [self._extractFileName(file_path, remove_extension=False) for file_path in files_to_move]
-			filtered_files = []
-			for s_file in files_to_move:
-				try:
-					index = len(subject + '_WMAdjusted_lesion')
-					_ = int(s_file[index])
-					filtered_files.append(s_file)
-				except:
-					pass
-			files += filtered_files
+
+			files_to_move = [x for x in files_to_move if 'custom' not in x.lower()]
+			files_to_move = [x for x in files_to_move if 'mni152' not in x.lower()]
+			files_to_move = [x for x in files_to_move if 'upper' not in x.lower()]
+			files_to_move = [x for x in files_to_move if 'lower' not in x.lower()]
+			files += files_to_move
 			try:
 				for file_name in files:
 					try:

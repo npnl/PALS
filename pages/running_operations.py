@@ -53,20 +53,21 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.lb_subject_file = Label(self.lf_subject_file, text="Select flagged subjects textfile", font='Helvetica 13 bold')
 		self.lb_subject_file.grid(row=0, column=0, sticky="W", pady=3)
 
-		self.select = tk.Button(self.lf_subject_file, text='Browse', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
-		self.select.grid(row=1, column=1, sticky='W', padx=5, pady=3)
+		self.select = tk.Button(self.lf_subject_file, text='Select flagged subjects file', command=lambda : self.chooseFile(self, controller, controller.selected_subjects, 'Selected Subjects', default_dir=self.downloaded_file_path))
+		self.select.grid(row=1, column=0, sticky='W', padx=5, pady=3)
+
+		lb_or = Label(self.lf_subject_file, text="-OR-", font='Helvetica 13 bold')
+		lb_or.grid(row=1, column=1, sticky="W", pady=3)
 
 		self.continue_with_all_sub = tk.Button(self.lf_subject_file, text='Continue with all subjects', command=lambda : self.continueWithAllSub())
-		self.continue_with_all_sub.grid(row=1, column=2, sticky='W', padx=5, pady=3)
-
-		en_input_dir = Entry(self.lf_subject_file, textvariable=controller.selected_subjects, width = 47)
-		en_input_dir.grid(row=1, column=0, sticky="W", pady=3)
+		self.continue_with_all_sub.grid(row=1, column=2, sticky='W', padx=10, pady=3)
 
 
 		self.controller.display = self.output
 
-		
-
+	def chooseFile(self, parent, controller, place_holder, message, default_dir=''):
+		super(RunningOperationsPage, self).chooseFile(parent, controller, place_holder, message, default_dir=default_dir)
+		self.executeCommand()
 
 	def setFrameTitle(self):
 		self.title.set('Press Start Execution')
@@ -122,15 +123,15 @@ class RunningOperationsPage(BaseInputPage, object):
 				with open(selected_subjects_file_path, 'r') as f:
 					new_subjects = f.readlines()
 				new_subjects = [subj.strip() for subj in new_subjects]
-				self.need_subjects_file = False
 				self.downloaded_file_path = os.path.dirname(selected_subjects_file_path)
 				self.controller.selected_subjects.set('')
 				self.operation.updateSubjects(new_subjects)
 				self.setRequiredInputError('')
+				self.need_subjects_file = False
 			except Exception as e:
 				self.controller.logger.error(e.message)
 				self.controller.logger.error(traceback.format_exc())
-				self.setRequiredInputError('Please import the textfile downloaded from the QC page.')
+				self.setRequiredInputError('Please import correct text file downloaded from the QC page.')
 				return False
 
 		self.disableChildren(self.lf_subject_file.winfo_children())
@@ -149,7 +150,7 @@ class RunningOperationsPage(BaseInputPage, object):
 
 	def pause(self, operation_name='', data='', need_pause=False):
 		if need_pause:
-			self.start.config(state="normal")
+			self.start.config(state="disabled")
 			self.start.config(text='Continue Execution')
 			self.title.set('Please input subject file')
 			self.btn_prev.config(state="normal")

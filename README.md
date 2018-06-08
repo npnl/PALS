@@ -114,7 +114,7 @@ For the lesion correction and lesion load calculation modules, separate CSV file
 ---
 ### Support
 
-The best way to keep track of bugs or failures is to open a New Issue on the Github system. You can also contact the author via email: kaoriito at usc dot edu.
+The best way to keep track of bugs or failures is to open a [New Issue](https://github.com/npnl/PALS/issues/new) on the Github system. You can also contact the author via email: kaoriito at usc dot edu.
 
 ---
 

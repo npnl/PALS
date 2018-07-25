@@ -241,8 +241,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 				fs_lesion_volume = self.com.runBrainVolume(lesion_fs_bin)
 				subject_info.append(fs_lesion_volume)
 
-				#cog = self.com.runFslStats(lesion_fs_bin, '-C')
-
 				for roi_code, roi_name in zip(roi_codes, fs_roi_paths):
 					roi_name = self._extractFileName(roi_name, remove_extension=True, extension_count=2)
 

@@ -64,7 +64,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 				self.com.runFlirt(bet_brain_file, template_brain, reg_brain_file, reg_file)
 				out_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space, '%s_Reg.png'%subject)
-				#self.com.runFslEyes(out_image_path, reg_brain_file + '.nii.gz', options='')
 				cmd = 'fsleyes render -hl -of %s %s %s -cm yellow -a 80'%(out_image_path, reg_brain_file + '.nii.gz', template_brain)
 				self.com.runRawCommand(cmd)
 
@@ -80,13 +79,10 @@ class LesionLoadCalculationOperation(BaseOperation):
 				# perform registration to FS Space for each subject to get transformation matrix
 				reg_file = os.path.join(self.getIntermediatePath(subject), '%s_T12FS.xfm'%subject)
 				reg_brain_file= os.path.join(self.getIntermediatePath(subject), '%s_T12FS'%subject)
-				#cmd = 'flirt -in %s -ref %s -omat %s -out %s;'%(anatomical_file_path, template_brain, reg_file, reg_brain_file)
-				#self.com.runRawCommand(cmd)
+
 				self.com.runFlirt(anatomical_file_path, template_brain, reg_brain_file, reg_file)
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
-				#self.com.runFslEyes(output_image_path, reg_brain_file + '.nii.gz', options='')
-				#self.com.runFslEyes(reg_brain_file, output_image_path=output_image_path, options='')
 
 				cmd = 'fsleyes render -hl -of %s %s %s -cm yellow -a 80'%(output_image_path, reg_brain_file + '.nii.gz', template_brain)
 				self.com.runRawCommand(cmd)
@@ -136,8 +132,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 				ss_lesion_volume = self.com.runBrainVolume(lesion_bin)
 				subject_info.append(ss_lesion_volume)
 
-				#cog = self.com.runFslStats(lesion_bin, '-C')
-
 				for roi_file in roi_list:
 					roi_name = self._extractFileName(roi_file, remove_extension=True, extension_count=2)
 					roi_volume = self.com.runBrainVolume(roi_file)
@@ -155,7 +149,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 					image_output_path = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', space, roi_name, subject + '_lesion' + str(counter+1) + '_LL.png')
 					cmd = 'fsleyes render -hl --hideCursor -of %s %s %s -cm blue -a 50 %s -cm copper -a 40'%(image_output_path, reg_brain_file + '.nii.gz', lesion_bin, roi_file)
-					#cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s %s %s -cm blue -a 50 %s -cm copper -a 40'%(cog, image_output_path, reg_brain_file + '.nii.gz', lesion_bin, roi_file)
 					self.com.runRawCommand(cmd)
 
 					subject_info.append(roi_volume)
@@ -271,7 +264,6 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 					ll_png = os.path.join(self.getBaseDirectory(), 'QC_LesionLoad', 'FS', '%s'%roi_name, '%s_LL.png'%subject)
 					cmd = 'fsleyes render -hl --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(ll_png, reg_brain_file, lesion_fs_bin, new_binary_file)
-					#cmd = 'fsleyes render -hl -vl %s --hideCursor -of %s  %s %s -cm blue -a 50 %s -cm copper -a 40;'%(cog, ll_png, reg_brain_file, lesion_fs_bin, new_binary_file)
 					self.com.runRawCommand(cmd)
 
 			subject_info_all.append(subject_info)

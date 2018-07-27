@@ -25,12 +25,12 @@ def generateQCPage(page_type, images_dir):
 	output += '}' + '\n'
 
 	output += '.container {' + '\n'
-	output += 'height: 240px;' + '\n'
+	output += 'height: 340px;' + '\n'
 	output += 'overflow: hidden;' + '\n'
 	output += '}' + '\n'
 
 	output += '.container img {' + '\n'
-	output += ' margin-top: -200px;' + '\n'
+	output += ' margin-top: -120px;' + '\n'
 	output += '}' + '\n'
 	output += '</style>' + '\n'
 

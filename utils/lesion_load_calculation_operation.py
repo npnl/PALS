@@ -64,7 +64,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 				self.com.runFlirt(bet_brain_file, template_brain, reg_brain_file, reg_file)
 				out_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', space, '%s_Reg.png'%subject)
-				cmd = 'fsleyes render -hl -of %s %s %s -cm yellow -a 80'%(out_image_path, reg_brain_file + '.nii.gz', template_brain)
+				cmd = 'fsleyes render -hl --hideCursor -of %s %s %s -cm yellow -a 90'%(out_image_path, template_brain, reg_brain_file + '.nii.gz')
 				self.com.runRawCommand(cmd)
 
 		if space == 'FS':
@@ -84,7 +84,7 @@ class LesionLoadCalculationOperation(BaseOperation):
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Registrations', 'FS', '%s_Reg.png'%subject)
 
-				cmd = 'fsleyes render -hl -of %s %s %s -cm yellow -a 80'%(output_image_path, reg_brain_file + '.nii.gz', template_brain)
+				cmd = 'fsleyes render -hl --hideCursor -of %s %s %s -cm yellow -a 90'%(output_image_path, template_brain, reg_brain_file + '.nii.gz')
 				self.com.runRawCommand(cmd)
 
 				# invert transformation matrix

@@ -11,9 +11,16 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 
 ## Getting Started
 
-You can also run [PALS with Docker](docker.md).
+There are two ways to use PALS: in a in a [Docker Container](docker.md) or in a [Manually Prepared Environment](#manual_env).
 
-### Prerequisites
+### Docker Container
+
+In order to run PALS in a Docker container, Docker must be installed. Once Docker is [installed](https://docs.docker.com/install/), follow the instructions [here](docker.md) to prepare your local machine for running the PALS GUI. Please note that some features (html QC & using freesurfer) are still under development for the dockerized version.
+
+### Manually Prepared Environment
+<a id='manual_env'></a>
+
+__Prerequisites__
 
 * Linux or Mac OS
 * [Python 2.7](https://www.python.org/download/releases/2.7/)
@@ -24,11 +31,6 @@ You can also run [PALS with Docker](docker.md).
 
 First-time users may be asked to specify a directory path to FSL and/or FreeSurfer binaries (see instructions for [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup) and [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/MacOsInstall#SetupandConfiguration) setup).
 
-<!-- ```
-Give examples
-``` -->
-
-### Install
 
 Clone this github repository:
 

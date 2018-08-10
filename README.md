@@ -31,6 +31,7 @@ __Prerequisites__
 
 First-time users may be asked to specify a directory path to FSL and/or FreeSurfer binaries (see instructions for [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup) and [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/MacOsInstall#SetupandConfiguration) setup).
 
+__Installing__
 
 Clone this github repository:
 

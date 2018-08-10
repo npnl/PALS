@@ -16,9 +16,11 @@ class BaseOperation():
 		if (not os.path.exists(self.getBaseDirectory())) and len(self.output_directory) > 0:
 			os.makedirs(self.getBaseDirectory())
 
+	# this is the input directory for PALS
 	def getProjectDirectory(self):
 		return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
+	#this is where PALS will output all files
 	def getBaseDirectory(self):
 		return os.path.join(self.output_directory, self.unique_dir_name)
 
@@ -140,7 +142,7 @@ class BaseOperation():
 		for subject in self.subjects:
 			intermediate_path = self.getIntermediatePath(subject)
 			subject_path = self.getSubjectPath(subject)
-			
+
 			files = ["%s_Reg_brain_MNI152.nii.gz",\
 					 "%s_Reg_brain_custom.nii.gz",\
 					 "%s_Reg_brain_MNI152.nii.gz",\
@@ -209,8 +211,8 @@ class BaseOperation():
 		for key in sorted(selection_mapping):
 			log_line = key.ljust(60) + " :  " + str(selection_mapping[key].get())
 			self.logger.debug(log_line)
-		
+
 		self.logSelectedROINames("19. Default ROIs List", default_roi)
 		self.logSelectedROINames("20. FreeSurfer ROIs List", fs_rois)
-		
+
 		self.logger.debug('\n')

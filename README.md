@@ -11,7 +11,7 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 
 ## Getting Started
 
-There are two ways to use PALS: in a in a [Docker Container](docker.md) or in a [Manually Prepared Environment](#manual_env).
+There are two ways to use PALS: in a [Docker Container](docker.md) or in a [Manually Prepared Environment](#manual_env).
 
 ### Docker Container
 

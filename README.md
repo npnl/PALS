@@ -1,6 +1,5 @@
 # Pipeline for Analyzing Lesions after Stroke (PALS) #
 
-
 Welcome to our github page!
 
 ## What is PALS?
@@ -44,6 +43,8 @@ Install python dependencies
 cd PALS
 pip install -r requirements.txt
 ```
+---
+## Running PALS through Docker
 ---
 
 

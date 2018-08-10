@@ -66,10 +66,10 @@ class Commands(object):
 		cmd = 'fslswapdim %s -x y z %s;'%(original_t1_files, output_bin_path)
 		output, ret_code = self.startExecution(cmd)
 
-	def runBet(self, anatomical_file_path, output_file):
-		# bet "${ANATOMICAL}" "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_Brain -R -f 0.5 -g 0;
-		cmd = 'bet %s %s -R -f 0.5 -g 0;'%(anatomical_file_path, output_file)
-		self.startExecution(cmd)
+	# def runBet(self, anatomical_file_path, output_file):
+	# 	# bet "${ANATOMICAL}" "${SUBJECTOPDIR}"/Intermediate_Files/"${SUBJ}"_Brain -R -f 0.5 -g 0;
+	# 	cmd = 'bet %s %s -R -f 0.5 -g 0;'%(anatomical_file_path, output_file)
+	# 	self.startExecution(cmd)
 
 	def runFslEyes(self, anatomical_file_path, bet_brain_file='', output_image_path='', options='-cm blue -a 50'):
 		# fsleyes render --hideCursor -of "$WORKINGDIR"/QC_BrainExtractions/"${SUBJ}"_BET.png "$ANATOMICAL" "$BET_Brain" -cm blue -a 50;

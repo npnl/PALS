@@ -11,6 +11,8 @@ PALS is a scalable and user-friendly toolbox designed to facilitate standardized
 
 ## Getting Started
 
+You can also run [PALS with Docker](docker.md).
+
 ### Prerequisites
 
 * Linux or Mac OS

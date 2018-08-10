@@ -15,7 +15,7 @@ There are two ways to use PALS: in a [Docker Container](docker.md) or in a [Manu
 
 ### Docker Container
 
-In order to run PALS in a Docker container, Docker must be installed. Once Docker is [installed](https://docs.docker.com/install/), follow the instructions [here](docker.md) to prepare your local machine for running the PALS GUI. Please note that some features (html QC & using freesurfer) are still under development for the dockerized version.
+In order to run PALS in a Docker container, Docker must be installed. Once Docker is [installed](https://docs.docker.com/install/), follow the instructions [here](docker.md) to prepare your local machine for running the PALS GUI.
 
 ### Manually Prepared Environment
 <a id='manual_env'></a>

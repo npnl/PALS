@@ -115,6 +115,17 @@ __Databases__:
 For the lesion correction and lesion load calculation modules, separate CSV files will be created, containing information for all subjects about number of voxels removed and amount of lesion-roi overlap, respectively.
 
 
+---
+### Troubleshooting
+###### Problem 1.
+On Mac OS X, Nipype.workflow fails with the error : `ValueError: unknown locale: UTF-8`.
+###### Solution. 
+If you are facing the above mentioned error on MacOS X, here's the quick fix - add these lines to your ~/.bash_profile or simply execute then in your terminal from where you are running the PALS software.:
+```
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+```
+
 
 ---
 ### Support

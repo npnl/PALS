@@ -126,7 +126,9 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 ```
 
-###### Problem 2. Pip fails with the error `Could not find a version that satisfies the requirement nypipe`.
+
+###### Problem 2.
+Pip fails with the error `Could not find a version that satisfies the requirement nypipe`.
 ###### Solution.
 Run the following command to upgrade the pip.
 1. If you are using Python 2.x

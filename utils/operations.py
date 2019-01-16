@@ -7,17 +7,17 @@ from threading import Thread
 from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_CT_Map
 from pages.stores.rois import FreesurferSubCorticalROINamesToFileMapping as FS_SCT_Map
 from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
-from commands import Commands
+from .commands import Commands
 
-from qc_page import generateQCPage
+from .qc_page import generateQCPage
 
-from base_operation import BaseOperation
-from wm_segmentation_operation import WMSegmentationOperation
-from wm_correction_operation import LesionCorrectionOperation
-from brain_extraction_operation import BrainExtractionOperation
-from lesion_load_calculation_operation import LesionLoadCalculationOperation
+from .base_operation import BaseOperation
+from .wm_segmentation_operation import WMSegmentationOperation
+from .wm_correction_operation import LesionCorrectionOperation
+from .brain_extraction_operation import BrainExtractionOperation
+from .lesion_load_calculation_operation import LesionLoadCalculationOperation
 
-class Operations(object, WMSegmentationOperation,\
+class Operations(WMSegmentationOperation,\
 				LesionCorrectionOperation, BrainExtractionOperation,\
 				LesionLoadCalculationOperation):
 	def __init__(self, controller):

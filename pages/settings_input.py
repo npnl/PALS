@@ -5,7 +5,7 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
-from base_input import *
+from .base_input import *
 from utils import isValidPath
 import os
 

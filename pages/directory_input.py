@@ -5,7 +5,7 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
-from base_input import *
+from .base_input import *
 from utils import isValidPath
 
 class DirectoryInputPage(BaseInputPage, object):
@@ -79,8 +79,3 @@ class DirectoryInputPage(BaseInputPage, object):
 		else:
 			super(DirectoryInputPage, self).moveToNextPage()
 
-
-	def checkValues(self, controller):
-		print controller.sv_input_dir.get()
-		print controller.sv_output_dir.get()
-		print controller.run_normalize_status.get()

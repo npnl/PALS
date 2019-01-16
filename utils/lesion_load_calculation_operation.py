@@ -1,6 +1,6 @@
 import os
-from qc_page import generateQCPage
-from base_operation import BaseOperation
+from .qc_page import generateQCPage
+from .base_operation import BaseOperation
 
 class LesionLoadCalculationOperation(BaseOperation):
 	def runLesionLoadCalculation(self, anatomical_id, lesion_mask_id):

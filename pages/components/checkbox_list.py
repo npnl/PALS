@@ -5,7 +5,7 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
-from entry_placeholder import EntryWithPlaceholder
+from .entry_placeholder import EntryWithPlaceholder
 import difflib
 
 class CheckboxList(object):

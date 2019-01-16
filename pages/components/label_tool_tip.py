@@ -5,7 +5,7 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
-from tool_tip import createToolTip
+from .tool_tip import createToolTip
 
 class LabelToolTip(tk.Frame, object):
 	def __init__(self, master=None, tool_tip_text='', **kwargs):

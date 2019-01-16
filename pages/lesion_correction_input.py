@@ -1,15 +1,16 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
-import tkFileDialog
 import os
 
 from utils import isValidPath
-from base_input import *
+from .base_input import *
 
 class LesionCorrInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):

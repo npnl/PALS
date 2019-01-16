@@ -1,14 +1,15 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
 import os
-import tkFileDialog
-from tool_tip import createToolTip
-from label_tool_tip import LabelToolTip
+from .tool_tip import createToolTip
+from .label_tool_tip import LabelToolTip
 
 class InputFieldList(object):
 	def __init__(self, parent, controller, title, input_array, row, column, columnspan=1):
@@ -31,7 +32,7 @@ class InputFieldList(object):
 		self.option_count = StringVar(parent)
 		self.option_count.set(options_count_list[0])
 
-		drop_down = apply(OptionMenu, (lf_options, self.option_count) + options_count_list)
+		drop_down = OptionMenu(lf_options, self.option_count, *options_count_list)
 		drop_down.grid(row=row, column=1, sticky='W', pady=3)
 		self.option_count.trace('w', self.changeInDropDown)
 
@@ -83,7 +84,7 @@ class InputFieldList(object):
 		while len(self.input_array) > 0:
 			self.input_array.pop()
 
-  		row = 0
+		row = 0
 		for index in range(max(len(self.controller.user_rois), int(self.option_count.get())) + len(self.bulk_text)):
 
 			lb_path = Label(self.frame_inputs, text='Input #%d'%(index+1))

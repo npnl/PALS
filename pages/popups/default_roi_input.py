@@ -1,12 +1,13 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
 import os
-import tkFileDialog
 from ..components import CheckboxList
 from ..stores import NameVarStore
 from ..components import ButtonToolTip

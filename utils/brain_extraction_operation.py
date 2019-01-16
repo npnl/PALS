@@ -2,10 +2,10 @@ import os, traceback
 import nipype as np
 
 from nipype.interfaces.fsl import BET
-from qc_page import generateQCPage
-from base_operation import BaseOperation
-#from generate_image import generateImage
-from brain_extraction_workflow import runNipypeBet
+from .qc_page import generateQCPage
+from .base_operation import BaseOperation
+#from .generate_image import generateImage
+from .brain_extraction_workflow import runNipypeBet
 from shutil import copyfile, rmtree
 
 

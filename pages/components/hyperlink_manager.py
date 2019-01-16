@@ -1,4 +1,10 @@
-from Tkinter import *
+try:
+    import Tkinter as tk
+    from Tkinter import *
+    import tkFileDialog
+except ImportError:
+    import tkinter as tk
+    from tkinter import *
 
 class HyperlinkManager:
 

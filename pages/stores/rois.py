@@ -1,4 +1,4 @@
-from name_var_store import NameVarStore
+from .name_var_store import NameVarStore
 
 CorticospinalTractROINames = ['Left Corticospinal Tract',
 	'Right Corticospinal Tract']

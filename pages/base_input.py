@@ -1,12 +1,13 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
 import os
-import tkFileDialog
 from .components import LabelToolTip
 
 class BaseInputPage(tk.Frame):
@@ -93,8 +94,3 @@ class BaseInputPage(tk.Frame):
 			entry.config(state='normal')
 		else:
 			entry.config(state='disabled')
-
-	def checkValues(self, controller):
-		print controller.sv_input_dir.get()
-		print controller.sv_output_dir.get()
-		print controller.run_normalize_status.get()

@@ -1,7 +1,7 @@
 import os
-from qc_page import generateQCPage
+from .qc_page import generateQCPage
 
-from base_operation import BaseOperation
+from .base_operation import BaseOperation
 
 class WMSegmentationOperation(BaseOperation):
 	def runWMSegmentation(self, anatomical_id, lesion_mask_id):

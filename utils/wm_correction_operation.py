@@ -1,6 +1,6 @@
 import os
-from qc_page import generateQCPage
-from base_operation import BaseOperation
+from .qc_page import generateQCPage
+from .base_operation import BaseOperation
 
 class LesionCorrectionOperation(BaseOperation):
 	def runLesionCorrection(self, anatomical_id, lesion_mask_id):

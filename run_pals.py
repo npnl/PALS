@@ -1,11 +1,13 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
-import tkFileDialog
+
 import os, subprocess
 import logging
 from datetime import datetime

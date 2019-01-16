@@ -1,12 +1,13 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
+	import tkFileDialog
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter import filedialog as tkFileDialog
 
 import os
-import tkFileDialog
 from ..components import InputFieldList
 from ..components import EntryWithPlaceholder
 from ..stores import NameVarStore

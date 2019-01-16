@@ -1,13 +1,14 @@
 try:
 	import Tkinter as tk
 	from Tkinter import *
-	import ttk
+	from ttk import Progressbar
 except ImportError:
 	import tkinter as tk
 	from tkinter import *
+	from tkinter.ttk import Progressbar
 
 
-from base_input import *
+from .base_input import *
 import webbrowser, os
 import traceback
 from functools import partial
@@ -33,7 +34,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.stop = tk.Button(self, text='Stop Execution', state="disabled", command=lambda : self.terminateCommand())
 		self.stop.grid(row=self.starting_row, column=2, sticky='E', padx=5, pady=3)
 
-		self.progressbar = ttk.Progressbar(self)
+		self.progressbar = Progressbar(self)
 		self.progressbar.configure(mode='determinate', max=100)
 		self.progressbar.grid(row=self.starting_row+1, column=0, columnspan=3, sticky='ew', padx=10, pady=10)
 

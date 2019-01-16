@@ -5,10 +5,10 @@ except ImportError:
 	import tkinter as tk
 	from tkinter import *
 
-from base_input import *
-from popups import DefaultROIInputPopup
-from popups import OwnROIInputPopup
-from popups import FSROIInputPopup
+from .base_input import *
+from .popups import DefaultROIInputPopup
+from .popups import OwnROIInputPopup
+from .popups import FSROIInputPopup
 
 class LesionLoadCalculationInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):

@@ -15,7 +15,11 @@ def runNipypeBet(subject_list, anatomical_id, proj_directory):
     seperator=''
     concat_words=('{subject_id}_', anatomical_id ,'.nii.gz')
     anat_file_name=seperator.join(concat_words)
+
+    # if not run rad reorient then:
     anat_file = opj('{subject_id}','Intermediate_Files','Original_Files',anat_file_name)
+    # else if run rad reorient then:
+    #anat_file = opj('{subject_id}',anat_file_name)
 
     templates = {'anat': anat_file}
 

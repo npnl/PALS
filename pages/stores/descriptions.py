@@ -52,6 +52,3 @@ class Descriptions(object):
 		# for subject-specific FS popup page
 		self.verify_FS = "FreeSurfer must have been already completed on all subjects prior to selecting this option. Each subject directory MUST contain an aparc+aseg.mgz and T1.mgz file for this module to run properly."
 
-
-
-		#

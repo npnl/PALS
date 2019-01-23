@@ -1,0 +1,32 @@
+{
+	"modules": {
+		"Re_orient_radiological": true,
+		"Lession_correction": false,
+		"Lesion_load_calculation": false,
+		"Visual_QC": false
+	},
+
+	"common_settings": {
+		"input_dir": "/Users/amit/WorkPro/Lily/PALS/data/INPUTS_FS",
+		"output_dir": "/Users/amit/WorkPro/Lily/PALS/data/OUTPUTS_FS",
+		"t1_id": "T1",
+		"lesion_mask_id": "LesionSmooth",
+		"same_anatomical_space": false
+	},
+
+	"module_settings": {
+		"Lession_correction": {
+			"bet_performed": false,
+			"bet_identifier": "brain",
+			"wms_performed": false,
+			"wms_identifier": "wm",
+			"t1_intensity_percent": 5.0
+
+		},
+
+		"Lesion_load_calculation": {
+			"bet_performed": false,
+			"bet_identifier": "brain"
+		}
+	}
+}

@@ -7,7 +7,6 @@ except ImportError:
 	from tkinter import *
 	from tkinter.ttk import Progressbar
 
-
 from .base_input import *
 import webbrowser, os
 import traceback
@@ -44,7 +43,6 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.output.grid(row=self.starting_row+2, column=0, columnspan=3, sticky='ew', padx=10)
 		self.hyperlink = HyperlinkManager(self.output)
 
-
 		self.lf_subject_file = LabelFrame(self, text='Visual QC', padx=15, font='Helvetica 14 bold')
 		self.lf_subject_file.grid(row=self.starting_row+3, column=0, columnspan=3, sticky='WE', padx=5, pady=5, ipadx=5, ipady=5)
 		self.lf_subject_file.grid_rowconfigure(0, weight=1)
@@ -63,7 +61,6 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.continue_with_all_sub = tk.Button(self.lf_subject_file, text='Continue with all subjects', command=lambda : self.continueWithAllSub())
 		self.continue_with_all_sub.grid(row=1, column=2, sticky='W', padx=10, pady=3)
 
-
 		self.controller.display = self.output
 
 	def chooseFile(self, parent, controller, place_holder, message, default_dir=''):
@@ -76,6 +73,7 @@ class RunningOperationsPage(BaseInputPage, object):
 	def onShowFrame(self, event):
 		super(RunningOperationsPage, self).onShowFrame(event)
 		self.resetAll()
+		self.silentMode()
 
 	def resetAll(self):
 		self.resetUI()
@@ -116,8 +114,12 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.need_subjects_file = False
 		self.executeCommand()
 
+	def silentMode(self):
+		if self.controller.silent:
+			self.executeCommand()
+
 	def executeCommand(self):
-		if self.start['text'] == 'Continue Execution' and self.need_subjects_file:
+		if self.start['text'] == 'Continue Execution' and self.need_subjects_file and not self.controller.silent:
 			selected_subjects_file_path  = self.controller.selected_subjects.get()
 			new_subjects = []
 			try:
@@ -150,7 +152,7 @@ class RunningOperationsPage(BaseInputPage, object):
 			self.operation.stopThreads()
 
 	def pause(self, operation_name='', data='', need_pause=False):
-		if need_pause:
+		if need_pause and not self.controller.silent:
 			self.start.config(state="disabled")
 			self.start.config(text='Continue Execution')
 			self.title.set('Please input subject file')

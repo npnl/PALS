@@ -21,7 +21,7 @@ class Commands(object):
 		self.running_process.stdout.close()
 		if return_code != 0 and show_error:
 			output = 'Something went wrong.'
-			self.parent.updateGUI(output)
+			self.parent.updateGUI(output, log_level='ERROR')
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		return output, return_code

@@ -41,11 +41,12 @@ class BaseOperation():
 	def incrementStage(self, count=1):
 		self.stage += count
 		self.updateProgressBar((100.0/self.total_stages))
+		self.controller.update()
 
 	def printQCPageUrl(self, operation_name, html_path, pause=True):
 		if pause and not self.controller.b_pause_for_qc.get():
 			self.incrementStage()
-		pause = pause and self.controller.b_pause_for_qc.get()
+		pause = pause and self.controller.b_pause_for_qc.get() and not self.controller.silent()
 		self.callback.pause(operation_name, html_path, pause)
 
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):

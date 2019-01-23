@@ -59,8 +59,9 @@ class DirectoryInputPage(BaseInputPage, object):
 		chk_same_anatomical_space = tk.Checkbutton(wrapper, variable=controller.b_same_anatomical_space)
 		chk_same_anatomical_space.grid(row=0, column=0, sticky='W', pady=(3, 20))
 
-
-		
+	def onShowFrame(self, event):
+		super(DirectoryInputPage, self).onShowFrame(event)
+		self.silentMode()
 
 
 	def setFrameTitle(self):

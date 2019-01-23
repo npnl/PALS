@@ -63,7 +63,6 @@ class Operations(WMSegmentationOperation,\
 
 	def startExecution(self):
 		self.skip = False
-
 		if self.stage == 0:
 			self.logUserChoices()
 			self.logger.debug("Stage currently executing is %d"%self.stage)
@@ -159,6 +158,8 @@ class Operations(WMSegmentationOperation,\
 			self.logger.debug("Stage currently executing is %d"%self.stage)
 			self.controller.progressbar['value'] = 100
 			self.callback.finished('all', '')
+			if self.controller.silent:
+				self.controller.quit()
 
 		if self.skip and self.reset_from_ui:
 			self.callback.resetAll()
@@ -220,7 +221,7 @@ class Operations(WMSegmentationOperation,\
 
 		errors = '\n'.join(errors)
 
-		self.controller.updateGUI(errors)
+		self.controller.updateGUI(errors, log_level='ERROR')
 		return flag
 
 

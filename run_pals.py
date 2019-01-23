@@ -11,6 +11,7 @@ except ImportError:
 import os, subprocess
 import logging
 from datetime import datetime
+import argparse
 
 from pages import WelcomePage
 from pages import SettingsInput
@@ -20,6 +21,7 @@ from pages import LesionCorrInputPage
 from pages import LesionLoadCalculationInputPage
 from pages import rois
 from pages.stores import Descriptions
+import utils
 
 LARGE_FONT = ("Verdana", 12)
 
@@ -114,6 +116,10 @@ class MainWindow(tk.Tk):
 		self.sv_fsl_binaries_msg = StringVar(self)
 		self.sv_fsl_binaries_msg.set('')
 
+		# Silent Mode Settings
+		self.silent = True
+		self.checkLocalConfig()
+
 		# this container contains all the pages
 		container = tk.Frame(self)
 		container.pack(side="top", fill="both", expand=True)
@@ -134,9 +140,13 @@ class MainWindow(tk.Tk):
 		self.bind_class("Text","<Control-a>", self.selectAll)
 		self.bind_class("Text","<Command-v>", self.pasteAll)
 
-	def updateGUI(self, text):
+	def updateGUI(self, text, log_level='DEBUG'):
 		self.display.insert(END, text + '\n')
 		self.display.see(END)
+		if log_level == 'DEBUG':
+			self.logger.debug(text)
+		if log_level == 'ERROR':
+			self.logger.error(text)
 		self.update()
 
 	def selectAll(self, event):
@@ -215,6 +225,12 @@ class MainWindow(tk.Tk):
 		msg = 'The following binaries location are not set in the path:\n' + msg if len(msg) != 0 else ''
 		self.sv_fsl_binaries_msg.set(msg)
 		return flag
+
+	def checkLocalConfig(self):
+		if self.silent:
+			pass
+		configs = utils.readConfig()
+		utils.setApplicationVariables(self, configs)
 
 if __name__ == '__main__':
 	app = MainWindow()

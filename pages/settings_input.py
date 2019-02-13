@@ -6,7 +6,6 @@ except ImportError:
 	from tkinter import *
 
 from .base_input import *
-from utils import isValidPath
 import os
 
 class SettingsInput(BaseInputPage, object):

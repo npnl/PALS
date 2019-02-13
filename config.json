@@ -1,21 +1,21 @@
 {
 	"modules": {
 		"Re_orient_radiological": true,
-		"Lession_correction": false,
-		"Lesion_load_calculation": false,
+		"Lesion_correction": false,
+		"Lesion_load_calculation": true,
 		"Visual_QC": false
 	},
 
 	"common_settings": {
-		"input_dir": "/Users/amit/WorkPro/Lily/PALS/data/INPUTS_FS",
+		"input_dir": "/Users/amit/WorkPro/Lily/PALS/data/reorient_test/",
 		"output_dir": "/Users/amit/WorkPro/Lily/PALS/data/OUTPUTS_FS",
-		"t1_id": "T1",
+		"t1_id": "t1",
 		"lesion_mask_id": "LesionSmooth",
 		"same_anatomical_space": false
 	},
 
 	"module_settings": {
-		"Lession_correction": {
+		"Lesion_correction": {
 			"bet_performed": false,
 			"bet_identifier": "brain",
 			"wms_performed": false,
@@ -26,7 +26,8 @@
 
 		"Lesion_load_calculation": {
 			"bet_performed": false,
-			"bet_identifier": "brain"
+			"bet_identifier": "brain",
+			"roi_names": ["Left Corticospinal Tract", "Left Bank of the Superior Temporal Sulcus"]
 		}
 	}
 }

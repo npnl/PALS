@@ -23,7 +23,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.move_back = False
 		self.need_subjects_file = False
 
-		self.downloaded_file_path = '~/Downloads'
+		self.downloaded_file_path = '~/Downloads/'
 
 		self.operation = Operations(self.controller)
 
@@ -170,7 +170,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.btn_prev.config(state="normal")
 		self.stop.config(state="disabled")
 		self.title.set('Completed')
-		self.controller.updateGUI('All operations completed. You may now close the application.')
+		self.controller.updateMessage('All operations completed. You may now close the application.')
 		self.resetClickCounter()
 		if data:
 			self.insertHyperLink(operation_name, data)

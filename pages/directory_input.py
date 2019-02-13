@@ -6,7 +6,6 @@ except ImportError:
 	from tkinter import *
 
 from .base_input import *
-from utils import isValidPath
 
 class DirectoryInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
@@ -70,7 +69,7 @@ class DirectoryInputPage(BaseInputPage, object):
 	def moveToNextPage(self):
 		input_dir = self.controller.sv_input_dir.get()
 		output_dir = self.controller.sv_output_dir.get()
-		if not isValidPath(input_dir.strip()) or not isValidPath(output_dir.strip()):
+		if not self.isValidPath(input_dir.strip()) or not self.isValidPath(output_dir.strip()):
 			self.setRequiredInputError('Directory inputs are not valid.')
 			return
 		if not self.controller.sv_lesion_mask_id.get().strip()\

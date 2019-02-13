@@ -96,6 +96,15 @@ class BaseInputPage(tk.Frame):
 		else:
 			entry.config(state='disabled')
 
+	def isValidPath(self, filePath):
+		if os.path.exists(filePath):
+			pass
+		elif os.access(os.path.dirname(filePath), os.W_OK):
+			pass
+		else:
+			return False
+		return True
+
 	def silentMode(self):
 		if self.controller.silent:
 			self.moveToNextPage()

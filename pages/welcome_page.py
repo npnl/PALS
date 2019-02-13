@@ -9,7 +9,6 @@ except ImportError:
 
 import os
 
-from utils import isValidPath
 from .base_input import *
 from .popups import QCPopup
 

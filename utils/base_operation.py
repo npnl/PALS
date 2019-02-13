@@ -29,11 +29,12 @@ class BaseOperation():
 		return os.path.join(self.getIntermediatePath(subject), self.ORIGINAL_FILES)
 
 	def updateProgressBar(self, value):
-		self.controller.progressbar.step(value)
+		# self.controller.progressbar.step(value)
+		self.controller.updateProgressBar(value)
 
 	def updateSubjects(self, subjects_to_drop):
 		if len(subjects_to_drop) > 0:
-			self.controller.updateGUI("Dropping subjects from further operations : " + str(subjects_to_drop))
+			self.controller.updateMessage("Dropping subjects from further operations : " + str(subjects_to_drop))
 		self.subjects = list(set(self.subjects) - set(subjects_to_drop))
 		self.subjects.sort()
 		self.logger.debug("Updated the subjects to " + str(self.subjects))
@@ -47,7 +48,8 @@ class BaseOperation():
 		if pause and not self.controller.b_pause_for_qc.get():
 			self.incrementStage()
 		pause = pause and self.controller.b_pause_for_qc.get() and not self.controller.silent()
-		self.callback.pause(operation_name, html_path, pause)
+		if self.callback:
+			self.callback.pause(operation_name, html_path, pause)
 
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):
 		head, tail = ntpath.split(path)

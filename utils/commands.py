@@ -5,7 +5,6 @@ class Commands(object):
 	def __init__(self, logger, parent):
 		self.logger = logger
 		self.parent = parent
-		self.display = parent.display
 
 	def startExecution(self, cmd, show_error=True):
 		self.running = True
@@ -21,7 +20,7 @@ class Commands(object):
 		self.running_process.stdout.close()
 		if return_code != 0 and show_error:
 			output = 'Something went wrong.'
-			self.parent.updateGUI(output, log_level='ERROR')
+			self.parent.updateMessage(output, log_level='ERROR')
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		return output, return_code

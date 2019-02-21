@@ -5,7 +5,7 @@ Welcome to our github page!
 
 ## What is PALS?
 
-PALS is a scalable and user-friendly toolbox designed to facilitate standardized analysis and ensure quality in stroke research using T1-weighted MRIs. The PALS toolbox offers four moduels integrated into a single pipeline, including (1) reorientation to radiological convention, (2) lesion correction for healthy white matter voxels, (3) lesion load calculation, and (4) visual quality control. To learn more, please refer to our [paper in Frontiers](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full). 
+[PALS](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full) is a scalable and user-friendly toolbox designed to facilitate standardized analysis and ensure quality in stroke research using T1-weighted MRIs. The PALS toolbox offers four moduels integrated into a single pipeline, including (1) reorientation to radiological convention, (2) lesion correction for healthy white matter voxels, (3) lesion load calculation, and (4) visual quality control. To learn more, please refer to our [paper in Frontiers](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full). 
 
 ![Image of PALS Data Structure](images/pipeline.png)
 
@@ -143,6 +143,12 @@ Run the following command to upgrade the pip.
 The best way to keep track of bugs or failures is to open a [New Issue](https://github.com/npnl/PALS/issues/new) on the Github system. You can also contact the author via email: kaoriito at usc dot edu.
 
 ---
+
+### Referencing
+
+Please reference our overview paper when using PALS:
+
+*Ito, K. L., Kumar, A., Zavaliangos-Petropulu, A., Cramer, S. C., & Liew, S. L. (2018). Pipeline for Analyzing Lesions After Stroke (PALS). Frontiers in neuroinformatics, 12, 63.
 
 ### Authors
 

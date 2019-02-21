@@ -148,7 +148,7 @@ The best way to keep track of bugs or failures is to open a [New Issue](https://
 
 Please reference our overview paper when using PALS:
 
-*Ito, K. L., Kumar, A., Zavaliangos-Petropulu, A., Cramer, S. C., & Liew, S. L. (2018). Pipeline for Analyzing Lesions After Stroke (PALS). Frontiers in neuroinformatics, 12, 63.
+*Ito, K. L., Kumar, A., Zavaliangos-Petropulu, A., Cramer, S. C., & Liew, S. L. (2018). Pipeline for Analyzing Lesions After Stroke (PALS). Frontiers in neuroinformatics, 12, 63.*
 
 ### Authors
 

@@ -13,8 +13,9 @@ class NameVarStore(object):
 		self.value = value
 
 class Application(object):
-	def __init__(self, logger, project_dir):
+	def __init__(self, logger, project_dir, need_display):
 		self.silent = True
+		self.need_display = need_display
 		self.logger = logger
 		self.project_dir = project_dir
 

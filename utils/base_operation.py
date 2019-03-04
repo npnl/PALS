@@ -47,7 +47,7 @@ class BaseOperation():
 	def printQCPageUrl(self, operation_name, html_path, pause=True):
 		if pause and not self.controller.b_pause_for_qc.get():
 			self.incrementStage()
-		pause = pause and self.controller.b_pause_for_qc.get() and not self.controller.silent()
+		pause = pause and self.controller.b_pause_for_qc.get() and not self.controller.silent
 		if self.callback:
 			self.callback.pause(operation_name, html_path, pause)
 
@@ -167,8 +167,9 @@ class BaseOperation():
 						file_path = os.path.join(intermediate_path, file_name%subject)
 					except:
 						file_path = os.path.join(intermediate_path, file_name)
-					cmd = "mv %s %s"%(file_path, subject_path)
-					self.com.runRawCommand(cmd, show_error=False)
+					if os.path.exists(file_path):
+						cmd = "mv %s %s"%(file_path, subject_path)
+						self.com.runRawCommand(cmd, show_error=False)
 			except:
 				pass
 

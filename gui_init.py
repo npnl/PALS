@@ -33,6 +33,7 @@ class MainWindow(tk.Tk):
 
 		# Silent Mode Settings
 		self.silent = False
+		self.need_display = False
 
 		self.logger = logger
 		self.project_dir = project_dir

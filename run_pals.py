@@ -3,17 +3,16 @@ import logging
 import argparse
 from datetime import datetime
 
-from gui_init import MainWindow
-
 from utils import Application, readApplicationConfigs
 
 from utils import Operations
 
 def parseArguments():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-q','--silent', help='Starts the PALS tool without showing the UI.', action='store_true')
+	parser.add_argument('-s','--silent', help='Starts the PALS tool without showing the UI.', action='store_true')
 	parser.add_argument('-d','--debug', help='Set the logging level as DEBUG', action='store_true')
 	parser.add_argument('-c', '--config', help='Pass a config file to the application. Default config file is [config.json] in current directory', default='')
+	parser.add_argument('--docker', help='Create a virtual display for fsleyes and fsl binaries in dockerized environment', action='store_true')
 	args = parser.parse_args()
 	return args
 
@@ -39,14 +38,15 @@ def setupLogger(debug):
 def getProjectDirectory():
 	return os.path.dirname(os.path.realpath(__file__))
 
-def silentMode(logger, config_file):
+def silentMode(logger, config_file, need_display):
 	project_dir = getProjectDirectory()
-	application = Application(logger, project_dir)
+	application = Application(logger, project_dir, need_display=need_display)
 	readApplicationConfigs(application, config_file)
 	operations = Operations(application)
 	operations.startThreads(None)
 
 def uiMode(logger):
+	from gui_init import MainWindow
 	project_dir = getProjectDirectory()
 	app = MainWindow(logger, project_dir)
 	app.mainloop()
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 		else:
 			logger.info('Reading application configurations from file [%s]'%(config_file))
 
-		silentMode(logger, config_file)
+		silentMode(logger, config_file, arguments.docker)
 
 	else:
 		uiMode(logger)

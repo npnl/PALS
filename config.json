@@ -7,9 +7,9 @@
 	},
 
 	"common_settings": {
-		"input_dir": "/Users/amit/WorkPro/Lily/PALS/data/reorient_test/",
-		"output_dir": "/Users/amit/WorkPro/Lily/PALS/data/OUTPUTS_FS",
-		"t1_id": "t1",
+		"input_dir": "/pals/data/INPUTS_FS/",
+		"output_dir": "/pals/data/OUTPUTS_FS",
+		"t1_id": "T1",
 		"lesion_mask_id": "LesionSmooth",
 		"same_anatomical_space": false
 	},

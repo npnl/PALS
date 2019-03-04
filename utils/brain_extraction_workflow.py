@@ -5,7 +5,7 @@ from nipype import IdentityInterface
 from nipype import Node, Workflow
 from nipype.interfaces.fsl import BET
 
-def runNipypeBet(subject_list, anatomical_id, proj_directory):
+def runNipypeBet(controller, subject_list, anatomical_id, proj_directory):
 
     infosource = Node(IdentityInterface(fields=['subject_id']),
                   name="infosource")
@@ -15,7 +15,10 @@ def runNipypeBet(subject_list, anatomical_id, proj_directory):
     seperator=''
     concat_words=('{subject_id}_', anatomical_id ,'.nii.gz')
     anat_file_name=seperator.join(concat_words)
-    anat_file = opj('{subject_id}','Intermediate_Files','Original_Files',anat_file_name)
+    if controller.b_radiological_convention.get() == True:
+      anat_file = opj('{subject_id}', anat_file_name)
+    else:
+      anat_file = opj('{subject_id}', 'Intermediate_Files', 'Original_Files',anat_file_name)
 
     templates = {'anat': anat_file}
 

@@ -38,3 +38,23 @@ RUN echo 'export USER=`whoami`' >> ~/.bashrc
 RUN echo 'export FSLDIR="/usr/local/fsl"' >> ~/.bashrc
 RUN echo 'source /usr/local/fsl/etc/fslconf/fsl.sh' >> ~/.bashrc
 
+RUN apt-get install -y git
+RUN git clone https://github.com/npnl/PALS
+WORKDIR "/PALS/"
+
+RUN git checkout hide-ui
+
+RUN echo 'export FSLDIR="/usr/local/fsl/"' >> ~/.pals-env.sh
+RUN echo 'export PATH="$PATH:/usr/local/fsl/bin"' >> ~/.pals-env.sh
+RUN echo 'export USER=`whoami`' >> ~/.pals-env.sh
+RUN echo 'export FSLDIR="/usr/local/fsl"' >> ~/.pals-env.sh
+RUN echo 'source /usr/local/fsl/etc/fslconf/fsl.sh' >> ~/.pals-env.sh
+
+COPY ./docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compatibility
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD []
+

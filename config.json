@@ -1,33 +1,46 @@
 {
-	"modules": {
-		"Re_orient_radiological": true,
-		"Lesion_correction": false,
-		"Lesion_load_calculation": true,
-		"Visual_QC": false
-	},
-
-	"common_settings": {
-		"input_dir": "/pals/data/INPUTS_FS/",
-		"output_dir": "/pals/data/OUTPUTS_FS",
-		"t1_id": "T1",
-		"lesion_mask_id": "LesionSmooth",
-		"same_anatomical_space": false
-	},
-
-	"module_settings": {
-		"Lesion_correction": {
-			"bet_performed": false,
-			"bet_identifier": "brain",
-			"wms_performed": false,
-			"wms_identifier": "wm",
-			"t1_intensity_percent": 5.0
-
-		},
-
-		"Lesion_load_calculation": {
-			"bet_performed": false,
-			"bet_identifier": "brain",
-			"roi_names": ["Left Corticospinal Tract", "Left Bank of the Superior Temporal Sulcus"]
-		}
-	}
+    "modules": {
+        "Re_orient_radiological": true,
+        "Lesion_correction": false,
+        "Lesion_load_calculation": false,
+        "Visual_QC": false
+    },
+    "common_settings": {
+        "input_dir": "/pals/input/",
+        "output_dir": "/pals/output/",
+        "t1_id": "T1",
+        "lesion_mask_id": "LesionSmooth",
+        "same_anatomical_space": false
+    },
+    "module_settings": {
+        "Lesion_correction": {
+            "bet_performed": false,
+            "bet_identifier": "",
+            "wms_performed": false,
+            "wms_identifier": "",
+            "t1_intensity_percent": 5
+        },
+        "Lesion_load_calculation": {
+            "bet_performed": false,
+            "bet_identifier": "",
+            "roi_names": {
+                "default": {
+                    "corticospinal_tracts": [
+                        "Left Corticospinal Tract",
+                        "Right Corticospinal Tract"
+                    ],
+                    "fs_cortical": [],
+                    "fs_sub_cortical": []
+                },
+                "free_surfer": {
+                    "fs_cortical": [],
+                    "fs_sub_cortical": []
+                },
+                "own": {
+                    "template_brain": "",
+                    "own_rois": false
+                }
+            }
+        }
+    }
 }

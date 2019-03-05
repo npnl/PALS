@@ -62,7 +62,7 @@ class Application(object):
 		self.user_rois = []
 		self.user_roi_paths = None
 
-		self.sv_user_brain_template = NameVarStore('', '')
+		self.sv_user_brain_template = None
 		self.user_agreed = NameVarStore('', False)
 
 		#Running Operations

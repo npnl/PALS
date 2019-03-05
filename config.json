@@ -2,7 +2,7 @@
     "modules": {
         "Re_orient_radiological": true,
         "Lesion_correction": false,
-        "Lesion_load_calculation": false,
+        "Lesion_load_calculation": true,
         "Visual_QC": false
     },
     "common_settings": {

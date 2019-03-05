@@ -16,34 +16,36 @@ def readLesionLoadCalculationConfigs(configs, application):
 		module_settings = configs['module_settings']['Lesion_load_calculation']
 		application.b_brain_extraction.set(module_settings['bet_performed'])
 		application.sv_bet_id.set(module_settings['bet_identifier'])
+
 		for roi in module_settings['roi_names']['default']['corticospinal_tracts']:
+			application.b_default_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.default_corticospinal_tract_roi.append(roi_obj)
 
 		for roi in module_settings['roi_names']['default']['fs_cortical']:
+			application.b_default_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.default_freesurfer_cortical_roi.append(roi_obj)
 
 		for roi in module_settings['roi_names']['default']['fs_sub_cortical']:
+			application.b_default_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.default_freesurfer_subcortical_roi.append(roi_obj)
 
 		for roi in module_settings['roi_names']['free_surfer']['fs_cortical']:
+			application.b_freesurfer_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.freesurfer_cortical_roi.append(roi_obj)
 
 		for roi in module_settings['roi_names']['free_surfer']['fs_sub_cortical']:
+			application.b_freesurfer_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.freesurfer_subcortical_roi.append(roi_obj)
 
 		if module_settings['roi_names']['own']['own_rois']:
+			application.b_own_rois.set(True)
 			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']['own_rois']["template_brain"])
 
-
-		for roi in module_settings['roi_names']:
-			roi_obj = application.buildRoi(roi)
-			application.default_corticospinal_tract_roi.append(roi_obj)
-		application.b_default_rois.set(True)
 	except Exception as e:
 		print('Failed to load lesion load configs : ', str(e))
 		

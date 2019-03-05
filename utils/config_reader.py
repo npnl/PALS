@@ -9,7 +9,20 @@ def readReOrientConfigs(configs, application):
 	pass
 
 def readLesionCorrectionConfigs(configs, application):
-	pass
+	try:
+		module_settings = configs['module_settings']['Lesion_correction']
+		application.b_brain_extraction.set(module_settings['bet_performed'])
+		application.sv_bet_id.set(module_settings['bet_identifier'])
+
+		module_settings = configs['module_settings']['Lesion_correction']
+		application.b_wm_segmentation.set(module_settings['wms_performed'])
+		application.sv_wm_id.set(module_settings['wms_identifier'])
+
+		application.sv_percent.set(str(module_settings["t1_intensity_percent"]))
+		application.percent_intensity = module_settings["t1_intensity_percent"]
+
+	except Exception as e:
+		application.updateMessage('Failed to load lesion load configs : ' + str(e), 'ERROR')
 
 def readLesionLoadCalculationConfigs(configs, application):
 	try:
@@ -47,7 +60,7 @@ def readLesionLoadCalculationConfigs(configs, application):
 			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']['own_rois']["template_brain"])
 
 	except Exception as e:
-		print('Failed to load lesion load configs : ', str(e))
+		application.updateMessage('Failed to load lesion load configs : ' + str(e), 'ERROR')
 		
 
 def readApplicationConfigs(application, config_file):
@@ -66,36 +79,36 @@ def readApplicationConfigs(application, config_file):
 			application.b_ll_calculation.set(True)
 			readLesionLoadCalculationConfigs(configs, application)
 	else:
-		print('Module selection is missing')
+		application.updateMessage('Module selection is missing', 'ERROR')
 
 	if 'common_settings' in configs:
 		common_configs = configs['common_settings']
 		if 'input_dir' in common_configs:
 			application.sv_input_dir.set(common_configs['input_dir'])
 		else:
-			print('Input Directory is missing in configs')
+			application.updateMessage('Input Directory is missing in configs', 'ERROR')
 
 		if 'output_dir' in common_configs:
 			application.sv_output_dir.set(common_configs['output_dir'])
 		else:
-			print('Output Directory is missing in configs')
+			application.updateMessage('Output Directory is missing in configs', 'ERROR')
 
 		if 't1_id' in common_configs:
 			application.sv_t1_id.set(common_configs['t1_id'])
 		else:
-			print('T1 Anatomical Identifier is missing in configs')
+			application.updateMessage('T1 Anatomical Identifier is missing in configs', 'ERROR')
 
 		if 'lesion_mask_id' in common_configs:
 			application.sv_lesion_mask_id.set(common_configs['lesion_mask_id'])
 		else:
-			print('Lesion Mask Identifier is missing in configs')
+			application.updateMessage('Lesion Mask Identifier is missing in configs', 'ERROR')
 
 		if 'same_anatomical_space' in common_configs:
 			application.b_same_anatomical_space.set(common_configs['same_anatomical_space'])
 		else:
-			print('Same Anatomical Space flag is missing in configs')
+			application.updateMessage('Same Anatomical Space flag is missing in configs', 'ERROR')
 	else:
-		print('Common configs missing')
+		application.updateMessage('Common configs missing', 'ERROR')
 
 
 	application.b_visual_qc.set(False)

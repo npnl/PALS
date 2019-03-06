@@ -74,11 +74,11 @@ def readLesionLoadCalculationConfigs(configs, application):
 def getOwnROIsList(application):
 	own_roi_path = '/own_rois'
 	message = ''
-	try:
-		roi_files = [f for f in listdir(own_roi_path) if isfile(join(own_roi_path, f) and f.endswith('gz'))]
-	except Exception as ex:
-		roi_files = []
-		message = 'Error : ' + str(ex)
+	# try:
+	roi_files = [f for f in listdir(own_roi_path) if isfile(join(own_roi_path, f) and f.endswith('gz'))]
+	# except Exception as ex:
+	# 	roi_files = []
+	# 	message = 'Error : ' + str(ex)
 
 	if len(roi_files) == 0:
 		application.updateMessage("Unable to find any user's custom ROI file in the specified directory." + message if message != '' else '')

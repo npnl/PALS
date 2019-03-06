@@ -176,8 +176,9 @@ class RunningOperationsPage(BaseInputPage, object):
 			self.insertHyperLink(operation_name, data)
 
 	def insertHyperLink(self, heading, link):
+		self.output.insert(END, '\n\n')
 		self.output.insert(END, "QC Page for " + heading, self.hyperlink.add(partial(webbrowser.open, link)))
-		self.output.insert(END, '\n')
+		self.output.insert(END, '\n\n')
 		self.output.see(END)
 
 	def toggleChildren(self):

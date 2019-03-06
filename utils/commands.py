@@ -41,7 +41,7 @@ class Commands(object):
 		cmd = "gzip %s"%(input_directory)
 		output, ret_code = self.startExecution(cmd, show_error=False)
 		if ret_code != 0:
-			self.logger.error('File was not zipped.')
+			self.logger.info('File was not zipped.')
 
 
 	def runFslMath(self, arg1, minimum, scalling, arg2):

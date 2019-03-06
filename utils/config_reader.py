@@ -70,7 +70,7 @@ def getOwnROIsList():
 	message = ''
 	try:
 		roi_files = [f for f in listdir(own_roi_path) if isfile(join(own_roi_path, f) and f.endswith('gz'))]
-	except Exception ex:
+	except Exception as ex:
 		roi_files = []
 		message = 'Error : ' + str(ex)
 

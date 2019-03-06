@@ -6,8 +6,8 @@
         "Visual_QC": false
     },
     "common_settings": {
-        "input_dir": "/pals/input/",
-        "output_dir": "/pals/output/",
+        "input_dir": "/input/",
+        "output_dir": "/output/",
         "t1_id": "T1",
         "lesion_mask_id": "LesionSmooth",
         "same_anatomical_space": false

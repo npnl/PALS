@@ -1,4 +1,6 @@
 import json
+from os import listdir
+from os.path import isfile, join
 
 def readConfig(filename):
 	with open(filename) as json_data_file:
@@ -57,11 +59,24 @@ def readLesionLoadCalculationConfigs(configs, application):
 
 		if module_settings['roi_names']['own']['own_rois']:
 			application.b_own_rois.set(True)
-			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']['own_rois']["template_brain"])
+			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']["template_brain"])
+			application.user_rois = getOwnROIsList()
 
 	except Exception as e:
 		application.updateMessage('Failed to load lesion load configs : ' + str(e), 'ERROR')
 		
+def getOwnROIsList():
+	own_roi_path = '/own_rois'
+	message = ''
+	try:
+		roi_files = [f for f in listdir(own_roi_path) if isfile(join(own_roi_path, f) and f.endswith('gz'))]
+	except Exception ex:
+		roi_files = []
+		message = 'Error : ' + str(ex)
+
+	if len(roi_files) == 0:
+		application.updateMessage("Unable to find any user's custom ROI file in the specified directory." + message if message != '' else '')
+	return roi_files
 
 def readApplicationConfigs(application, config_file):
 	configs = readConfig(config_file)

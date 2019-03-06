@@ -59,8 +59,14 @@ def readLesionLoadCalculationConfigs(configs, application):
 
 		if module_settings['roi_names']['own']['own_rois']:
 			application.b_own_rois.set(True)
-			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']["template_brain"])
-			application.user_rois = getOwnROIsList(application)
+			brain_template_file = module_settings['roi_names']['own']["template_brain"]
+			application.sv_user_brain_template = application.buildRoi(brain_template_file)
+			user_rois= getOwnROIsList(application)
+			if brain_template_file in user_rois:
+				user_rois.remove(brain_template_file)
+			for roi in user_rois:
+				roi_obj = application.buildRoi(roi)
+				application.user_rois.append(roi_obj)
 
 	except Exception as e:
 		application.updateMessage('Failed to load lesion load configs : ' + str(e), 'ERROR')

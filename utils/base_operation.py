@@ -205,6 +205,7 @@ class BaseOperation():
 
 		default_roi = self.controller.default_corticospinal_tract_roi + self.controller.default_freesurfer_cortical_roi + self.controller.default_freesurfer_subcortical_roi
 		fs_rois = self.controller.freesurfer_cortical_roi + self.controller.freesurfer_subcortical_roi
+		own_rois = self.controller.user_rois
 
 		self.logger.debug('\n')
 		for key in sorted(selection_mapping):
@@ -213,5 +214,6 @@ class BaseOperation():
 
 		self.logSelectedROINames("19. Default ROIs List", default_roi)
 		self.logSelectedROINames("20. FreeSurfer ROIs List", fs_rois)
+		self.logSelectedROINames("21. Own Custom ROIs List", own_rois)
 
 		self.logger.debug('\n')

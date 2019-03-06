@@ -60,12 +60,12 @@ def readLesionLoadCalculationConfigs(configs, application):
 		if module_settings['roi_names']['own']['own_rois']:
 			application.b_own_rois.set(True)
 			application.sv_user_brain_template = application.buildRoi(module_settings['roi_names']['own']["template_brain"])
-			application.user_rois = getOwnROIsList()
+			application.user_rois = getOwnROIsList(application)
 
 	except Exception as e:
 		application.updateMessage('Failed to load lesion load configs : ' + str(e), 'ERROR')
 		
-def getOwnROIsList():
+def getOwnROIsList(application):
 	own_roi_path = '/own_rois'
 	message = ''
 	try:

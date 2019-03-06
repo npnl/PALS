@@ -87,8 +87,8 @@ class Application(object):
 		pass
 
 		
-	def buildRoi(self, name):
-		return NameVarStore(name, True)
+	def buildRoi(self, name, value=True):
+		return NameVarStore(name, value)
 
 	def setLogger(self, logger):
 		self.logger = logger

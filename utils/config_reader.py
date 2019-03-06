@@ -60,12 +60,13 @@ def readLesionLoadCalculationConfigs(configs, application):
 		if module_settings['roi_names']['own']['own_rois']:
 			application.b_own_rois.set(True)
 			brain_template_file = module_settings['roi_names']['own']["template_brain"]
-			application.sv_user_brain_template = application.buildRoi(brain_template_file)
+			brain_template_file_path = join('/own_rois', brain_template_file)
+			application.sv_user_brain_template = application.buildRoi(brain_template_file_path, brain_template_file_path)
 			user_rois= getOwnROIsList(application)
-			if brain_template_file in user_rois:
-				user_rois.remove(brain_template_file)
+			if brain_template_file_path in user_rois:
+				user_rois.remove(brain_template_file_path)
 			for roi in user_rois:
-				roi_obj = application.buildRoi(roi)
+				roi_obj = application.buildRoi(roi, roi)
 				application.user_rois.append(roi_obj)
 
 	except Exception as e:
@@ -79,12 +80,12 @@ def getOwnROIsList(application):
 	try:
 		for file_name in all_files:
 			if isfile(join(own_roi_path, file_name)) and file_name.endswith('gz'):
-				roi_files.append(file_name)
+				roi_files.append(join(own_roi_path, file_name))
 		# roi_files = [file_name for file_name in all_files if isfile(join(own_roi_path, file_name) and file_name.endswith('gz'))]
 	except Exception as ex:
 		roi_files = []
 		message = 'Error : ' + str(ex)
-		
+
 	if len(roi_files) == 0:
 		application.updateMessage("Unable to find any user's custom ROI file in the specified directory." + message if message != '' else '')
 	return roi_files

@@ -1,41 +1,41 @@
 # Dockerized PALS
 
-## How to use this docker image
+## How to use the PALS docker image
+In order to run PALS in a Docker container, Docker must be installed. You can follow instruction from [here](https://docs.docker.com/docker-for-mac/install/) to install Docker software on your system. Once Docker is installed, follow these instructions to run PALS.
 
-PALS requires a graphic interface, so you need to prepare you environment first (in this case, go to the section "Configuring your environment to run a GUI with Docker").
+### Preparation
+1. Gather all subjects on which you want to perform PALS operations into one directory. Let us call this directory as `/subjects`.
+2. Create a directory which would contain the result files after running PALS on the input subjects. Let us call this directory as `/results`.
+3. Go to [PALS Config Generator](https://npnl.github.io/ConfigGenerator/), select all the options that apply and download the config file. This step will download a file named `config.json`. Do not rename this file.
+4. Store the config file in a separate directory. Let us call this directory as `/settings`.
 
-To run the docker image, type on the terminal:
-```sh
-docker run -it --rm \
-  -v /your/local/path:/app/data \
-  -e DISPLAY=$IP:0 -v /tmp/.X11-unix:/tmp/X11-unix \
-  joselisa/pals
-```
+### Running PALS
+1. Make sure that your Docker process is running. You can do this by executing the following command on the terminal.
+    ```
+    docker run hello-world
+    ```
+    If you see following kind of output, then you have a running instance of docker on your machine and you are good to go.
+    
+    ```
+    Unable to find image 'hello-world:latest' locally
+    latest: Pulling from library/hello-world
+    1b930d010525: Pull complete
+    Digest: sha256:2557e3c07ed1e38f26e389462d03ed943586f744621577a99efb77324b0fe535
+    Status: Downloaded newer image for hello-world:latest
 
--  `/your/local/path` should point to the directory where your subject files are;
-- Remember that the `IP` variable should be set previously;
-- The `DISPLAY` environment variable and the `/tmp/.X11-unix` extra volume are required to run the graphical interface.
-
-## Configuring your environment to run a [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface) with Docker
-
-### On Linux
-
-This docker image has not been tested on a Linux distribution.
-This [stackoverflow answer](https://stackoverflow.com/questions/16296753/can-you-run-gui-applications-in-a-docker-container/25280523#25280523) might help you.
-
-### On MAC
-
-1. Install Xquartz with `brew install Caskroom/cask/xquartz`;
-2. Open Xquartz with `open -a XQuartz`;
-3. In the XQuartz preferences, go to the “Security” tab and make sure you’ve got “Allow connections from network clients”
-
- ![Xquartz preferences](https://user-images.githubusercontent.com/12244661/43937529-1b1e00aa-9c13-11e8-9ad9-6b0809ab1cc6.png)
-
-4. Get your IP address
-  - `IP=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}')`
-  - Replace `en0` with the proper BSD in use (en0, en1 or other)
-  - Ensure that the IP variable is set with `echo $IP`
-5. Add the IP using Xhost with `/usr/X11/bin/xhost + $IP`
-6. Now you are ready to run your container! So go back to the "How to use this docker image" section.
-
-We have based this config on the tutorial ["Running GUI applications using Docker for Mac"](https://sourabhbajaj.com/blog/2017/02/07/gui-applications-docker-mac/).
+    Hello from Docker!
+    This message shows that your installation appears to be working correctly.
+    ... Few more lines...
+    ```
+2. Tu run PALS, run the following command with appropriate arguments.
+    ```
+    docker run -it -v <absolute_path_to_directory_containing_input_subjects>:/input/ -v <absolute_path_to_the output_directory>:/output/ -v <absolute_path_to_directory_containing_config_file>:/config/ amitasviper/pals:stable -d
+    ```
+    
+    For example, with configuration set in [Preparation](#preparation) step, the command to run PALS would be given as follows.
+    
+    ```
+    docker run -it -v /subjects:/input/ -v /results:/output/ -v /settings:/config/ amitasviper/pals:stable -d
+    ```
+    
+    Note: Make sure you do not change `:/input/` or `:/output/` or `:/config/` part in the command.

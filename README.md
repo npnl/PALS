@@ -94,8 +94,7 @@ pip install -r requirements.txt
 ```
 ---
 
-
-## Run
+__Run__
 Open up your terminal and navigate to the directory containing PALS source code.
 
 ```

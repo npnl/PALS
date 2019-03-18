@@ -20,13 +20,13 @@ Docker must be installed to run PALS in a Docker container. You can follow instr
 
 __NOTE: this requires 10Gb to run__
 
-__Preparing your directories__
+#### Preparing your directories
 1. Gather all subjects on which you want to perform PALS operations into a single data directory. This directory should contain sub-directories with subject ID's for each subject (see [Data Structure](#data_structure)). For example, here we will call this directory `/subjects`.
 2. Create another directory which would contain the result files after running PALS on the input subjects. We will call this directory  `/results` in our example.
 3. Go to [PALS Config Generator](https://npnl.github.io/ConfigGenerator/), select all the options that apply and download the config file. This step will download a file named `config.json`. __Do not rename this file.__
 4. Store the config file in a separate directory. Here, we have moved our config file to our `/settings` directory
 
-__Running PALS__
+#### Running PALS
 1. Make sure that your Docker process is already running. You can do this by executing the following command on the terminal.
     ```
     docker run hello-world
@@ -57,7 +57,7 @@ __Running PALS__
     
     Note: Make sure you do not change the `:/input/` or `:/output/` or `:/config/` parts in the command!
   
-  3. That's it! You can find the outputs from PALS in the output directory you specified in [Preparation](#preparation) step #2!
+  3. That's it! You can find the outputs from PALS in the output directory you specified in [Preparation](#preparing-your-directories) step #2!
 
 
 ### Manually Prepared Environment

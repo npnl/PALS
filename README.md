@@ -49,7 +49,7 @@ __Running PALS__
     docker run -it -v <absolute_path_to_directory_containing_input_subjects>:/input/ -v <absolute_path_to_the output_directory>:/output/ -v <absolute_path_to_directory_containing_config_file>:/config/ amitasviper/pals:stable -d
     ```
     
-    For example, with the configuration file created in the [Preparation](#preparation) step, the command to run PALS would be given as follows.
+    For example, with the configuration file created in the [Preparation](#preparing-your-directories) step, the command to run PALS would be given as follows.
     
     ```
     docker run -it -v /subjects:/input/ -v /results:/output/ -v /settings:/config/ amitasviper/pals:stable -d

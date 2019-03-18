@@ -59,6 +59,7 @@ __NOTE: this requires 10Gb of free space on your hard drive to run__
   
   3. That's it! You can find the outputs from PALS in the output directory you specified in [Preparation](#preparing-your-directories) step #2!
 
+---
 
 ### Manually Prepared Environment
 <a id='manual_env'></a>
@@ -92,9 +93,10 @@ Install python dependencies
 cd PALS
 pip install -r requirements.txt
 ```
----
+
 
 __Run__
+
 Open up your terminal and navigate to the directory containing PALS source code.
 
 ```

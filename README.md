@@ -18,7 +18,7 @@ There are two ways to use PALS: in a [Docker Container](#docker_instructions) (r
 
 Docker must be installed to run PALS in a Docker container. You can follow instructions from [here](https://docs.docker.com/docker-for-mac/install/) to install the Docker software on your system. Once Docker is installed, follow the instructions below to run PALS.
 
-__NOTE: this requires 10Gb to run__
+__NOTE: this requires 10Gb of free space on your hard drive to run__
 
 #### Preparing your directories
 1. Gather all subjects on which you want to perform PALS operations into a single data directory. This directory should contain sub-directories with subject ID's for each subject (see [Data Structure](#data_structure)). For example, here we will call this directory `/subjects`.

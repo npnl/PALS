@@ -5,6 +5,8 @@ Docker must be installed to run PALS in a Docker container. You can follow instr
 
 For more general instructions on using PALS, please take a look at our [paper in Frontiers](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).
 
+_NOTE: this requires 10gb space to run_
+
 ### Preparing your directories
 1. Gather all subjects on which you want to perform PALS operations into a single data directory. This directory should contain sub-directories with subject ID's for each subject. For example, here we will call this directory `/subjects`.
 2. Create another directory which would contain the result files after running PALS on the input subjects. We will call this directory  `/results` in our example.

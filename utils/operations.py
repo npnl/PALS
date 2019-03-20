@@ -368,7 +368,7 @@ class Operations(WMSegmentationOperation,\
 					+ self.controller.default_freesurfer_subcortical_roi
 
 		roi_paths = self._getRoiFilePaths(all_rois, FS_CT_Map)[0]
-		roi_paths = self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
+		roi_paths += self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
 		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)[0]
 
 		# Add additional ROIs that user provided

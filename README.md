@@ -5,17 +5,61 @@ Welcome to our github page!
 
 ## What is PALS?
 
-PALS is a scalable and user-friendly toolbox designed to facilitate standardized analysis and ensure quality in stroke research using T1-weighted MRIs. The PALS toolbox offers four moduels integrated into a single pipeline, including (1) reorientation to radiological convention, (2) lesion correction for healthy white matter voxels, (3) lesion load calculation, and (4) visual quality control.
+[PALS](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full) is a scalable and user-friendly toolbox designed to facilitate standardized analysis and ensure quality in stroke research using T1-weighted MRIs. The PALS toolbox offers four moduels integrated into a single pipeline, including (1) reorientation to radiological convention, (2) lesion correction for healthy white matter voxels, (3) lesion load calculation, and (4) visual quality control. To learn more, please refer to our [paper in Frontiers](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full). 
 
 ![Image of PALS Data Structure](images/pipeline.png)
 
 ## Getting Started
 
-There are two ways to use PALS: in a [Docker Container](docker.md) or in a [Manually Prepared Environment](#manual_env).
+There are two ways to use PALS: in a [Docker Container](#docker_instructions) (recommended) or in a [Manually Prepared Environment](#manual_env).
 
-### Docker Container
+### Docker Container (recommended)
+<a id='docker_instructions'></a>
 
-In order to run PALS in a Docker container, Docker must be installed. Once Docker is [installed](https://docs.docker.com/install/), follow the instructions [here](docker.md) to prepare your local machine for running the PALS GUI.
+Docker must be installed to run PALS in a Docker container. You can follow instructions from [here](https://docs.docker.com/docker-for-mac/install/) to install the Docker software on your system. Once Docker is installed, follow the instructions below to run PALS.
+
+__NOTE: this requires 10Gb of free space on your hard drive to run__
+
+#### Preparing your directories
+1. Gather all subjects on which you want to perform PALS operations into a single data directory. This directory should contain sub-directories with subject ID's for each subject (see [Data Structure](#data_structure)). For example, here we will call this directory `/subjects`.
+2. Create another directory which would contain the result files after running PALS on the input subjects. We will call this directory  `/results` in our example.
+3. Go to [PALS Config Generator](https://npnl.github.io/ConfigGenerator/), select all the options that apply and download the config file. This step will download a file named `config.json`. __Do not rename this file.__
+4. Store the config file in a separate directory. Here, we have moved our config file to our `/settings` directory
+
+#### Running PALS
+1. Make sure that your Docker process is already running. You can do this by executing the following command on the terminal.
+    ```
+    docker run hello-world
+    ```
+    If you see the following kind of output, then you have a running instance of docker on your machine and you are good to go.
+    
+    ```
+    Unable to find image 'hello-world:latest' locally
+    latest: Pulling from library/hello-world
+    1b930d010525: Pull complete
+    Digest: sha256:2557e3c07ed1e38f26e389462d03ed943586f744621577a99efb77324b0fe535
+    Status: Downloaded newer image for hello-world:latest
+
+    Hello from Docker!
+    This message shows that your installation appears to be working correctly.
+    ... Few more lines...
+    ```
+2. To run PALS, simply run the following command, __making sure to replace filepaths with your own filepaths__.
+    ```
+    docker run -it -v <absolute_path_to_directory_containing_input_subjects>:/input/ -v <absolute_path_to_the output_directory>:/output/ -v <absolute_path_to_directory_containing_config_file>:/config/ amitasviper/pals:stable -d
+    ```
+    
+    For example, with the configuration file created in the [Preparation](#preparing-your-directories) step, the command to run PALS would be given as follows.
+    
+    ```
+    docker run -it -v /subjects:/input/ -v /results:/output/ -v /settings:/config/ amitasviper/pals:stable -d
+    ```
+    
+    Note: Make sure you do not change the `:/input/` or `:/output/` or `:/config/` parts in the command!
+  
+  3. That's it! You can find the outputs from PALS in the output directory you specified in [Preparation](#preparing-your-directories) step #2!
+
+---
 
 ### Manually Prepared Environment
 <a id='manual_env'></a>
@@ -49,10 +93,10 @@ Install python dependencies
 cd PALS
 pip install -r requirements.txt
 ```
----
 
 
-## Run
+__Run__
+
 Open up your terminal and navigate to the directory containing PALS source code.
 
 ```
@@ -64,6 +108,7 @@ This will open up the PALS GUI.
 To use PALS, the user must first use a method of their choice to generate initial lesion masks for their dataset.
 
 ## Data Structure
+<a id='data_structure'></a>
 
 ![Image of PALS Data Structure](images/data_structure.jpg)
 
@@ -143,6 +188,12 @@ Run the following command to upgrade the pip.
 The best way to keep track of bugs or failures is to open a [New Issue](https://github.com/npnl/PALS/issues/new) on the Github system. You can also contact the author via email: kaoriito at usc dot edu.
 
 ---
+
+### Referencing
+
+Please reference our overview paper when using PALS:
+
+*Ito, K. L., Kumar, A., Zavaliangos-Petropulu, A., Cramer, S. C., & Liew, S. L. (2018). Pipeline for Analyzing Lesions After Stroke (PALS). Frontiers in neuroinformatics, 12, 63.*
 
 ### Authors
 

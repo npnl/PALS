@@ -6,7 +6,7 @@ git config user.email "docker@pals.com"
 git config user.name "Docker"
 
 git fetch --all > /dev/null 2>&1
-git reset --hard origin/hide-ui > /dev/null 2>&1
+git reset --hard origin/master > /dev/null 2>&1
 
 if [[ $1 == "" ]]; then
 	/usr/bin/python run_pals.py -s --docker -c /config/*.json

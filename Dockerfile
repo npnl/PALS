@@ -42,8 +42,6 @@ RUN apt-get install -y git
 RUN git clone https://github.com/npnl/PALS
 WORKDIR "/PALS/"
 
-RUN git checkout hide-ui
-
 RUN echo 'export FSLDIR="/usr/local/fsl/"' >> ~/.pals-env.sh
 RUN echo 'export PATH="$PATH:/usr/local/fsl/bin"' >> ~/.pals-env.sh
 RUN echo 'export USER=`whoami`' >> ~/.pals-env.sh

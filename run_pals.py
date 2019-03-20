@@ -16,9 +16,9 @@ def parseArguments():
 	args = parser.parse_args()
 	return args
 
-def setupLogger(debug):
+def setupLogger(debug, is_docker):
 	project_path = getProjectDirectory()
-	logs_dir = os.path.join(project_path, 'logs')
+	logs_dir = os.path.join('/output', 'logs') if is_docker else os.path.join(project_path, 'logs')
 	if not os.path.exists(logs_dir):
 		os.makedirs(logs_dir)
 	logging.basicConfig(level=logging.DEBUG,
@@ -57,7 +57,9 @@ if __name__ == '__main__':
 	silent = arguments.silent
 	debug = arguments.debug
 
-	logger = setupLogger(debug)
+	docker = arguments.docker
+
+	logger = setupLogger(debug, docker)
 
 	if silent:
 		config_file = arguments.config

@@ -4,9 +4,9 @@ from datetime import datetime
 from shutil import copyfile, rmtree
 from threading import Thread
 
-from pages.stores.rois import FreesurferCorticalROINamesToFileMapping as FS_CT_Map
-from pages.stores.rois import FreesurferSubCorticalROINamesToFileMapping as FS_SCT_Map
-from pages.stores.rois import CorticospinalTractROINamesToFileMapping as CT_Map
+from mappings import FreesurferCorticalROINamesToFileMapping as FS_CT_Map
+from mappings import FreesurferSubCorticalROINamesToFileMapping as FS_SCT_Map
+from mappings import CorticospinalTractROINamesToFileMapping as CT_Map
 from .commands import Commands
 
 from .qc_page import generateQCPage
@@ -63,19 +63,18 @@ class Operations(WMSegmentationOperation,\
 
 	def startExecution(self):
 		self.skip = False
-
 		if self.stage == 0:
 			self.logUserChoices()
 			self.logger.debug("Stage currently executing is %d"%self.stage)
-			self.controller.progressbar['value'] = 0
-			self.controller.updateGUI('Selected operations initiated')
+			self.controller.updateProgressBar(0)
+			self.controller.updateMessage('Selected operations initiated')
 			self.initialiseConstants()
-			self.controller.updateGUI('Checking for necessary files in all subject directories')
+			self.controller.updateMessage('Checking for necessary files in all subject directories')
 			self.createOutputSubjectDirectories(self.input_directory, self.getBaseDirectory(), only_iterate=True)
 			if not self.checkAllSubjectInputs():
 				self.incrementStage(15)
 			else:
-				self.controller.updateGUI('All subjects have necessary files')
+				self.controller.updateMessage('All subjects have necessary files')
 				self.incrementStage()
 
 		if self.stage == 1:
@@ -157,12 +156,15 @@ class Operations(WMSegmentationOperation,\
 
 		if self.stage >= 15:
 			self.logger.debug("Stage currently executing is %d"%self.stage)
-			self.controller.progressbar['value'] = 100
-			self.callback.finished('all', '')
+			self.controller.updateProgressBar(100)
+			if self.callback:
+				self.callback.finished('all', '')
 
 		if self.skip and self.reset_from_ui:
-			self.callback.resetAll()
-			self.controller.updateGUI('PALS is reset to perform all operation from scratch')
+			if self.callback:
+				self.callback.resetAll()
+			if not self.controller.silent:
+				self.controller.updateMessage('PALS is reset to perform all operation from scratch')
 
 		elif self.stage < 15:
 			self.logger.debug("Waiting for stage [%d] to start"%(self.stage + 1))
@@ -172,7 +174,7 @@ class Operations(WMSegmentationOperation,\
 		flag = True
 		mri_convert = True
 		if self.controller.b_ll_calculation.get() and self.controller.b_freesurfer_rois.get():
-			mri_convert =  self.controller.checkFslInstalled(bypass_mri_convert=False)
+			mri_convert =  self.checkFslInstalled(bypass_mri_convert=False)
 		if not mri_convert:
 			flag = False
 			errors.append("mri_convert is not in the PATH variable. Please set it to proceed.")
@@ -220,7 +222,7 @@ class Operations(WMSegmentationOperation,\
 
 		errors = '\n'.join(errors)
 
-		self.controller.updateGUI(errors)
+		self.controller.updateMessage(errors, log_level='ERROR')
 		return flag
 
 
@@ -366,7 +368,7 @@ class Operations(WMSegmentationOperation,\
 					+ self.controller.default_freesurfer_subcortical_roi
 
 		roi_paths = self._getRoiFilePaths(all_rois, FS_CT_Map)[0]
-		roi_paths = self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
+		roi_paths += self._getRoiFilePaths(all_rois, FS_SCT_Map)[0]
 		roi_paths += self._getRoiFilePaths(all_rois, CT_Map)[0]
 
 		# Add additional ROIs that user provided
@@ -569,14 +571,24 @@ class Operations(WMSegmentationOperation,\
 
 		return True
 
-def isValidPath(filePath):
-	if os.path.exists(filePath):
-		pass
-	elif os.access(os.path.dirname(filePath), os.W_OK):
-		pass
-	else:
-		return False
-	return True
+	def checkFslInstalled(self, bypass_mri_convert=True):
+		commands = ['fslmaths', 'fsleyes', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
+		if not bypass_mri_convert:
+			commands += ['mri_convert']
+		flag = True
+		msg = ''
+		FNULL = open(os.devnull, 'w')
+		for cmd in commands:
+			cmd_to_exe = 'which ' + cmd
+			try:
+				exit_code = subprocess.call([cmd_to_exe], shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+				if exit_code != 0:
+					raise
+			except Exception as e:
+				flag = False
+				msg += cmd + '\n'
+		msg = 'The following binaries location are not set in the path:\n' + msg if len(msg) != 0 else ''
+		return flag
 
 if __name__ == '__main__':
 	pass

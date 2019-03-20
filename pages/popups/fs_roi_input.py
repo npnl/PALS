@@ -6,7 +6,6 @@ except ImportError:
 	from tkinter import *
 
 from ..components import CheckboxList
-from ..stores import NameVarStore
 from ..components import LabelToolTip
 
 class FSROIInputPopup(Toplevel, object):
@@ -28,11 +27,11 @@ class FSROIInputPopup(Toplevel, object):
 		chk_option.grid(row=1, column=0, sticky='w', pady=3)
 
 		option_heading = 'FreeSurfer Cortical Regions of Interest'
-		options_freesurfer = [ NameVarStore(controller, 'Label_%d'%x) for x in range(15)]
+		# options_freesurfer = [ NameVarStore(controller, 'Label_%d'%x) for x in range(15)]
 		ch_list_freesurfer = CheckboxList(self, controller, option_heading, controller.freesurfer_cortical_roi, row=1, column=0, user_agreed=self.user_agreed)
 
 		option_heading = 'FreeSurfer Sub-Cortical Regions of Interest'
-		options_freesurfer_sub = [ NameVarStore(controller, 'Label_%d'%x) for x in range(15)]
+		# options_freesurfer_sub = [ NameVarStore(controller, 'Label_%d'%x) for x in range(15)]
 		ch_list_freesurfer_sub = CheckboxList(self, controller, option_heading, controller.freesurfer_subcortical_roi, row=1, column=1, user_agreed=self.user_agreed)
 
 		btn_ok = Button(self, text='OK', command=self.cleanup)

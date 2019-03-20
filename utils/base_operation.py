@@ -29,11 +29,12 @@ class BaseOperation():
 		return os.path.join(self.getIntermediatePath(subject), self.ORIGINAL_FILES)
 
 	def updateProgressBar(self, value):
-		self.controller.progressbar.step(value)
+		# self.controller.progressbar.step(value)
+		self.controller.updateProgressBar(value)
 
 	def updateSubjects(self, subjects_to_drop):
 		if len(subjects_to_drop) > 0:
-			self.controller.updateGUI("Dropping subjects from further operations : " + str(subjects_to_drop))
+			self.controller.updateMessage("Dropping subjects from further operations : " + str(subjects_to_drop))
 		self.subjects = list(set(self.subjects) - set(subjects_to_drop))
 		self.subjects.sort()
 		self.logger.debug("Updated the subjects to " + str(self.subjects))
@@ -41,12 +42,14 @@ class BaseOperation():
 	def incrementStage(self, count=1):
 		self.stage += count
 		self.updateProgressBar((100.0/self.total_stages))
+		self.controller.update()
 
 	def printQCPageUrl(self, operation_name, html_path, pause=True):
 		if pause and not self.controller.b_pause_for_qc.get():
 			self.incrementStage()
-		pause = pause and self.controller.b_pause_for_qc.get()
-		self.callback.pause(operation_name, html_path, pause)
+		pause = pause and self.controller.b_pause_for_qc.get() and not self.controller.silent
+		if self.callback:
+			self.callback.pause(operation_name, html_path, pause)
 
 	def _extractFileName(self, path, remove_extension=True, extension_count=1):
 		head, tail = ntpath.split(path)
@@ -164,8 +167,9 @@ class BaseOperation():
 						file_path = os.path.join(intermediate_path, file_name%subject)
 					except:
 						file_path = os.path.join(intermediate_path, file_name)
-					cmd = "mv %s %s"%(file_path, subject_path)
-					self.com.runRawCommand(cmd, show_error=False)
+					if os.path.exists(file_path):
+						cmd = "mv %s %s"%(file_path, subject_path)
+						self.com.runRawCommand(cmd, show_error=False)
 			except:
 				pass
 
@@ -201,6 +205,7 @@ class BaseOperation():
 
 		default_roi = self.controller.default_corticospinal_tract_roi + self.controller.default_freesurfer_cortical_roi + self.controller.default_freesurfer_subcortical_roi
 		fs_rois = self.controller.freesurfer_cortical_roi + self.controller.freesurfer_subcortical_roi
+		own_rois = self.controller.user_rois
 
 		self.logger.debug('\n')
 		for key in sorted(selection_mapping):
@@ -209,5 +214,6 @@ class BaseOperation():
 
 		self.logSelectedROINames("19. Default ROIs List", default_roi)
 		self.logSelectedROINames("20. FreeSurfer ROIs List", fs_rois)
+		self.logSelectedROINames("21. Own Custom ROIs List", own_rois)
 
 		self.logger.debug('\n')

@@ -14,8 +14,6 @@ from ..stores import NameVarStore
 from ..components import LabelToolTip
 from ..components import ButtonToolTip
 
-from utils import isValidPath
-
 class OwnROIInputPopup(Toplevel, object):
 	def __init__(self, controller):
 		Toplevel.__init__(self, controller, padx=25, pady=25)
@@ -47,12 +45,12 @@ class OwnROIInputPopup(Toplevel, object):
 		btn_ok.grid(row=300, column=0, sticky='e')
 
 	def cleanup(self):
-		if not isValidPath(self.controller.sv_user_brain_template.get()):
+		if not self.isValidPath(self.controller.sv_user_brain_template.get()):
 			self.status.set("A valid brain template path is required.")
 			return
 
 		for sv in self.inputs:
-			if not isValidPath(sv.get().strip()):
+			if not self.isValidPath(sv.get().strip()):
 				self.status.set("ROI path is invalid : " + sv.get())
 				return
 
@@ -65,3 +63,12 @@ class OwnROIInputPopup(Toplevel, object):
 		chosen_file =  tkFileDialog.askopenfilename(parent=self, initialdir = current_dir, title='Indicate the location of ' + message)
 		place_holder.set(chosen_file)
 		entry['fg'] = entry.default_fg_color
+
+	def isValidPath(self, filePath):
+		if os.path.exists(filePath):
+			pass
+		elif os.access(os.path.dirname(filePath), os.W_OK):
+			pass
+		else:
+			return False
+		return True

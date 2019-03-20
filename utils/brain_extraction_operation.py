@@ -20,7 +20,7 @@ class BrainExtractionOperation(BaseOperation):
 
 		projBaseDir=self.getBaseDirectory()
 		print(anatomical_id)
-		bet_id = runNipypeBet(self.subjects, anatomical_id, projBaseDir)
+		bet_id = runNipypeBet(self.controller, self.subjects, anatomical_id, projBaseDir)
 
 		for subject in self.subjects:
 			try:

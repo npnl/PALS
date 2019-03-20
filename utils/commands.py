@@ -5,10 +5,13 @@ class Commands(object):
 	def __init__(self, logger, parent):
 		self.logger = logger
 		self.parent = parent
-		self.display = parent.display
+		self.counter = 100
 
 	def startExecution(self, cmd, show_error=True):
 		self.running = True
+		if self.parent.need_display:
+			cmd = 'xvfb-run -a --server-num %d -s "-screen 0 640x480x24" '%(self.counter) + cmd
+			self.counter += 1
 		msg = "Running [%s]"%cmd
 		self.logger.debug(msg)
 		self.running_process = subprocess.Popen('exec ' + cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
@@ -20,8 +23,8 @@ class Commands(object):
 			output += stdout_line
 		self.running_process.stdout.close()
 		if return_code != 0 and show_error:
-			output = 'Something went wrong.'
-			self.parent.updateGUI(output)
+			output = 'Something went wrong. ' + output
+			self.parent.updateMessage(output, log_level='ERROR')
 		if len(output.strip()) > 0:
 			self.logger.debug(output)
 		return output, return_code
@@ -38,7 +41,7 @@ class Commands(object):
 		cmd = "gzip %s"%(input_directory)
 		output, ret_code = self.startExecution(cmd, show_error=False)
 		if ret_code != 0:
-			self.logger.error('File was not zipped.')
+			self.logger.info('File was not zipped.')
 
 
 	def runFslMath(self, arg1, minimum, scalling, arg2):

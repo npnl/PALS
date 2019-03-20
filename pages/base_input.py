@@ -54,6 +54,7 @@ class BaseInputPage(tk.Frame):
 	def onShowFrame(self, event):
 		self.setFrameTitle()
 		self.setStatusMessage(self.empty_status)
+		# self.silentMode()
 
 	def setFrameTitle(self):
 		self.title.set('Base Model Title')
@@ -94,3 +95,17 @@ class BaseInputPage(tk.Frame):
 			entry.config(state='normal')
 		else:
 			entry.config(state='disabled')
+
+	def isValidPath(self, filePath):
+		if os.path.exists(filePath):
+			pass
+		elif os.access(os.path.dirname(filePath), os.W_OK):
+			pass
+		else:
+			return False
+		return True
+
+	def silentMode(self):
+		if self.controller.silent:
+			self.moveToNextPage()
+

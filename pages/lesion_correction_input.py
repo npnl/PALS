@@ -9,7 +9,6 @@ except ImportError:
 
 import os
 
-from utils import isValidPath
 from .base_input import *
 
 class LesionCorrInputPage(BaseInputPage, object):
@@ -64,18 +63,17 @@ class LesionCorrInputPage(BaseInputPage, object):
 		en_percent = Entry(self, textvariable=controller.sv_percent, width = 5)
 		en_percent.grid(row=self.starting_row+5, column=2, sticky="E", pady=(10, 20))
 
-		
-
 	def onShowFrame(self, event):
 		super(LesionCorrInputPage, self).onShowFrame(event)
 		if not self.controller.b_wm_correction.get():
 			super(LesionCorrInputPage, self).moveToNextPage(is_parent=False)
+		else:
+			self.silentMode()
 
 	def setFrameTitle(self):
 		self.title.set('Lesion Correction')
 
 	def moveToNextPage(self):
-
 		if self.controller.b_brain_extraction.get() and len(self.controller.sv_bet_id.get().strip()) == 0:
 			self.setRequiredInputError('Provide the skull-stripped brain identifier.')
 			return

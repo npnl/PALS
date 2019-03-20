@@ -9,7 +9,6 @@ except ImportError:
 
 import os
 from ..components import CheckboxList
-from ..stores import NameVarStore
 from ..components import ButtonToolTip
 
 class DefaultROIInputPopup(Toplevel, object):

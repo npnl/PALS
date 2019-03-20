@@ -76,6 +76,8 @@ class LesionLoadCalculationInputPage(BaseInputPage, object):
 		super(LesionLoadCalculationInputPage, self).onShowFrame(event)
 		if not self.controller.b_ll_calculation.get():
 			super(LesionLoadCalculationInputPage, self).moveToNextPage(is_parent=False)
+		else:
+			self.silentMode()
 
 
 	def moveToNextPage(self):

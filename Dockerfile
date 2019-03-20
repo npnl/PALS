@@ -1,22 +1,60 @@
-FROM neurodebian:xenial
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y python \
-                       python-pip \
-                       python-tk \
-                       fsl
-RUN pip install --only-binary wxpython -f https://extras.wxpython.org/wxPython4/extras/linux/gtk2/ubuntu-16.04/ wxpython
+FROM ubuntu:16.04
 
-WORKDIR /app/
-COPY . .
+# Install Java8 and ssh-server
+RUN apt-get update && apt-get -y install python-dev && apt-get install -y wget
+RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
+RUN chmod +x fslinstaller.py
+RUN printf '\n' | ./fslinstaller.py
+RUN echo 'export FSLDIR="/usr/local/fsl/"' >> ~/.bashrc
+RUN echo 'export PATH="$PATH:/usr/local/fsl/bin"' >> ~/.bashrc
+# RUN source /usr/local/fsl/etc/fslconf/fsl.sh
 
-RUN pip install -r requirements.txt
-# setup fsl environment
-ENV FSLDIR=/usr/share/fsl/5.0 \
-    FSLOUTPUTTYPE=NIFTI_GZ \
-    FSLMULTIFILEQUIT=TRUE \
-    POSSUMDIR=/usr/share/fsl/5.0 \
-    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
-    FSLTCLSH=/usr/bin/tclsh \
-    FSLWISH=/usr/bin/wish \
-    PATH=/usr/lib/fsl/5.0:$PATH
-CMD ["/usr/bin/python2.7", "/app/run_pals.py"]
+RUN apt-get install -y python-pip build-essential libgtk2.0-dev libgtk-3-dev \
+  libjpeg-dev libtiff-dev \
+  libsdl1.2-dev libgstreamer-plugins-base0.10-dev \
+  libnotify-dev freeglut3 freeglut3-dev libsm-dev \
+  libwebkitgtk-dev libwebkitgtk-3.0-dev xvfb
+
+RUN pip install fsleyes
+RUN pip install nipype
+RUN pip install pathlib
+
+RUN apt-get install -y libopenblas-base
+
+RUN wget https://nifti.nimh.nih.gov/pub/dist/src/fsliolib/imcp -O /usr/local/fsl/bin/imcp
+RUN chmod +x  /usr/local/fsl/bin/imcp
+
+RUN apt-get install -y dc bc
+
+RUN apt-get install -y libjpeg62-dev
+
+RUN wget http://old-lcni.uoregon.edu/~jolinda/MRIConvert/MRIConvert-2.0.7-x86_64.tar.gz
+
+RUN tar xzf MRIConvert-2.0.7-x86_64.tar.gz
+
+RUN cd MRIConvert-2.0.7 && chmod +x install.sh && ./install.sh && ln -s /usr/bin/MRIConvert /usr/bin/mri_convert
+
+RUN echo 'export USER=`whoami`' >> ~/.bashrc
+RUN echo 'export FSLDIR="/usr/local/fsl"' >> ~/.bashrc
+RUN echo 'source /usr/local/fsl/etc/fslconf/fsl.sh' >> ~/.bashrc
+
+RUN apt-get install -y git
+RUN git clone https://github.com/npnl/PALS
+WORKDIR "/PALS/"
+
+RUN git checkout hide-ui
+
+RUN echo 'export FSLDIR="/usr/local/fsl/"' >> ~/.pals-env.sh
+RUN echo 'export PATH="$PATH:/usr/local/fsl/bin"' >> ~/.pals-env.sh
+RUN echo 'export USER=`whoami`' >> ~/.pals-env.sh
+RUN echo 'export FSLDIR="/usr/local/fsl"' >> ~/.pals-env.sh
+RUN echo 'source /usr/local/fsl/etc/fslconf/fsl.sh' >> ~/.pals-env.sh
+
+COPY ./docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compatibility
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD []
+

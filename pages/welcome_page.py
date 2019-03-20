@@ -9,7 +9,6 @@ except ImportError:
 
 import os
 
-from utils import isValidPath
 from .base_input import *
 from .popups import QCPopup
 
@@ -62,7 +61,11 @@ class WelcomePage(BaseInputPage, object):
 		self.chk_out_out = Checkbutton(wrapper, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
 		self.chk_out_out.grid(row=0, column=0, sticky='W')
 
-		
+		# self.silentMode()
+
+	def onShowFrame(self, event):
+		super(WelcomePage, self).onShowFrame(event)
+		self.silentMode()
 
 	def setFrameTitle(self):
 		self.title.set('Welcome to PALS!')

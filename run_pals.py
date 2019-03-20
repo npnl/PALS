@@ -1,221 +1,76 @@
-try:
-	import Tkinter as tk
-	from Tkinter import *
-	import tkFileDialog
-except ImportError:
-	import tkinter as tk
-	from tkinter import *
-	from tkinter import filedialog as tkFileDialog
-
-
-import os, subprocess
+import os
 import logging
+import argparse
 from datetime import datetime
 
-from pages import WelcomePage
-from pages import SettingsInput
-from pages import DirectoryInputPage
-from pages import RunningOperationsPage
-from pages import LesionCorrInputPage
-from pages import LesionLoadCalculationInputPage
-from pages import rois
-from pages.stores import Descriptions
+from utils import Application, readApplicationConfigs
 
-LARGE_FONT = ("Verdana", 12)
+from utils import Operations
 
-class MainWindow(tk.Tk):
-	def __init__(self, *args, **kwargs):
-		tk.Tk.__init__(self, *args, **kwargs)
-		self.title("Pipeline for Analyzing Lesions after Stroke")
-		# self.geometry("1200x800")
+def parseArguments():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-s','--silent', help='Starts the PALS tool without showing the UI.', action='store_true')
+	parser.add_argument('-d','--debug', help='Set the logging level as DEBUG', action='store_true')
+	parser.add_argument('-c', '--config', help='Pass a config file to the application. Default config file is [config.json] in current directory', default='')
+	parser.add_argument('--docker', help='Create a virtual display for fsleyes and fsl binaries in dockerized environment', action='store_true')
+	args = parser.parse_args()
+	return args
 
-		self.setupLogger()
-
-		# Tooltip descriptions
-		self.desc = Descriptions()
-
-		# Text area to show the logs of running operations
-		self.display = None
-		self.progressbar = None
-
-		#Welcome page
-		self.b_radiological_convention = BooleanVar(self)
-		self.b_wm_correction = BooleanVar(self)
-		self.b_ll_calculation = BooleanVar(self)
-		self.b_visual_qc = BooleanVar(self)
-		self.b_pause_for_qc = BooleanVar(self)
-
-		self.b_radiological_convention.set(False)
-		self.b_wm_correction.set(False)
-		self.b_ll_calculation.set(False)
-		self.b_visual_qc.set(False)
-		self.b_pause_for_qc.set(True)
-
-		#Directory Input Page
-		self.sv_input_dir = StringVar(self)
-		self.sv_output_dir = StringVar(self)
-		self.sv_t1_id = StringVar(self)
-		self.sv_lesion_mask_id = StringVar(self)
-		self.b_same_anatomical_space = BooleanVar(self)
-
-		self.sv_t1_id.set('')
-		self.sv_lesion_mask_id.set('')
-		self.b_same_anatomical_space.set(False)
-
-		#White Matter Correction Page
-		self.sv_bet_id = StringVar(self)
-		self.sv_wm_id = StringVar(self)
-		self.sv_percent = StringVar(self)
-		self.b_brain_extraction = BooleanVar(self)
-		self.b_wm_segmentation = BooleanVar(self)
-		self.sv_bet_id.set('')
-		self.sv_wm_id.set('')
-		self.b_brain_extraction.set(False)
-		self.b_wm_segmentation.set(False)
-		self.sv_percent.set('5.0')
-		self.percent_intensity = 5.0
-
-		#Lesion Load Calculation Page
-		self.b_default_rois = BooleanVar(self)
-		self.b_freesurfer_rois = BooleanVar(self)
-		self.b_own_rois = BooleanVar(self)
-		self.b_default_rois.set(False)
-		self.b_freesurfer_rois.set(False)
-		self.b_own_rois.set(False)
-
-		#Default ROI Popup
-		all_rois = rois.getROIs(self)
-		self.default_corticospinal_tract_roi = all_rois[0]
-		self.default_freesurfer_cortical_roi = all_rois[1]
-		self.default_freesurfer_subcortical_roi =  all_rois[2]
-		self.default_custom_rois = []
-		self.default_roi_paths = None
-
-		#FreeSurfer Rois
-		all_rois = rois.getROIs(self)
-		self.freesurfer_cortical_roi = all_rois[1]
-		self.freesurfer_subcortical_roi =  all_rois[2]
-		self.fs_roi_paths = None
-		self.fs_roi_codes = None
-
-		#User ROIs
-		self.user_rois = []
-		self.user_roi_paths = None
-		self.sv_user_brain_template = StringVar(self)
-		self.sv_user_brain_template.set('')
-		self.user_agreed = BooleanVar(self)
-		self.user_agreed.set(False)
-
-		#Running Operations
-		self.selected_subjects = StringVar(self)
-		self.selected_subjects.set('')
-
-		#Settings Page
-		self.sv_fsl_binaries_msg = StringVar(self)
-		self.sv_fsl_binaries_msg.set('')
-
-		# this container contains all the pages
-		container = tk.Frame(self)
-		container.pack(side="top", fill="both", expand=True)
-		container.grid_rowconfigure(0, weight=1)
-		container.grid_columnconfigure(0, weight=1)
-		self.frames = {}
-		self.parent_frames_stack = []
-
-		frame_number = 0
-		for PageType in self.getApplicationPages():
-			frame = PageType(container, self, frame_number)
-			self.frames[frame_number] = frame
-			frame_number += 1
-			frame.grid(row=0, column=0, sticky="nsew", padx=25, pady=25)
-
-		self.show_frame(0)
-
-		self.bind_class("Text","<Control-a>", self.selectAll)
-		self.bind_class("Text","<Command-v>", self.pasteAll)
-
-	def updateGUI(self, text):
-		self.display.insert(END, text + '\n')
-		self.display.see(END)
-		self.update()
-
-	def selectAll(self, event):
-		event.widget.tag_add("sel","1.0","end")
-
-	def pushFrameToStack(self, frame_number):
-		self.parent_frames_stack.append(frame_number)
-
-	def getParentFrame(self):
-		try:
-			return self.parent_frames_stack.pop()
-		except:
-			return 0
-
-	def pasteAll(self, event):
-		clipboard = self.clipboard_get()
-		clipboard = clipboard.replace("\n", "\\n")
-		try:
-			start = event.widget.index("sel.first")
-			end = event.widget.index("sel.last")
-			event.widget.delete(start, end)
-		except TclError as e:
-			pass
-
-		event.widget.insert("insert", clipboard)
-
-	def setupLogger(self):
-		project_path = os.path.dirname(os.path.realpath(__file__))
-		logs_dir = os.path.join(project_path, 'logs')
-		if not os.path.exists(logs_dir):
-			os.makedirs(logs_dir)
-		logging.basicConfig(level=logging.DEBUG,
-					format='%(asctime)s %(levelname)s %(message)s',
-					filename=os.path.join(logs_dir, datetime.now().strftime('logfile_%Y%m%d_%H_%M.log')),
-					filemode='w')
-		console = logging.StreamHandler()
+def setupLogger(debug, is_docker):
+	project_path = getProjectDirectory()
+	logs_dir = os.path.join('/output', 'logs') if is_docker else os.path.join(project_path, 'logs')
+	if not os.path.exists(logs_dir):
+		os.makedirs(logs_dir)
+	logging.basicConfig(level=logging.DEBUG,
+				format='%(asctime)s %(levelname)s %(message)s',
+				filename=os.path.join(logs_dir, datetime.now().strftime('logfile_%Y%m%d_%H_%M.log')),
+				filemode='w')
+	console = logging.StreamHandler()
+	if debug:
+		console.setLevel(logging.DEBUG)
+	else:
 		console.setLevel(logging.INFO)
-		formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-		console.setFormatter(formatter)
-		logging.getLogger('').addHandler(console)
-		self.logger = logging.getLogger(__name__)
+	formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+	console.setFormatter(formatter)
+	logging.getLogger('').addHandler(console)
+	return logging.getLogger(__name__)
 
-	def show_frame(self, frame_number):
-		if frame_number >= len(self.frames) or frame_number < 0:
-			return
-		frame = self.frames[frame_number]
-		frame.tkraise()
-		frame.update()
-		frame.event_generate("<<ShowFrame>>")
+def getProjectDirectory():
+	return os.path.dirname(os.path.realpath(__file__))
 
-	def getApplicationPages(self):
-		pages = [WelcomePage, DirectoryInputPage, LesionCorrInputPage, LesionLoadCalculationInputPage, RunningOperationsPage]
-		if not self.checkFslInstalled():
-			pages = [SettingsInput]
-		return pages
+def silentMode(logger, config_file, need_display):
+	project_dir = getProjectDirectory()
+	application = Application(logger, project_dir, need_display=need_display)
+	readApplicationConfigs(application, config_file)
+	operations = Operations(application)
+	operations.startThreads(None)
 
-	def getProjectDirectory(self):
-		return os.path.dirname(os.path.realpath(__file__))
-
-	def checkFslInstalled(self, bypass_mri_convert=True):
-		commands = ['fslmaths', 'fsleyes', 'flirt', 'fslstats', 'fast', 'bet', 'fslswapdim', 'fslreorient2std', 'fslorient', 'gzip']
-		if not bypass_mri_convert:
-			commands += ['mri_convert']
-		flag = True
-		msg = ''
-		FNULL = open(os.devnull, 'w')
-		for cmd in commands:
-			cmd_to_exe = 'which ' + cmd
-			try:
-				exit_code = subprocess.call([cmd_to_exe], shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-				if exit_code != 0:
-					raise
-			except Exception as e:
-				flag = False
-				msg += cmd + '\n'
-		msg = 'The following binaries location are not set in the path:\n' + msg if len(msg) != 0 else ''
-		self.sv_fsl_binaries_msg.set(msg)
-		return flag
+def uiMode(logger):
+	from gui_init import MainWindow
+	project_dir = getProjectDirectory()
+	app = MainWindow(logger, project_dir)
+	app.mainloop()
 
 if __name__ == '__main__':
-	app = MainWindow()
-	app.mainloop()
+	arguments = parseArguments()
+	
+	silent = arguments.silent
+	debug = arguments.debug
+
+	docker = arguments.docker
+
+	logger = setupLogger(debug, docker)
+
+	if silent:
+		config_file = arguments.config
+		if config_file == '':
+			logger.info('Using the default [config.json] file for application configurations as no external config file was passed in commandline arguments')
+			config_file = 'config.json'
+		else:
+			logger.info('Reading application configurations from file [%s]'%(config_file))
+
+		silentMode(logger, config_file, arguments.docker)
+
+	else:
+		uiMode(logger)
+		

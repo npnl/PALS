@@ -67,7 +67,7 @@ class LesionCorrectionOperation(BaseOperation):
 
 				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_LesionCorrection', '%s_WMAdjLesion%d.png'%(subject, counter+1))
 				self.com.runFslEyes2(anatomical_file_path, lesion_file, wm_adjusted_lesion, x, y, z, output_image_path)
-		subject_info_all.append(subject_info)
+			subject_info_all.append(subject_info)
 
 		header = ['Subject', 'Total_Native_Brain_Volume', 'Mean_White_Matter_Intensity']
 		for lesion_counter in range(max_lesions):

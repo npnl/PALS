@@ -73,6 +73,7 @@ def generateQCPage(page_type, images_dir):
 	output += """<form onsubmit="download('selected_subjects.txt')">""" + '\n'
 
 	image_files = _getPathOfFiles(images_dir, endswith_str='.png')
+	image_files.sort()
 	for image_path in image_files:
 		image_name = _extractFileName(image_path)
 		subject = image_name.split('_')[0]

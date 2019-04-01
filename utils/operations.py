@@ -61,6 +61,10 @@ class Operations(WMSegmentationOperation,\
 				or self.controller.b_wm_correction.get()\
 				or self.controller.b_ll_calculation.get()
 
+	def isLesionMaskRequired(self):
+		return self.controller.b_wm_correction.get()\
+				or self.controller.b_ll_calculation.get()
+
 	def startExecution(self):
 		self.skip = False
 		if self.stage == 0:
@@ -189,7 +193,8 @@ class Operations(WMSegmentationOperation,\
 				errors.append('Subject [%s] is missing the anatomical file'%subject)
 				flag = False
 			try:
-				_ = lesion_files[0]
+				if self.isLesionMaskRequired():
+					_ = lesion_files[0]
 			except:
 				errors.append('Subject [%s] is missing the lesion mask file'%subject)
 				flag = False

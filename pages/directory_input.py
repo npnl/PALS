@@ -72,9 +72,14 @@ class DirectoryInputPage(BaseInputPage, object):
 		if not self.isValidPath(input_dir.strip()) or not self.isValidPath(output_dir.strip()):
 			self.setRequiredInputError('Directory inputs are not valid.')
 			return
-		if not self.controller.sv_lesion_mask_id.get().strip()\
-			or not self.controller.sv_t1_id.get().strip():
-			self.setRequiredInputError()
+		if not self.controller.sv_t1_id.get().strip():
+			self.setRequiredInputError('Provide a valid T1 Anatomical Image Identifier')
+			return
+		if not self.controller.sv_lesion_mask_id.get().strip() \
+			and (self.controller.b_wm_correction.get() \
+			or self.controller.b_ll_calculation.get() \
+			or self.controller.b_visual_qc.get()):
+			self.setRequiredInputError('Provide a valid Lesion Mask Image Id')
 			return
 		else:
 			super(DirectoryInputPage, self).moveToNextPage()

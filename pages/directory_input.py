@@ -79,7 +79,7 @@ class DirectoryInputPage(BaseInputPage, object):
 			and (self.controller.b_wm_correction.get() \
 			or self.controller.b_ll_calculation.get() \
 			or self.controller.b_visual_qc.get()):
-			self.setRequiredInputError('Provide a valid Lesion Mask Image Id')
+			self.setRequiredInputError('Provide a valid Lesion Mask Image Identifier')
 			return
 		else:
 			super(DirectoryInputPage, self).moveToNextPage()

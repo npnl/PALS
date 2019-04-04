@@ -17,6 +17,8 @@ from .wm_correction_operation import LesionCorrectionOperation
 from .brain_extraction_operation import BrainExtractionOperation
 from .lesion_load_calculation_operation import LesionLoadCalculationOperation
 
+LESION_ID_EMPTY = 'this_field_is_deliberately_left_like_this'
+
 class Operations(WMSegmentationOperation,\
 				LesionCorrectionOperation, BrainExtractionOperation,\
 				LesionLoadCalculationOperation):
@@ -249,17 +251,28 @@ class Operations(WMSegmentationOperation,\
 
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
-			for counter, lesion_file in enumerate(lesion_files):
-				cog = self.com.runFslStats(lesion_file, '-C')
-				x,y,z=cog.split(' ')
-				x=int(x)
-				y=int(y)
-				z=int(z)
 
-				output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
-				self.com.runFslEyes2(anatomical_file_path[0], lesion_file, '', x, y, z, output_image_path)
+			if self.controller.sv_lesion_mask_id.get() == LESION_ID_EMPTY:
+				images_dir = os.path.join(self.getBaseDirectory(), 'QC')
+				if not os.path.isdir(images_dir):
+					os.makedirs(images_dir)
+				output_image_path = os.path.join(images_dir, '%s_%d.png'%(subject, 1))
+				self.com.runFslEyes(anatomical_file_path[0], bet_brain_file='', output_image_path=output_image_path, options='-b 60 -c 70')
+			else:
+				for counter, lesion_file in enumerate(lesion_files):
+					cog = self.com.runFslStats(lesion_file, '-C')
+					x,y,z=cog.split(' ')
+					x=int(x)
+					y=int(y)
+					z=int(z)
 
-		html_file_path = generateQCPage('Lesions', images_dir)
+					output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
+					self.com.runFslEyes2(anatomical_file_path[0], lesion_file, '', x, y, z, output_image_path)
+
+		if self.controller.sv_lesion_mask_id.get() == LESION_ID_EMPTY:
+			html_file_path = generateQCPage('QC', images_dir)
+		else:
+			html_file_path = generateQCPage('Lesions', images_dir)
 		self.printQCPageUrl('createQCPage', html_file_path, pause=False)
 		self.logger.info('QC Page generation completed')
 

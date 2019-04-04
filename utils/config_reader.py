@@ -1,6 +1,7 @@
 import json
 from os import listdir
 from os.path import isfile, join
+from mappings import AdditionalROINamesToFileMapping
 
 def readConfig(filename):
 	with open(filename) as json_data_file:
@@ -46,6 +47,11 @@ def readLesionLoadCalculationConfigs(configs, application):
 			application.b_default_rois.set(True)
 			roi_obj = application.buildRoi(roi)
 			application.default_freesurfer_subcortical_roi.append(roi_obj)
+
+		if roi in module_settings['roi_names']['default']['additional']:
+			roi_file_name = AdditionalROINamesToFileMapping[roi_name]
+			roi_file_path = os.path.join('/PALS/ROIs', roi_file_name)
+			application.default_custom_rois.append(roi_file_path)
 
 		for roi in module_settings['roi_names']['free_surfer']['fs_cortical']:
 			application.b_freesurfer_rois.set(True)

@@ -30,7 +30,8 @@
                         "Right Corticospinal Tract"
                     ],
                     "fs_cortical": [],
-                    "fs_sub_cortical": []
+                    "fs_sub_cortical": [],
+                    "additional": []
                 },
                 "free_surfer": {
                     "fs_cortical": [],

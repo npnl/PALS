@@ -129,3 +129,18 @@ FreesurferSubCorticalROINamesToFileMapping = {
 	'Left Thalamus'			: ['10', 'roi_FS_L_Thalamus_2mm.nii.gz'],
 	'Right Thalamus'		: ['49', 'roi_FS_R_Thalamus_2mm.nii.gz']
 }
+
+AdditionalROINamesToFileMapping = {
+	'S-MATT_L_M1'		:'roi_S-MATT_L_M1_2mm.nii.gz',
+	'S-MATT_L_PMd'		:'roi_S-MATT_L_PMd_2mm.nii.gz',
+	'S-MATT_L_PMv'		:'roi_S-MATT_L_PMv_2mm.nii.gz',
+	'S-MATT_L_preSMA'	:'roi_S-MATT_L_preSMA_2mm.nii.gz',
+	'S-MATT_L_S1'		:'roi_S-MATT_L_S1_2mm.nii.gz',
+	'S-MATT_L_SMA'		:'roi_S-MATT_L_SMA_2mm.nii.gz',
+	'S-MATT_R_M1'		:'roi_S-MATT_R_M1_2mm.nii.gz',
+	'S-MATT_R_PMd'		:'roi_S-MATT_R_PMd_2mm.nii.gz',
+	'S-MATT_R_PMv'		:'roi_S-MATT_R_PMv_2mm.nii.gz',
+	'S-MATT_R_preSMA'	:'roi_S-MATT_R_preSMA_2mm.nii.gz',
+	'S-MATT_R_S1'		:'roi_S-MATT_R_S1_2mm.nii.gz',
+	'S-MATT_R_SMA'		:'roi_S-MATT_R_SMA_2mm.nii.gz'
+}

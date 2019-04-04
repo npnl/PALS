@@ -7,6 +7,8 @@ except ImportError:
 
 from .base_input import *
 
+LESION_ID_EMPTY = 'this_field_is_deliberately_left_like_this'
+
 class DirectoryInputPage(BaseInputPage, object):
 	def __init__(self, parent, controller, frame_number):
 		BaseInputPage.__init__(self, parent, controller, frame_number)
@@ -77,10 +79,11 @@ class DirectoryInputPage(BaseInputPage, object):
 			return
 		if not self.controller.sv_lesion_mask_id.get().strip() \
 			and (self.controller.b_wm_correction.get() \
-			or self.controller.b_ll_calculation.get() \
-			or self.controller.b_visual_qc.get()):
+			or self.controller.b_ll_calculation.get()):
 			self.setRequiredInputError('Provide a valid Lesion Mask Image Identifier')
 			return
-		else:
-			super(DirectoryInputPage, self).moveToNextPage()
+		if self.controller.b_visual_qc.get() \
+			and self.controller.sv_lesion_mask_id.get().strip() == '':
+			self.controller.sv_lesion_mask_id.set(LESION_ID_EMPTY)
+		super(DirectoryInputPage, self).moveToNextPage()
 

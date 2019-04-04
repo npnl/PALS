@@ -246,16 +246,20 @@ class Operations(WMSegmentationOperation,\
 
 	def createQCPage(self):
 		self.logger.info('Visual QC module has been initiated.')
-		images_dir = os.path.join(self.getBaseDirectory(), 'QC_Lesions')
-		os.makedirs(images_dir)
+		if self.controller.sv_lesion_mask_id.get() == LESION_ID_EMPTY:
+			qc_dir = 'QC'
+		else:
+			qc_dir = 'QC_Lesions'
+
+		images_dir = os.path.join(self.getBaseDirectory(), qc_dir)
+
+		if not os.path.isdir(images_dir):
+			os.makedirs(images_dir)
 
 		for subject in self.subjects:
 			anatomical_file_path, lesion_files = self.getT1NLesionFromInput(subject)
 
 			if self.controller.sv_lesion_mask_id.get() == LESION_ID_EMPTY:
-				images_dir = os.path.join(self.getBaseDirectory(), 'QC')
-				if not os.path.isdir(images_dir):
-					os.makedirs(images_dir)
 				output_image_path = os.path.join(images_dir, '%s_%d.png'%(subject, 1))
 				self.com.runFslEyes(anatomical_file_path[0], bet_brain_file='', output_image_path=output_image_path, options='-b 60 -c 70')
 			else:
@@ -266,7 +270,7 @@ class Operations(WMSegmentationOperation,\
 					y=int(y)
 					z=int(z)
 
-					output_image_path = os.path.join(self.getBaseDirectory(), 'QC_Lesions', '%s_Lesion%d.png'%(subject, counter+1))
+					output_image_path = os.path.join(self.getBaseDirectory(), qc_dir, '%s_Lesion%d.png'%(subject, counter+1))
 					self.com.runFslEyes2(anatomical_file_path[0], lesion_file, '', x, y, z, output_image_path)
 
 		if self.controller.sv_lesion_mask_id.get() == LESION_ID_EMPTY:

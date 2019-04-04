@@ -49,6 +49,7 @@ def readLesionLoadCalculationConfigs(configs, application):
 			application.default_freesurfer_subcortical_roi.append(roi_obj)
 
 		if roi in module_settings['roi_names']['default']['additional']:
+			application.b_default_rois.set(True)
 			roi_file_name = AdditionalROINamesToFileMapping[roi_name]
 			roi_file_path = os.path.join('/PALS/ROIs', roi_file_name)
 			application.default_custom_rois.append(roi_file_path)

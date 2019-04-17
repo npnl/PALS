@@ -86,7 +86,7 @@ def getOwnROIsList(application):
 	roi_files = []
 	try:
 		for file_name in all_files:
-			if isfile(join(own_roi_path, file_name)) and file_name.endswith('gz'):
+			if isfile(join(own_roi_path, file_name)) and (file_name.endswith('.gz') or file_name.endswith('.nii')):
 				roi_files.append(join(own_roi_path, file_name))
 		# roi_files = [file_name for file_name in all_files if isfile(join(own_roi_path, file_name) and file_name.endswith('gz'))]
 	except Exception as ex:

@@ -11,7 +11,7 @@ Welcome to our github page!
 
 ## Getting Started
 
-There are two ways to use PALS: in a [Docker Container](#docker_instructions) (recommended) or in a [Manually Prepared Environment](#manual_env).
+There are two ways to use PALS: in a [Docker Container](#docker_instructions) (recommended) or in a [Manually Prepared Environment](#manual_env) (no longer supported - use at your own risk!).
 
 ### Docker Container (recommended)
 <a id='docker_instructions'></a>
@@ -61,7 +61,7 @@ __NOTE: this requires 10Gb of free space on your hard drive to run__
 
 ---
 
-### Manually Prepared Environment
+### Manually Prepared Environment (no longer supported - use at your own risk!)
 <a id='manual_env'></a>
 
 __Prerequisites__

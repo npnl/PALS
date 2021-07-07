@@ -9,7 +9,6 @@ from utils import Operations
 
 def parseArguments():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-s','--silent', help='Starts the PALS tool without showing the UI.', action='store_true')
 	parser.add_argument('-d','--debug', help='Set the logging level as DEBUG', action='store_true')
 	parser.add_argument('-c', '--config', help='Pass a config file to the application. Default config file is [config.json] in current directory', default='')
 	parser.add_argument('--docker', help='Create a virtual display for fsleyes and fsl binaries in dockerized environment', action='store_true')
@@ -35,8 +34,10 @@ def setupLogger(debug, is_docker):
 	logging.getLogger('').addHandler(console)
 	return logging.getLogger(__name__)
 
+
 def getProjectDirectory():
 	return os.path.dirname(os.path.realpath(__file__))
+
 
 def silentMode(logger, config_file, need_display):
 	project_dir = getProjectDirectory()
@@ -45,11 +46,14 @@ def silentMode(logger, config_file, need_display):
 	operations = Operations(application)
 	operations.startThreads(None)
 
+
 def uiMode(logger):
+	DeprecationWarning('This mode of operation is no longer supported.')
 	from gui_init import MainWindow
 	project_dir = getProjectDirectory()
 	app = MainWindow(logger, project_dir)
 	app.mainloop()
+
 
 if __name__ == '__main__':
 	arguments = parseArguments()
@@ -61,16 +65,11 @@ if __name__ == '__main__':
 
 	logger = setupLogger(debug, docker)
 
-	if silent:
-		config_file = arguments.config
-		if config_file == '':
-			logger.info('Using the default [config.json] file for application configurations as no external config file was passed in commandline arguments')
-			config_file = 'config.json'
-		else:
-			logger.info('Reading application configurations from file [%s]'%(config_file))
-
-		silentMode(logger, config_file, arguments.docker)
-
+	config_file = arguments.config
+	if config_file == '':
+		logger.info('Using the default [config.json] file for application configurations as no external config file was passed in commandline arguments')
+		config_file = 'config.json'
 	else:
-		uiMode(logger)
-		
+		logger.info('Reading application configurations from file [%s]'%(config_file))
+
+	silentMode(logger, config_file, arguments.docker)

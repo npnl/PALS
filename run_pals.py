@@ -58,12 +58,9 @@ if __name__ == '__main__':
 						help='Create a virtual display for fsleyes and fsl binaries in dockerized environment',
 						action='store_true')
 	arguments = parser.parse_args()
-	
-	silent = arguments.silent
+
 	debug = arguments.debug
-
 	docker = arguments.docker
-
 	logger = setupLogger(debug, docker)
 
 	config_file = arguments.config

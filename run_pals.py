@@ -7,13 +7,6 @@ from utils import Application, readApplicationConfigs
 
 from utils import Operations
 
-def parseArguments():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-d','--debug', help='Set the logging level as DEBUG', action='store_true')
-	parser.add_argument('-c', '--config', help='Pass a config file to the application. Default config file is [config.json] in current directory', default='')
-	parser.add_argument('--docker', help='Create a virtual display for fsleyes and fsl binaries in dockerized environment', action='store_true')
-	args = parser.parse_args()
-	return args
 
 def setupLogger(debug, is_docker):
 	project_path = getProjectDirectory()
@@ -56,7 +49,15 @@ def uiMode(logger):
 
 
 if __name__ == '__main__':
-	arguments = parseArguments()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-d', '--debug', help='Set the logging level as DEBUG', action='store_true')
+	parser.add_argument('-c', '--config',
+						help='Pass a config file to the application. Default config file is [config.json] in current directory',
+						default='')
+	parser.add_argument('--docker',
+						help='Create a virtual display for fsleyes and fsl binaries in dockerized environment',
+						action='store_true')
+	arguments = parser.parse_args()
 	
 	silent = arguments.silent
 	debug = arguments.debug

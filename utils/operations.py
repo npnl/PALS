@@ -1,6 +1,4 @@
 import os, traceback
-import ntpath
-from datetime import datetime
 from shutil import copyfile, rmtree
 from threading import Thread
 
@@ -32,6 +30,8 @@ class Operations(WMSegmentationOperation,\
 		self.callback = callback
 		thread = Thread(target=self.startExecution, args=())
 		thread.start()
+		thread.join()
+		return self.unique_dir_name
 
 	def stopThreads(self):
 		self.skip = True

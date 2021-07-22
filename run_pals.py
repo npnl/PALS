@@ -16,11 +16,15 @@ from utils import Application, readApplicationConfigs
 from utils import Operations
 
 
-def setupLogger(debug, is_docker):
-	project_path = getProjectDirectory()
-	logs_dir = os.path.join('/output', 'logs') if is_docker else os.path.join(project_path, 'logs')
-	if not os.path.exists(logs_dir):
-		os.makedirs(logs_dir)
+def setupLogger(debug, is_docker, output_path: str = None):
+	if(output_path is None):
+		project_path = getProjectDirectory()
+		logs_dir = os.path.join('/output', 'logs') if is_docker else os.path.join(project_path, 'logs')
+		if not os.path.exists(logs_dir):
+			os.makedirs(logs_dir)
+	else:
+		logs_dir = os.path.join(output_path, 'logs')
+
 	logging.basicConfig(level=logging.DEBUG,
 				format='%(asctime)s %(levelname)s %(message)s',
 				filename=os.path.join(logs_dir, datetime.now().strftime('logfile_%Y%m%d_%H_%M.log')),
@@ -165,6 +169,7 @@ if __name__ == '__main__':
 		else:
 			conf = arguments.config
 		configs = json.load(open(conf, 'r'))
+		final_output = configs['common_settings']['output_dir']
 
 		# Get input/lesion settings
 		input_dir = configs['common_settings']['input_dir']
@@ -196,7 +201,8 @@ if __name__ == '__main__':
 
 	debug = arguments.debug
 	docker = arguments.docker
-	logger = setupLogger(debug, docker)
+	pathlib.Path(join(final_output, 'logs')).mkdir(exist_ok=True, parents=True)
+	logger = setupLogger(debug, docker, final_output)
 	if(not arguments.bids):
 		config_file = arguments.config
 

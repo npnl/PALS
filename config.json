@@ -1,47 +1,53 @@
 {
-    "modules": {
-        "Re_orient_radiological": true,
-        "Lesion_correction": false,
-        "Lesion_load_calculation": true,
-        "Visual_QC": false
-    },
-    "common_settings": {
-        "input_dir": "/input/",
-        "output_dir": "/output/",
-        "t1_id": "T1",
-        "lesion_mask_id": "LesionSmooth",
-        "same_anatomical_space": false
-    },
-    "module_settings": {
-        "Lesion_correction": {
-            "bet_performed": false,
-            "bet_identifier": "",
-            "wms_performed": false,
-            "wms_identifier": "",
-            "t1_intensity_percent": 5
-        },
-        "Lesion_load_calculation": {
-            "bet_performed": false,
-            "bet_identifier": "",
-            "roi_names": {
-                "default": {
-                    "corticospinal_tracts": [
-                        "Left Corticospinal Tract",
-                        "Right Corticospinal Tract"
-                    ],
-                    "fs_cortical": [],
-                    "fs_sub_cortical": [],
-                    "additional": []
-                },
-                "free_surfer": {
-                    "fs_cortical": [],
-                    "fs_sub_cortical": []
-                },
-                "own": {
-                    "template_brain": "",
-                    "own_rois": false
-                }
-            }
-        }
-    }
+	"Analysis": {
+		"Reorient":			true,
+		"Orientation":			"LAS",
+		"Registration": 		true	,
+		"RegistrationMethod":		"FLIRT",
+		"BrainExtraction": 		true,
+		"BrainExtractionMethod":	"BET",
+		"WhiteMatterSegmentation": 	true,
+		"LesionCorrection": 		true,
+		"LesionLoadCalculation": 	true
+	},
+	"Outputs": {
+		"Reorient":			"/home/lex/NPNL/projects/pals/out_ex/",
+		"BrainExtraction":		"/home/lex/NPNL/projects/pals/out_ex/",
+		"BrainExtractionSpace":		"MNI152NLin2009aSym",
+		"RegistrationTransform":	"/home/lex/NPNL/projects/pals/out_ex/",
+		"LesionLoadDatabase":		"/home/lex/NPNL/projects/pals/out_ex/db.db",
+		"LesionLoadTableName":		"LESION",
+		"LesionCorrected":		"/home/lex/NPNL/projects/pals/out_ex/"
+	},
+
+	"BrainExtraction": {
+		"frac":		0.5,
+		"mask":		true
+	},
+	"Registration": {
+		"cost_func":		"leastsq",
+		"reference":		"/home/lex/NPNL/projects/pals/PALS/MNI152_T1_2mm_brain.nii.gz",
+		"out_matrix_file":	"reg_matrix.mat"
+	},
+
+	"LesionCorrection": {
+		"ImageNormMin":			 0,
+		"ImageNormMax": 		255,
+		"WhiteMatterSpread": 		0.05,
+		"Database":			"/home/lex/NPNL/projects/pals/db_corr.db"
+	},
+	"BIDSroot":				"/home/lex/NPNL/projects/pals/R001/",
+	"Subject":				"r001s001",
+	"Session":				"1",
+	"LesionRoot":				"/home/lex/NPNL/projects/pals/R001/",
+	"t1_entities":{
+		"suffix":	"T1w"
+		},
+	"output_directory":			"/home/lex/NPNL/projects/pals/output_ex3",
+	"T1": 					"/home/lex/NPNL/projects/pals/R001/sub-r001s001/ses-1/anat/sub-r001s001_ses-1_T1w.nii.gz",
+	"LesionMask": 				"/home/lex/NPNL/projects/pals/R001/derivatives/lesion_raw/sub-r001s001/ses-1/anat/sub-r001s001_ses-1_space-orig_label-L_desc-T1lesion_mask.nii.gz",
+	"Template":				"/home/lex/NPNL/projects/pals/PALS/MNI152_T1_2mm_brain.nii.gz",
+	"ROI_dir":				"/home/lex/NPNL/projects/pals/PALS/ROIs",
+	"ROI_list": [
+	]
 }

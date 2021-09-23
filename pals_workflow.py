@@ -15,18 +15,18 @@ from nipype.interfaces.fsl import FAST
 import node_fetch
 import shutil, pathlib, sqlalchemy
 from os.path import join
-
+import pandas as pd
 bids.config.set_option('extension_initial_dot', True)
 
 
 def pals(config: dict):
     # Get config file defining workflow
     # configs = json.load(open(config_file, 'r'))
-
+    print('Starting: initializing workflow.')
     # Build pipelie
-    wf = Workflow(name='chicken')
+    wf = Workflow(name='PALS')
 
-    bidsLayout = bids.BIDSLayout(config['BIDSroot'])
+    # bidsLayout = bids.BIDSLayout(config['BIDSroot'])
     # Get data
     loader = BIDSDataGrabber()
     loader.inputs.base_dir = config['BIDSroot']
@@ -37,7 +37,7 @@ def pals(config: dict):
     loader.inputs.output_query = {'t1w': dict(datatype='anat')}
     loader = Node(loader,  name='BIDS-grabber')
 
-    bidsLayout = bids.BIDSLayout(root=config['Outputs']['Reorient'], derivatives=True, validate=False)
+    # bidsLayout = bids.BIDSLayout(root=config['Outputs']['Reorient'], derivatives=True, validate=False)
     entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
     # SQL prep
@@ -51,7 +51,7 @@ def pals(config: dict):
         if('Reorient' in config['Outputs'].keys()):
             reorient_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                     name='reorient_copy', iterfield='src')
-            path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_desc-' + config['Analysis']['Orientation'] + '_{suffix}{extension}'
+            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-' + config['Analysis']['Orientation'] + '_{suffix}{extension}'
             reorient_filename = join(config['Outputs']['Reorient'], path_pattern.format(**entities))
             pathlib.Path(os.path.dirname(reorient_filename)).mkdir(parents=True, exist_ok=True)
             reorient_sink.inputs.dst = reorient_filename
@@ -64,7 +64,7 @@ def pals(config: dict):
     # Brain extraction
     bet = node_fetch.extraction_node(config, **config['BrainExtraction'])
     if('BrainExtraction' in config['Outputs'].keys()):
-        path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
+        path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['BrainExtractionSpace'] + '_desc-brain_mask{extension}'
         brain_mask_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
                                   name='brain_mask_sink', iterfield='src')
@@ -76,7 +76,7 @@ def pals(config: dict):
     # Registration
     reg = node_fetch.registration_node(config, **config['Registration'])
     if('RegistrationTransform' in config['Outputs'].keys()):
-        path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
+        path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['BrainExtractionSpace'] + '_desc-transform.mat'
         registration_transform_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
@@ -110,6 +110,15 @@ def pals(config: dict):
     sql_output.inputs.subject = config['Subject']
     sql_output.inputs.session = config['Session']
     sql_output.inputs.database = config['Outputs']['LesionLoadDatabase']
+
+    # CSV output
+    csv_output = MapNode(Function(function=csv_writer, input_names=['filename', 'data_dict', 'subject', 'session']),
+                         name='csv_output', iterfield=['data_dict'])
+    csv_output.inputs.subject = config['Subject']
+    csv_output.inputs.session = config['Session']
+    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
+    csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+    csv_output.inputs.filename = csv_out_filename
 
 
     ## Lesion correction
@@ -149,6 +158,17 @@ def pals(config: dict):
     sql_output_corr.inputs.table_name = config['Outputs']['LesionLoadTableName']
     sql_output_corr.inputs.data_name = 'CorrectedVolume'
 
+    # CSV output
+    csv_output_corr = MapNode(Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
+                         name='csv_output_corr', iterfield=['data'])
+    csv_output_corr.inputs.subject = config['Subject']
+    csv_output_corr.inputs.session = config['Session']
+    csv_output_corr.inputs.data_name = 'CorrectedVolume'
+
+    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
+    csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+    csv_output_corr.inputs.filename = csv_out_filename
+
 
     file_load0 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
                         name='file_load0', iterfield='in_filename')
@@ -160,19 +180,25 @@ def pals(config: dict):
     wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                         name='image_writer1', iterfield=['image'])
     wm_map.inputs.reference=config['Registration']['reference']
-    path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
+    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                    config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
     wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
     wm_map.inputs.file_name = wm_map_filename
 
     out_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-                        name='image_writer0', iterfield=['image'])
-    out_image.inputs.reference = config['Registration']['reference']
-    path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
+                        name='image_writer0', iterfield=['image', 'reference'])
+    # out_image.inputs.reference = config['Registration']['reference']
+    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                    config['Outputs']['BrainExtractionSpace'] + '_desc-CorrectedLesion_mask{extension}'
     lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
     out_image.inputs.file_name = lesion_corrected_filename
 
+    # out_image_wm = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
+    #         name='image_writer0', iterfield=['image'])
+    # out_image.inputs.reference = config['Registration']['reference']
+    # path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
+    #                config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
+    # lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
 
     wf.connect([
         # Starter
@@ -183,7 +209,9 @@ def pals(config: dict):
         (reg, apply_xfm, [('out_matrix_file', 'in_matrix_file')]),
         (mask_loader, apply_xfm, [('mask', 'in_file')]),
         (apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
-        (lesion_load, sql_output, [('out_list', 'data_dict')]),
+        #(lesion_load, sql_output, [('out_list', 'data_dict')]),
+        (lesion_load, csv_output, [('out_list', 'data_dict')]),
+        (mask_loader, out_image, [('mask', 'reference')]),
 
         # Lesion WM correction
         (bet, t1_norm, [('out_file', 'image')]),
@@ -199,12 +227,13 @@ def pals(config: dict):
         (mask_loader, file_load2, [('mask', 'in_filename')]),
         (file_load2, wm_removal, [('out_image', 'lesion_mask')]),
 
-        (wm_removal, sql_output_corr, [('corrected_volume', 'data')]),
+        # (wm_removal, sql_output_corr, [('corrected_volume', 'data')]),
+        (wm_removal, csv_output_corr, [('corrected_volume', 'data')]),
         (wm_removal, out_image, [('out_data', 'image')])
 
     ])
 
-
+    wf.run()
     return wf
 
 
@@ -343,7 +372,7 @@ def white_matter_correction(image,
     image_data = image.get_fdata()
 
     # Extract white matter that doesn't have lesion to get mean value of white matter
-    not_lesion = lesion_mask == 0
+    not_lesion = lesion_mask_data == 0
     wm_mask_sans_lesions = wm_mask_data * not_lesion
     wm_sans_lesions = wm_mask_sans_lesions * image_data
 
@@ -354,7 +383,7 @@ def white_matter_correction(image,
     upper_thresh = mean_wm + mean_dist
 
     lesion_data = image_data * lesion_mask_data
-    corrected_lesion_data = (lesion_data < lower_thresh) + (lesion_data > upper_thresh)
+    corrected_lesion_data = lesion_mask_data*((lesion_data < lower_thresh) + (lesion_data > upper_thresh))
     corrected_lesion = nb.Nifti1Image(np.array(corrected_lesion_data, dtype=float), lesion_mask.affine)
 
     return corrected_lesion, np.sum(corrected_lesion_data)
@@ -399,6 +428,52 @@ def overlap(ref_mask: str, roi_list: list) -> str:
     f.close()
     # return os.path.abspath(filename)
     return overlap_dict
+
+
+def csv_writer(filename: str, subject: str, session: str, data_dict: dict = None, data = None, data_name: str = None):
+    '''
+    Writes dictionary to CSV file.
+    Parameters
+    ----------
+    filename : str
+        Output filename.
+    subject : str
+        Subject ID.
+    session : str
+        Session ID.
+    data_dict : dict
+        Dictionary to write to CSV.
+    data
+        Single data point to write.
+    data_name : str
+        Name of column.
+
+    Returns
+    -------
+    None
+    '''
+    import pandas as pd
+    import os
+
+
+    if(data_dict is None):
+        data_dict = {data_name: data}
+    if(os.path.exists(filename)):
+        pdat = pd.read_csv(filename)
+        pdat_cols = pdat.columns
+        for col in data_dict.keys():
+            if(col not in pdat_cols):
+                pdat.insert(len(pdat), col, data_dict[col])
+    else:
+        pdat = pd.DataFrame(data_dict, [0])
+    if('session' not in pdat.columns):
+        pdat.insert(0, 'session', session)
+    if('subject' not in pdat.columns):
+        pdat.insert(0, 'subject', subject)
+    pdat.to_csv(filename, index=False)
+    return
+
+
 
 def sql_writer(database: str, subject: str, session: str, data_dict: dict = None, table_name='LESION', data = None, data_name: str = None):
     '''
@@ -506,19 +581,27 @@ def extract_first(in_list: list) -> str:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the value in the config file.', default=None)
-    parser.add_argument('--subject', type=str, help='Subject ID; value of the label associated with the "subject" BIDS entity. If set, overrides the value in the config file.', default=None)
-    parser.add_argument('--session', type=str, help='Session ID; value of the label associated with the "session" BIDS entity. If set, overrides the value in the config file.', default=None)
-    parser.add_argument('--lesion_root', help='Root directory for the BIDS directory containing the lesion masks. If set, overrides the value in the config file.', default=None)
-    parser.add_argument('--output_root', type=str, help='Root directory for the output.')
-    parser.add_argument('--config', type=str, help='Path to the configuration file.', default=None)
+    parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the'
+                                                     ' value in the config file.', default=None)
+    parser.add_argument('--subject', type=str, help='Subject ID; value of the label associated with the "subject" BIDS'
+                                                    ' entity. If set, overrides the value in the config file.', default=None)
+    parser.add_argument('--session', type=str, help='Session ID; value of the label associated with the "session" BIDS'
+                                                    ' entity. If set, overrides the value in the config file.', default=None)
+    parser.add_argument('--lesion_root', type=str, help='Root directory for the BIDS directory containing the lesion '
+                                                        'masks. If set, overrides the value in the config file.', default=None)
+    parser.add_argument('--config', type=str, help='Path to the configuration file.', required=True)
 
 
     pargs = parser.parse_args()
     # TODO: prioritize args over config file, parsem validate
 
-    configs = json.load(open(pargs.config, 'r'))
+    config = json.load(open(pargs.config, 'r'))
     if(pargs.root_dir is not None):
-        configs[]
-
-    pals(configs)
+        config['BIDSroot'] = pargs.root_dir
+    if(pargs.subject is not None):
+        config['Subject'] = pargs.subject
+    if(pargs.session is not None):
+        config['Session'] = pargs.session
+    if(pargs.lesion_root is not None):
+        config['LesionRoot'] = pargs.lesion_root
+    pals(config)

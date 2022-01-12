@@ -53,7 +53,8 @@ def registration_node(config: dict, **kwargs):
     reg_method = config['Analysis']['RegistrationMethod']
     if(not config['Analysis']['Registration']):
         # No registration; in -> out
-        n = MapNode(Function(function=infile_to_outfile, input_names='in_file', output_names='out_file'),
+        n = MapNode(Function(function=infile_to_outfile, input_names='in_file',
+                             output_names=['out_file', 'out_matrix_file']),
                     name='registration_skip', iterfield='in_file')
     elif(reg_method.lower() == 'flirt'):
         # Use FLIRT

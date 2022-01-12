@@ -1,6 +1,3 @@
-import nibabel as nb
-import nipype
-import numpy as np
 import argparse
 import json
 import bids
@@ -8,14 +5,12 @@ import os
 from nipype.pipeline import Node, MapNode, Workflow
 from nipype.interfaces.utility import Function
 from nipype.interfaces.io import BIDSDataGrabber, DataSink, SQLiteSink
-from nipype.interfaces.fsl import BET
-from nipype.interfaces import fsl
 from nipype.interfaces.image import Reorient
 from nipype.interfaces.fsl import FAST
 import node_fetch
-import shutil, pathlib, sqlalchemy
+import pathlib, sqlalchemy
+import shutil
 from os.path import join
-import pandas as pd
 bids.config.set_option('extension_initial_dot', True)
 
 
@@ -28,16 +23,14 @@ def pals(config: dict):
 
     # bidsLayout = bids.BIDSLayout(config['BIDSroot'])
     # Get data
-    loader = BIDSDataGrabber()
+    loader = BIDSDataGrabber(index_derivatives=True)
     loader.inputs.base_dir = config['BIDSroot']
     loader.inputs.subject = config['Subject']
     if(config['Session'] is not None):
         loader.inputs.session = config['Session']
-    # loader.inputs.modality = 'anat'
-    loader.inputs.output_query = {'t1w': dict(datatype='anat')}
-    loader = Node(loader,  name='BIDS-grabber')
+    loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
+    loader = Node(loader,  name='BIDSgrabber')
 
-    # bidsLayout = bids.BIDSLayout(root=config['Outputs']['Reorient'], derivatives=True, validate=False)
     entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
     # SQL prep
@@ -84,15 +77,15 @@ def pals(config: dict):
         pathlib.Path(os.path.dirname(registration_transform_filename)).mkdir(parents=True, exist_ok=True)
         registration_transform_sink.inputs.dst = registration_transform_filename
         wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
+
     # Get mask
     mask_loader = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
                                        subject=config['Subject'],
                                        index_derivatives=True,
-                                       output_query={'mask': dict(suffix='mask')}
-                                       ), name='mask-grabber')
+                                       output_query={'mask': dict(**config['LesionEntities'])}
+                                       ), name='mask_grabber')
 
     # Apply reg file to lesion mask
-    # apply_xfm = MapNode(fsl.FLIRT(apply_xfm=True, reference=config['Template']), name='apply_xfm', iterfield=['in_file', 'in_matrix_file'])
     apply_xfm = node_fetch.apply_xfm_node(config)
 
     # Lesion load calculation
@@ -178,8 +171,8 @@ def pals(config: dict):
                          name='file_load2', iterfield='in_filename')
 
     wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-                        name='image_writer1', iterfield=['image'])
-    wm_map.inputs.reference=config['Registration']['reference']
+                        name='image_writer1', iterfield=['image', 'reference'])
+    # wm_map.inputs.reference=config['Registration']['reference']
     path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                    config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
     wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
@@ -193,13 +186,7 @@ def pals(config: dict):
     lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
     out_image.inputs.file_name = lesion_corrected_filename
 
-    # out_image_wm = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-    #         name='image_writer0', iterfield=['image'])
-    # out_image.inputs.reference = config['Registration']['reference']
-    # path_pattern = 'sub-{subject}/ses-{session}/sub-{subject}_ses-{session}_space-' + \
-    #                config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
-    # lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
-
+    # Connecting workflow.
     wf.connect([
         # Starter
         (loader, radio, [('t1w', 'in_file')]),
@@ -211,7 +198,9 @@ def pals(config: dict):
         (apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
         #(lesion_load, sql_output, [('out_list', 'data_dict')]),
         (lesion_load, csv_output, [('out_list', 'data_dict')]),
+
         (mask_loader, out_image, [('mask', 'reference')]),
+        (mask_loader, wm_map, [('mask', 'reference')]),
 
         # Lesion WM correction
         (bet, t1_norm, [('out_file', 'image')]),
@@ -221,7 +210,8 @@ def pals(config: dict):
         (ex_last, file_load1, [('out_entry', 'in_filename')]),
         (file_load1, wm_removal, [('out_image', 'wm_mask')]),
 
-        (loader, file_load0, [('t1w', 'in_filename')]),
+        # (loader, file_load0, [('t1w', 'in_filename')]),
+        (radio, file_load0, [('out_file', 'in_filename')]),
         (file_load0, wm_removal, [('out_image', 'image')]),
 
         (mask_loader, file_load2, [('mask', 'in_filename')]),
@@ -232,7 +222,10 @@ def pals(config: dict):
         (wm_removal, out_image, [('out_data', 'image')])
 
     ])
-
+    graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
+    wf.write_graph(graph2use='orig', dotfilename=join(graph_out, 'graph.dot'), format='png')
+    os.remove(graph_out + 'graph.dot')
+    os.remove(graph_out + 'graph_detailed.dot')
     wf.run()
     return wf
 
@@ -370,6 +363,9 @@ def white_matter_correction(image,
     lesion_mask_data = lesion_mask.get_fdata()
     wm_mask_data = wm_mask.get_fdata()
     image_data = image.get_fdata()
+    print(f'lesion_mask: {lesion_mask_data.shape}')
+    print(f'wm_mask: {wm_mask_data.shape}')
+    print(f'image_data: {image_data.shape}')
 
     # Extract white matter that doesn't have lesion to get mean value of white matter
     not_lesion = lesion_mask_data == 0
@@ -384,10 +380,10 @@ def white_matter_correction(image,
 
     lesion_data = image_data * lesion_mask_data
     corrected_lesion_data = lesion_mask_data*((lesion_data < lower_thresh) + (lesion_data > upper_thresh))
-    corrected_lesion = nb.Nifti1Image(np.array(corrected_lesion_data, dtype=float), lesion_mask.affine)
+    corrected_lesion = nb.Nifti1Image(np.array(corrected_lesion_data, dtype=float),
+                                      affine=lesion_mask.affine, header=lesion_mask.header)
 
     return corrected_lesion, np.sum(corrected_lesion_data)
-
 
 
 def overlap(ref_mask: str, roi_list: list) -> str:
@@ -406,17 +402,22 @@ def overlap(ref_mask: str, roi_list: list) -> str:
         Path to list of floats indicating the amount of overlap between the reference mask and each ROI in the list.
     '''
     import nibabel as nb
+    import nibabel.processing as nbp
     import numpy as np
     import os
 
     # Initialize; get reference data
     overlap_list = []
     overlap_dict = {}
+    ref_image = nb.load(ref_mask)
     ref_dat = nb.load(ref_mask).get_fdata()
+    overlap_dict['UncorrectedVolume'] = np.sum(ref_dat)
 
     # Compute overlap for each mask
     for roi_file in roi_list:
-        roi = nb.load(roi_file).get_fdata()
+        roi_image = nb.load(roi_file)
+        roi = nb.processing.resample_from_to(roi_image, ref_image).get_fdata()
+        # roi = nb.load(roi_file).get_fdata()
         overlap_val = np.sum(ref_dat * roi)
         overlap_list.append(overlap_val)
         base_roi = os.path.basename(roi_file).replace('.nii.gz', '')
@@ -426,7 +427,6 @@ def overlap(ref_mask: str, roi_list: list) -> str:
     for roi_val in overlap_list:
         f.write(str(roi_val) + '\n')
     f.close()
-    # return os.path.abspath(filename)
     return overlap_dict
 
 
@@ -563,6 +563,7 @@ def sql_writer(database: str, subject: str, session: str, data_dict: dict = None
     com.close()
     return
 
+
 def extract_first(in_list: list) -> str:
     '''
     Returns the first entity of the input list.
@@ -579,6 +580,24 @@ def extract_first(in_list: list) -> str:
     return in_list[0]
 
 
+def bids_derivative_loader(config: dict, **kwargs):
+    '''
+
+    Parameters
+    ----------
+    config
+    kwargs
+
+    Returns
+    -------
+
+    '''
+    import bids
+    bl = bids.BIDSLayout(config['BIDSroot'], derivatives=True)
+    deriv = bl.derivatives[config['PipelineName']]
+    return deriv.get(subject=config['Subject'], session=config['Session'], **config['t1_entities'])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the'
@@ -593,7 +612,7 @@ if __name__ == "__main__":
 
 
     pargs = parser.parse_args()
-    # TODO: prioritize args over config file, parsem validate
+    # TODO: prioritize args over config file, parse, validate
 
     config = json.load(open(pargs.config, 'r'))
     if(pargs.root_dir is not None):

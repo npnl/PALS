@@ -49,6 +49,6 @@
  },
  "Template": "MNI152_T1_2mm_brain.nii.gz",
  "ROIDir": "/data1/ROIs/",
- "ROI_list": [],
+ "ROIList": [],
  "Multiprocessing": 1
 }

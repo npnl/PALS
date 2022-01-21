@@ -93,7 +93,7 @@ config.json
   "space": "MNI152NLin2009aSym"
  },
  "ROIDir": "ROIs",                             # str; Path to the directory containing ROI image files.
- "ROI_list": [],                                # list; List of ROI files to use.
+ "ROIList": [],                                # list; List of ROI files to use.
  "Multiprocessing": 16                          # int; Number of threads to use for multiprocessing.
 }
 ```

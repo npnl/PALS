@@ -109,7 +109,7 @@ def pals(config: dict):
                           name='overlap_calc', iterfield=['ref_mask'])
     buf = os.listdir(config['ROIDir'])
     roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
-    buf = config['ROI_list']
+    buf = config['ROIList']
     roi_list += [os.path.abspath(b) for b in buf]
     lesion_load.inputs.roi_list = roi_list
 

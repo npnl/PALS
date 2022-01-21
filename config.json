@@ -11,13 +11,14 @@
   "LesionLoadCalculation": true
  },
  "Outputs": {
-  "Reorient": "/data1/pals_proc/R001",
-  "BrainExtraction": "/data1/pals_proc/R001/",
-  "BrainExtractionSpace": "MNI152NLin2009aSym",
-  "RegistrationTransform": "/data1/pals_proc/R001",
-  "LesionLoadDatabase": "/data1/pals_proc/db.db",
+  "Root": "/data1/pals/",
+  "LesionLoadDatabase": "pals_lesionload.db",
   "LesionLoadTableName": "LESION",
-  "LesionCorrected": "/data1/pals_proc/R001"
+  "BrainExtractionSpace": "MNI152NLin2009aSym",
+  "RegistrationTransform": "",
+  "Reorient": "",
+  "BrainExtraction": "",
+  "LesionCorrected": ""
  },
  "BrainExtraction": {
   "frac": 0.5,
@@ -25,20 +26,18 @@
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "/home/lex/NPNL/projects/pals/PALS/MNI152_T1_2mm_brain.nii.gz",
-  "out_matrix_file": "reg_matrix.mat",
+  "reference": "/data1/reference.",
   "no_search": true
  },
  "LesionCorrection": {
   "ImageNormMin": 0,
   "ImageNormMax": 255,
-  "WhiteMatterSpread": 0.05,
-  "Database": "/home/lex/NPNL/projects/pals/pals_proc/db_corr.db"
+  "WhiteMatterSpread": 0.05
  },
- "BIDSroot": "/data1/StrokeData/R001",
- "Subject": "r001s001",
- "Session": "1",
- "LesionRoot": "/data1/StrokeData/R001",
+ "BIDSroot": "data/",
+ "Subject": "",
+ "Session": "",
+ "LesionRoot": "data/",
  "LesionEntities": {
   "suffix": "mask",
   "space": "MNI152NLin2009aSym",
@@ -48,7 +47,8 @@
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
- "Template": "/home/lex/NPNL/projects/pals/PALS/MNI152_T1_2mm_brain.nii.gz",
- "ROI_dir": "/data1/atlases/HMAT_website/",
- "ROI_list": []
+ "Template": "MNI152_T1_2mm_brain.nii.gz",
+ "ROI_dir": "/data1/ROIs/",
+ "ROI_list": [],
+ "Multiprocessing": 1
 }

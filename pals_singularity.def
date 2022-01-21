@@ -132,4 +132,4 @@ echo "Some packages in this Singularity container are non-free"
 echo "If you are considering commercial use of this container, please consult the relevant license:"
 echo "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence"
 
-python3.8 /PALS/run_pals.py $@
+python3.8 /PALS/pals_workflow.py $@

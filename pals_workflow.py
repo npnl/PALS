@@ -2,6 +2,8 @@ import argparse
 import json
 import bids
 import os
+import multiprocessing
+from config_parse import PALSConfig
 from nipype.pipeline import Node, MapNode, Workflow
 from nipype.interfaces.utility import Function
 from nipype.interfaces.io import BIDSDataGrabber, DataSink, SQLiteSink
@@ -10,6 +12,7 @@ from nipype.interfaces.fsl import FAST
 import node_fetch
 import pathlib, sqlalchemy
 import shutil
+from copy import deepcopy
 from os.path import join
 bids.config.set_option('extension_initial_dot', True)
 
@@ -23,13 +26,15 @@ def pals(config: dict):
 
     # bidsLayout = bids.BIDSLayout(config['BIDSroot'])
     # Get data
-    loader = BIDSDataGrabber(index_derivatives=True)
+    loader = BIDSDataGrabber(index_derivatives=False)
     loader.inputs.base_dir = config['BIDSroot']
     loader.inputs.subject = config['Subject']
     if(config['Session'] is not None):
         loader.inputs.session = config['Session']
     loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
+    loader.inputs.extra_derivatives = [config['BIDSroot']]
     loader = Node(loader,  name='BIDSgrabber')
+
 
     entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
@@ -69,9 +74,15 @@ def pals(config: dict):
     # Registration
     reg = node_fetch.registration_node(config, **config['Registration'])
     if('RegistrationTransform' in config['Outputs'].keys()):
+
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['BrainExtractionSpace'] + '_desc-transform.mat'
+
         registration_transform_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+        # reg.inputs.out_matrix_file = registration_transform_filename
+        # reg.inputs.out_file = 'tmp.nii.gz'
+        print(f'registration_transform_filename: {registration_transform_filename}')
+        # registration_transform_sink = MapNode(DataSink)
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
                                               name='registration_transf_sink', iterfield='src')
         pathlib.Path(os.path.dirname(registration_transform_filename)).mkdir(parents=True, exist_ok=True)
@@ -79,11 +90,16 @@ def pals(config: dict):
         wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
 
     # Get mask
+    print(f"fetching subject {config['Subject']}")
     mask_loader = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
                                        subject=config['Subject'],
-                                       index_derivatives=True,
-                                       output_query={'mask': dict(**config['LesionEntities'])}
+                                       index_derivatives=False,
+                                       output_query={'mask': dict(**config['LesionEntities'],
+                                                                  invalid_filters='allow')},
+                                       extra_derivatives = [config['BIDSroot']]
                                        ), name='mask_grabber')
+    # loader.inputs.extra_derivatives = [config['BIDSroot']]
+    # loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)
@@ -233,7 +249,7 @@ def pals(config: dict):
 def copyfile(src, dst):
     import shutil
     shutil.copyfile(src, dst)
-
+    return
 
 def infile_to_outfile(**kwargs):
     return kwargs['in_file']
@@ -574,28 +590,38 @@ def extract_first(in_list: list) -> str:
 
     Returns
     -------
-    str
+    var
         First element of input
     '''
     return in_list[0]
 
 
-def bids_derivative_loader(config: dict, **kwargs):
-    '''
 
+def create_modified_config_copy(config: dict,
+                                subject: str = None,
+                                session: str = None) -> dict:
+    '''
+    Sets the subject and session using a function for parallelization.
     Parameters
     ----------
-    config
-    kwargs
+    config : dict
+     Config dict object
+    subject : str
+        BIDS subject ID
+    session : str
+        BIDS session ID
 
     Returns
     -------
-
+    dict
+        Config with updated values
     '''
-    import bids
-    bl = bids.BIDSLayout(config['BIDSroot'], derivatives=True)
-    deriv = bl.derivatives[config['PipelineName']]
-    return deriv.get(subject=config['Subject'], session=config['Session'], **config['t1_entities'])
+    new_config = deepcopy(config)
+    if(subject is not None):
+        new_config['Subject'] = subject
+    if(session is not None):
+        new_config['Session'] = session
+    return new_config
 
 
 if __name__ == "__main__":
@@ -610,17 +636,47 @@ if __name__ == "__main__":
                                                         'masks. If set, overrides the value in the config file.', default=None)
     parser.add_argument('--config', type=str, help='Path to the configuration file.', required=True)
 
-
     pargs = parser.parse_args()
     # TODO: prioritize args over config file, parse, validate
+    pals_config = PALSConfig(pargs.config)
 
-    config = json.load(open(pargs.config, 'r'))
+    # config = json.load(open(pargs.config, 'r'))
     if(pargs.root_dir is not None):
-        config['BIDSroot'] = pargs.root_dir
+        pals_config['BIDSroot'] = pargs.root_dir
     if(pargs.subject is not None):
-        config['Subject'] = pargs.subject
+        pals_config['Subject'] = pargs.subject
     if(pargs.session is not None):
-        config['Session'] = pargs.session
+        pals_config['Session'] = pargs.session
     if(pargs.lesion_root is not None):
-        config['LesionRoot'] = pargs.lesion_root
-    pals(config)
+        pals_config['LesionRoot'] = pargs.lesion_root
+
+    # If either Subject or Session is empty, assume that we'll be processing all subjects + sessions
+    no_subject = len(pals_config['Subject']) == 0
+    no_session = len(pals_config['Session']) == 0
+    subject_list = []
+    session_list = []
+    if(no_subject or no_session):
+        dataset = bids.BIDSLayout(root=pals_config['BIDSroot'],
+                                  derivatives=pals_config['BIDSroot']).derivatives['stroke_preproc']
+    if(no_subject):
+        subject_list = dataset.entities['subject'].unique()
+    else:
+        subject_list = [pargs.subject]
+    if(no_session):
+        session_list = dataset.entities['session'].unique()
+    else:
+        session_list = [pargs.session]
+
+    config_list = []
+    print(f"sub/ses lengths: {len(subject_list)}, {len(session_list)}")
+    for sub in subject_list:
+        for ses in session_list:
+            config_list.append(create_modified_config_copy(pals_config,
+                                                           subject=sub,
+                                                           session=ses))
+    print(f"Starting {pals_config['Multiprocessing']} threads...")
+    # print(config_list[0]['Outputs'])
+    # pals(config_list[0])
+    p = multiprocessing.Pool(pals_config['Multiprocessing'])
+    # print(config_list[0])
+    p.map(pals, config_list)

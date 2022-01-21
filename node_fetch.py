@@ -4,6 +4,7 @@ from nipype.interfaces import Function
 
 
 def infile_to_outfile(**kwargs):
+    print(f"returning {kwargs['in_file']}")
     return kwargs['in_file']
 
 
@@ -58,7 +59,12 @@ def registration_node(config: dict, **kwargs):
                     name='registration_skip', iterfield='in_file')
     elif(reg_method.lower() == 'flirt'):
         # Use FLIRT
-        n = MapNode(fsl.FLIRT(**kwargs), name='registration_flirt', iterfield='in_file')
+        print(kwargs)
+        n = MapNode(fsl.FLIRT(), name='registration_flirt', iterfield='in_file')
+        n.inputs.reference = kwargs['reference']
+        for k, v in kwargs.items():
+            print(f'setting {k} to {v}')
+            setattr(n.inputs, k, v)
     else:
         raise(NotImplementedError(f'Registration method {reg_method} not implemented.'))
     return n
@@ -86,6 +92,6 @@ def apply_xfm_node(config: dict, **kwargs):
                              output_names='out_file'),
                     name='transformation_skip', iterfield=['in_file', 'in_matrix_file'])
     else:
-        n = MapNode(fsl.FLIRT(apply_xfm=True, reference=config['Template']),
+        n = MapNode(fsl.FLIRT(apply_xfm=True, reference=config['Registration']['reference']),
                     name='transformation_flirt', iterfield=['in_file', 'in_matrix_file'])
     return n

@@ -48,7 +48,7 @@
   "space": "MNI152NLin2009aSym"
  },
  "Template": "MNI152_T1_2mm_brain.nii.gz",
- "ROI_dir": "/data1/ROIs/",
+ "ROIDir": "/data1/ROIs/",
  "ROI_list": [],
  "Multiprocessing": 1
 }

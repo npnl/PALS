@@ -107,8 +107,8 @@ def pals(config: dict):
     # Lesion load calculation
     lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
                           name='overlap_calc', iterfield=['ref_mask'])
-    buf = os.listdir(config['ROI_dir'])
-    roi_list = [os.path.abspath(os.path.join(config['ROI_dir'], b)) for b in buf]
+    buf = os.listdir(config['ROIDir'])
+    roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
     buf = config['ROI_list']
     roi_list += [os.path.abspath(b) for b in buf]
     lesion_load.inputs.roi_list = roi_list

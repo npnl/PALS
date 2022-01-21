@@ -92,7 +92,7 @@ config.json
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
- "ROI_dir": "ROIs",                             # str; Path to the directory containing ROI image files.
+ "ROIDir": "ROIs",                             # str; Path to the directory containing ROI image files.
  "ROI_list": [],                                # list; List of ROI files to use.
  "Multiprocessing": 16                          # int; Number of threads to use for multiprocessing.
 }

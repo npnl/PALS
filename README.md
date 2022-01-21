@@ -79,7 +79,7 @@ config.json
   "ImageNormMax": 255,                          # Maximum value for image
   "WhiteMatterSpread": 0.05                     # The deviation of the white matter intensity as a fraction of the mean white matter intensity.
  },
- "BIDSroot": "/data1/data",                     # str; Path to the BIDS root directory for the raw data.
+ "BIDSRoot": "/data1/data",                     # str; Path to the BIDS root directory for the raw data.
  "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects.
  "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions.
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.

@@ -1,47 +1,54 @@
 {
-    "modules": {
-        "Re_orient_radiological": true,
-        "Lesion_correction": false,
-        "Lesion_load_calculation": true,
-        "Visual_QC": false
-    },
-    "common_settings": {
-        "input_dir": "/input/",
-        "output_dir": "/output/",
-        "t1_id": "T1",
-        "lesion_mask_id": "LesionSmooth",
-        "same_anatomical_space": false
-    },
-    "module_settings": {
-        "Lesion_correction": {
-            "bet_performed": false,
-            "bet_identifier": "",
-            "wms_performed": false,
-            "wms_identifier": "",
-            "t1_intensity_percent": 5
-        },
-        "Lesion_load_calculation": {
-            "bet_performed": false,
-            "bet_identifier": "",
-            "roi_names": {
-                "default": {
-                    "corticospinal_tracts": [
-                        "Left Corticospinal Tract",
-                        "Right Corticospinal Tract"
-                    ],
-                    "fs_cortical": [],
-                    "fs_sub_cortical": [],
-                    "additional": []
-                },
-                "free_surfer": {
-                    "fs_cortical": [],
-                    "fs_sub_cortical": []
-                },
-                "own": {
-                    "template_brain": "",
-                    "own_rois": false
-                }
-            }
-        }
-    }
+ "Analysis": {
+  "Reorient": true,
+  "Orientation": "LAS",
+  "Registration": true,
+  "RegistrationMethod": "FLIRT",
+  "BrainExtraction": true,
+  "BrainExtractionMethod": "BET",
+  "WhiteMatterSegmentation": true,
+  "LesionCorrection": true,
+  "LesionLoadCalculation": true
+ },
+ "Outputs": {
+  "Root": "/data1/pals/",
+  "LesionLoadDatabase": "pals_lesionload.db",
+  "LesionLoadTableName": "LESION",
+  "BrainExtractionSpace": "MNI152NLin2009aSym",
+  "RegistrationTransform": "",
+  "Reorient": "",
+  "BrainExtraction": "",
+  "LesionCorrected": ""
+ },
+ "BrainExtraction": {
+  "frac": 0.5,
+  "mask": true
+ },
+ "Registration": {
+  "cost_func": "normmi",
+  "reference": "/data1/reference.",
+  "no_search": true
+ },
+ "LesionCorrection": {
+  "ImageNormMin": 0,
+  "ImageNormMax": 255,
+  "WhiteMatterSpread": 0.05
+ },
+ "BIDSroot": "data/",
+ "Subject": "",
+ "Session": "",
+ "LesionRoot": "data/",
+ "LesionEntities": {
+  "suffix": "mask",
+  "space": "MNI152NLin2009aSym",
+  "label": "L"
+ },
+ "t1_entities": {
+  "desc": "T1FinalResampledNorm",
+  "space": "MNI152NLin2009aSym"
+ },
+ "Template": "MNI152_T1_2mm_brain.nii.gz",
+ "ROI_dir": "/data1/ROIs/",
+ "ROI_list": [],
+ "Multiprocessing": 1
 }

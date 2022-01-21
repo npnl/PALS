@@ -1,0 +1,135 @@
+# Most of this definition file was generated automatically using Neurodocker:
+#     https://github.com/ReproNim/neurodocker
+# Some modifications were made to include PALS.
+
+Bootstrap: docker
+From: ubuntu:18.04
+
+%post
+su - root
+
+export ND_ENTRYPOINT="/neurodocker/startup.sh"
+apt-get update -qq
+apt-get install -y -q --no-install-recommends \
+    apt-utils \
+    bzip2 \
+    ca-certificates \
+    curl \
+    locales \
+    unzip \
+    git
+
+apt-get install -y -q --no-install-recommends build-essential
+apt-get install -y -q --no-install-recommends python3.8 python3.8-dev python3-pip
+apt-get install -y -q --no-install-recommends python3-setuptools
+apt-get install -y freeglut3 libsdl1.2debian
+apt-get install -y libgtk2.0-dev libgtk-3-dev libwebkitgtk-dev libwebkitgtk-3.0-dev
+apt-get install -y libjpeg-turbo8-dev libtiff5-dev libsdl1.2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libnotify-dev freeglut3-dev
+
+# Get PALS
+git clone https://github.com/npnl/PALS /PALS
+
+python3.8 -m pip install --upgrade pip
+python3.8 -m pip install -r /PALS/requirements.txt
+
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
+sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+dpkg-reconfigure --frontend=noninteractive locales
+update-locale LANG="en_US.UTF-8"
+chmod 777 /opt && chmod a+s /opt
+mkdir -p /neurodocker
+if [ ! -f "$ND_ENTRYPOINT" ]; then
+  echo '#!/usr/bin/env bash' >> "$ND_ENTRYPOINT"
+  echo 'set -e' >> "$ND_ENTRYPOINT"
+  echo 'export USER="${USER:=`whoami`}"' >> "$ND_ENTRYPOINT"
+  echo 'if [ -n "$1" ]; then "$@"; else /usr/bin/env bash; fi' >> "$ND_ENTRYPOINT";
+fi
+chmod -R 777 /neurodocker && chmod a+s /neurodocker
+
+apt-get update -qq
+apt-get install -y -q --no-install-recommends \
+    bc \
+    dc \
+    file \
+    libfontconfig1 \
+    libfreetype6 \
+    libgl1-mesa-dev \
+    libgl1-mesa-dri \
+    libglu1-mesa-dev \
+    libgomp1 \
+    libice6 \
+    libxcursor1 \
+    libxft2 \
+    libxinerama1 \
+    libxrandr2 \
+    libxrender1 \
+    libxt6 \
+    sudo \
+    wget
+#apt-get clean
+#rm -rf /var/lib/apt/lists/*
+echo "Downloading FSL ..."
+mkdir -p /opt/fsl-6.0.3
+curl -fsSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
+| tar -xz -C /opt/fsl-6.0.3 --strip-components 1 
+sed -i '$iecho Some packages in this Docker container are non-free' $ND_ENTRYPOINT
+sed -i '$iecho If you are considering commercial use of this container, please consult the relevant license:' $ND_ENTRYPOINT
+sed -i '$iecho https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence' $ND_ENTRYPOINT
+sed -i '$isource $FSLDIR/etc/fslconf/fsl.sh' $ND_ENTRYPOINT
+echo "Installing FSL conda environment ..."
+bash /opt/fsl-6.0.3/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.3
+
+
+echo '{
+\n  "pkg_manager": "apt",
+\n  "instructions": [
+\n    [
+\n      "base",
+\n      "ubuntu:18.04"
+\n    ],
+\n    [
+\n      "user",
+\n      "root"
+\n    ],
+\n    [
+\n      "_header",
+\n      {
+\n        "version": "generic",
+\n        "method": "custom"
+\n      }
+\n    ],
+\n    [
+\n      "fsl",
+\n      {
+\n        "version": "6.0.3",
+\n        "method": "binaries"
+\n      }
+\n    ]
+\n  ]
+\n}' > /neurodocker/neurodocker_specs.json
+
+
+%environment
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+export ND_ENTRYPOINT="/neurodocker/startup.sh"
+export FSLDIR="/opt/fsl-6.0.3"
+export PATH="/opt/fsl-6.0.3/bin:$PATH"
+export FSLOUTPUTTYPE="NIFTI_GZ"
+export FSLMULTIFILEQUIT="TRUE"
+export FSLTCLSH="/opt/fsl-6.0.3/bin/fsltclsh"
+export FSLWISH="/opt/fsl-6.0.3/bin/fslwish"
+export FSLLOCKDIR=""
+export FSLMACHINELIST=""
+export FSLREMOTECALL=""
+export FSLGECUDAQ="cuda.q"
+
+%runscript
+#!/bin/bash
+echo "Some packages in this Singularity container are non-free"
+echo "If you are considering commercial use of this container, please consult the relevant license:"
+echo "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence"
+
+python3.8 /PALS/pals_workflow.py $@

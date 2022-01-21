@@ -11,6 +11,9 @@ Here is a visualization of the workflow:
 
 For additional information about the original implementation, see the publication in [Frontier in Neuroinformatics](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).
 
+## Expected Data Structure
+PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "t1_entities" to match your data. Outputs are provided in BIDS derivatives.
+
 ## Getting Started
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. 
 

@@ -34,7 +34,7 @@
   "ImageNormMax": 255,
   "WhiteMatterSpread": 0.05
  },
- "BIDSroot": "data/",
+ "BIDSRoot": "data/",
  "Subject": "",
  "Session": "",
  "LesionRoot": "data/",
@@ -43,12 +43,12 @@
   "space": "MNI152NLin2009aSym",
   "label": "L"
  },
- "t1_entities": {
+ "T1Entities": {
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
  "Template": "MNI152_T1_2mm_brain.nii.gz",
- "ROI_dir": "/data1/ROIs/",
- "ROI_list": [],
+ "ROIDir": "/data1/ROIs/",
+ "ROIList": [],
  "Multiprocessing": 1
 }

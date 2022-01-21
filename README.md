@@ -12,7 +12,7 @@ Here is a visualization of the workflow:
 For additional information about the original implementation, see the publication in [Frontier in Neuroinformatics](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).
 
 ## Expected Data Structure
-PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "t1_entities" to match your data. Outputs are provided in BIDS derivatives.
+PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "T1Entities" to match your data. Outputs are provided in BIDS derivatives.
 
 ## Getting Started
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. 
@@ -79,7 +79,7 @@ config.json
   "ImageNormMax": 255,                          # Maximum value for image
   "WhiteMatterSpread": 0.05                     # The deviation of the white matter intensity as a fraction of the mean white matter intensity.
  },
- "BIDSroot": "/data1/data",                     # str; Path to the BIDS root directory for the raw data.
+ "BIDSRoot": "/data1/data",                     # str; Path to the BIDS root directory for the raw data.
  "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects.
  "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions.
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.
@@ -88,12 +88,12 @@ config.json
   "space": "MNI152NLin2009aSym",
   "label": "L"
  },
- "t1_entities": {                               # BIDS entity:value pairs for identifying the T1 images.
+ "T1Entities": {                               # BIDS entity:value pairs for identifying the T1 images.
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
- "ROI_dir": "ROIs",                             # str; Path to the directory containing ROI image files.
- "ROI_list": [],                                # list; List of ROI files to use.
+ "ROIDir": "ROIs",                             # str; Path to the directory containing ROI image files.
+ "ROIList": [],                                # list; List of ROI files to use.
  "Multiprocessing": 16                          # int; Number of threads to use for multiprocessing.
 }
 ```

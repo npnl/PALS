@@ -24,15 +24,15 @@ def pals(config: dict):
     # Build pipelie
     wf = Workflow(name='PALS')
 
-    # bidsLayout = bids.BIDSLayout(config['BIDSroot'])
+    # bidsLayout = bids.BIDSLayout(config['BIDSRoot'])
     # Get data
     loader = BIDSDataGrabber(index_derivatives=False)
-    loader.inputs.base_dir = config['BIDSroot']
+    loader.inputs.base_dir = config['BIDSRoot']
     loader.inputs.subject = config['Subject']
     if(config['Session'] is not None):
         loader.inputs.session = config['Session']
-    loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
-    loader.inputs.extra_derivatives = [config['BIDSroot']]
+    loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
+    loader.inputs.extra_derivatives = [config['BIDSRoot']]
     loader = Node(loader,  name='BIDSgrabber')
 
 
@@ -96,10 +96,10 @@ def pals(config: dict):
                                        index_derivatives=False,
                                        output_query={'mask': dict(**config['LesionEntities'],
                                                                   invalid_filters='allow')},
-                                       extra_derivatives = [config['BIDSroot']]
+                                       extra_derivatives = [config['BIDSRoot']]
                                        ), name='mask_grabber')
-    # loader.inputs.extra_derivatives = [config['BIDSroot']]
-    # loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
+    # loader.inputs.extra_derivatives = [config['BIDSRoot']]
+    # loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)
@@ -107,9 +107,9 @@ def pals(config: dict):
     # Lesion load calculation
     lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
                           name='overlap_calc', iterfield=['ref_mask'])
-    buf = os.listdir(config['ROI_dir'])
-    roi_list = [os.path.abspath(os.path.join(config['ROI_dir'], b)) for b in buf]
-    buf = config['ROI_list']
+    buf = os.listdir(config['ROIDir'])
+    roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
+    buf = config['ROIList']
     roi_list += [os.path.abspath(b) for b in buf]
     lesion_load.inputs.roi_list = roi_list
 
@@ -642,7 +642,7 @@ if __name__ == "__main__":
 
     # config = json.load(open(pargs.config, 'r'))
     if(pargs.root_dir is not None):
-        pals_config['BIDSroot'] = pargs.root_dir
+        pals_config['BIDSRoot'] = pargs.root_dir
     if(pargs.subject is not None):
         pals_config['Subject'] = pargs.subject
     if(pargs.session is not None):
@@ -656,8 +656,8 @@ if __name__ == "__main__":
     subject_list = []
     session_list = []
     if(no_subject or no_session):
-        dataset = bids.BIDSLayout(root=pals_config['BIDSroot'],
-                                  derivatives=pals_config['BIDSroot']).derivatives['stroke_preproc']
+        dataset = bids.BIDSLayout(root=pals_config['BIDSRoot'],
+                                  derivatives=pals_config['BIDSRoot']).derivatives['stroke_preproc']
     if(no_subject):
         subject_list = dataset.entities['subject'].unique()
     else:

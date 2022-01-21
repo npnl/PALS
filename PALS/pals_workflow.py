@@ -1,21 +1,18 @@
 import argparse
-import json
 import bids
 import os
 import multiprocessing
-from config_parse import PALSConfig
 from nipype.pipeline import Node, MapNode, Workflow
 from nipype.interfaces.utility import Function
 from nipype.interfaces.io import BIDSDataGrabber, DataSink, SQLiteSink
 from nipype.interfaces.image import Reorient
 from nipype.interfaces.fsl import FAST
-import node_fetch
 import pathlib, sqlalchemy
-import shutil
 from copy import deepcopy
 from os.path import join
 bids.config.set_option('extension_initial_dot', True)
-
+from . import node_fetch
+from .config_parse import PALSConfig
 
 def pals(config: dict):
     # Get config file defining workflow
@@ -624,7 +621,7 @@ def create_modified_config_copy(config: dict,
     return new_config
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the'
                                                      ' value in the config file.', default=None)
@@ -668,15 +665,16 @@ if __name__ == "__main__":
         session_list = [pargs.session]
 
     config_list = []
-    print(f"sub/ses lengths: {len(subject_list)}, {len(session_list)}")
     for sub in subject_list:
         for ses in session_list:
             config_list.append(create_modified_config_copy(pals_config,
                                                            subject=sub,
                                                            session=ses))
-    print(f"Starting {pals_config['Multiprocessing']} threads...")
-    # print(config_list[0]['Outputs'])
-    # pals(config_list[0])
-    p = multiprocessing.Pool(pals_config['Multiprocessing'])
-    # print(config_list[0])
+    num_threads = min(pals_config['Multiprocessing'], len(subject_list))
+    print(f"Starting {num_threads} threads...")
+    p = multiprocessing.Pool(num_threads)
     p.map(pals, config_list)
+    return
+
+if __name__ == "__main__":
+    main()

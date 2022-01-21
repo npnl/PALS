@@ -43,7 +43,7 @@
   "space": "MNI152NLin2009aSym",
   "label": "L"
  },
- "t1_entities": {
+ "T1Entities": {
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },

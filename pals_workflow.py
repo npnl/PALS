@@ -31,7 +31,7 @@ def pals(config: dict):
     loader.inputs.subject = config['Subject']
     if(config['Session'] is not None):
         loader.inputs.session = config['Session']
-    loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
+    loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
     loader.inputs.extra_derivatives = [config['BIDSRoot']]
     loader = Node(loader,  name='BIDSgrabber')
 
@@ -99,7 +99,7 @@ def pals(config: dict):
                                        extra_derivatives = [config['BIDSRoot']]
                                        ), name='mask_grabber')
     # loader.inputs.extra_derivatives = [config['BIDSRoot']]
-    # loader.inputs.output_query = {'t1w': dict(**config['t1_entities'], invalid_filters='allow')}
+    # loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)

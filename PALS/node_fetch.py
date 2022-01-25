@@ -54,16 +54,14 @@ def registration_node(config: dict, **kwargs):
     reg_method = config['Analysis']['RegistrationMethod']
     if(not config['Analysis']['Registration']):
         # No registration; in -> out
-        n = MapNode(Function(function=infile_to_outfile, input_names='in_file',
+        n = MapNode(Function(function=reg_no_reg,
+                             input_names=['in_file'],
                              output_names=['out_file', 'out_matrix_file']),
-                    name='registration_skip', iterfield='in_file')
+                    name='registration_identity', iterfield='in_file')
     elif(reg_method.lower() == 'flirt'):
         # Use FLIRT
-        print(kwargs)
         n = MapNode(fsl.FLIRT(), name='registration_flirt', iterfield='in_file')
-        n.inputs.reference = kwargs['reference']
         for k, v in kwargs.items():
-            print(f'setting {k} to {v}')
             setattr(n.inputs, k, v)
     else:
         raise(NotImplementedError(f'Registration method {reg_method} not implemented.'))
@@ -95,3 +93,26 @@ def apply_xfm_node(config: dict, **kwargs):
         n = MapNode(fsl.FLIRT(apply_xfm=True, reference=config['Registration']['reference']),
                     name='transformation_flirt', iterfield=['in_file', 'in_matrix_file'])
     return n
+
+
+def reg_no_reg(in_file):
+    '''
+    Returns the input file and an identity transform.
+    Parameters
+    ----------
+    in_file
+        Input file, as with fsl.FLIRT()
+    reference
+        Ignored; present for compatibility.
+    Returns
+    -------
+    tuple
+        Returns input file + path to identity transform
+    '''
+    import numpy as np
+    import tempfile
+    ident_transf = np.eye(4)
+    ident_transf[-1,-1] = 0
+    ident_path = tempfile.mktemp()
+    np.savetxt(ident_path, ident_transf, fmt='%.1f')
+    return in_file, ident_path

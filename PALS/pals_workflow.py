@@ -76,10 +76,6 @@ def pals(config: dict):
                        config['Outputs']['BrainExtractionSpace'] + '_desc-transform.mat'
 
         registration_transform_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
-        # reg.inputs.out_matrix_file = registration_transform_filename
-        # reg.inputs.out_file = 'tmp.nii.gz'
-        print(f'registration_transform_filename: {registration_transform_filename}')
-        # registration_transform_sink = MapNode(DataSink)
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
                                               name='registration_transf_sink', iterfield='src')
         pathlib.Path(os.path.dirname(registration_transform_filename)).mkdir(parents=True, exist_ok=True)
@@ -87,7 +83,6 @@ def pals(config: dict):
         wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
 
     # Get mask
-    print(f"fetching subject {config['Subject']}")
     mask_loader = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
                                        subject=config['Subject'],
                                        index_derivatives=False,
@@ -149,7 +144,7 @@ def pals(config: dict):
     ex_last = MapNode(Function(function=extract_last, input_names=['in_list'], output_names='out_entry'),
                       name='ex_last', iterfield='in_list')
 
-    wm_removal = MapNode(Function(function=white_matter_correction, inputs_names=['image', 'wm_mask', 'lesion_mask',
+    wm_removal = MapNode(Function(function=white_matter_correction, input_names=['image', 'wm_mask', 'lesion_mask',
                                                                                   'max_difference_fraction'],
                                   output_names=['out_data', 'corrected_volume']),
                          name='wm_removal', iterfield=['image', 'wm_mask', 'lesion_mask'])
@@ -185,7 +180,6 @@ def pals(config: dict):
 
     wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                         name='image_writer1', iterfield=['image', 'reference'])
-    # wm_map.inputs.reference=config['Registration']['reference']
     path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                    config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
     wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
@@ -193,7 +187,6 @@ def pals(config: dict):
 
     out_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                         name='image_writer0', iterfield=['image', 'reference'])
-    # out_image.inputs.reference = config['Registration']['reference']
     path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                    config['Outputs']['BrainExtractionSpace'] + '_desc-CorrectedLesion_mask{extension}'
     lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
@@ -247,6 +240,7 @@ def copyfile(src, dst):
     import shutil
     shutil.copyfile(src, dst)
     return
+
 
 def infile_to_outfile(**kwargs):
     return kwargs['in_file']
@@ -376,9 +370,6 @@ def white_matter_correction(image,
     lesion_mask_data = lesion_mask.get_fdata()
     wm_mask_data = wm_mask.get_fdata()
     image_data = image.get_fdata()
-    print(f'lesion_mask: {lesion_mask_data.shape}')
-    print(f'wm_mask: {wm_mask_data.shape}')
-    print(f'image_data: {image_data.shape}')
 
     # Extract white matter that doesn't have lesion to get mean value of white matter
     not_lesion = lesion_mask_data == 0
@@ -392,7 +383,7 @@ def white_matter_correction(image,
     upper_thresh = mean_wm + mean_dist
 
     lesion_data = image_data * lesion_mask_data
-    corrected_lesion_data = lesion_mask_data*((lesion_data < lower_thresh) + (lesion_data > upper_thresh))
+    corrected_lesion_data = lesion_mask_data*((lesion_data < lower_thresh) + (lesion_data >= upper_thresh))
     corrected_lesion = nb.Nifti1Image(np.array(corrected_lesion_data, dtype=float),
                                       affine=lesion_mask.affine, header=lesion_mask.header)
 
@@ -429,11 +420,15 @@ def overlap(ref_mask: str, roi_list: list) -> str:
     # Compute overlap for each mask
     for roi_file in roi_list:
         roi_image = nb.load(roi_file)
-        roi = nb.processing.resample_from_to(roi_image, ref_image).get_fdata()
+        roi = nb.processing.resample_from_to(roi_image, ref_image, order=1).get_fdata()
         # roi = nb.load(roi_file).get_fdata()
         overlap_val = np.sum(ref_dat * roi)
         overlap_list.append(overlap_val)
-        base_roi = os.path.basename(roi_file).replace('.nii.gz', '')
+        base_roi = os.path.basename(roi_file)
+        if(base_roi.endswith('.nii.gz')):
+            base_roi = base_roi[:-len('.nii.gz')]
+        if(base_roi.endswith('.nii')):
+            base_roi = base_roi[:-len('.nii')]
         overlap_dict[base_roi] = overlap_val
     filename = 'overlap_list'
     f = open(filename, 'w')
@@ -624,9 +619,10 @@ def create_modified_config_copy(config: dict,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the'
-                                                     ' value in the config file.', default=None)
+                                                     ' value in the config file.', default=None, required=False)
     parser.add_argument('--subject', type=str, help='Subject ID; value of the label associated with the "subject" BIDS'
-                                                    ' entity. If set, overrides the value in the config file.', default=None)
+                                                    ' entity. If set, overrides the value in the config file.',
+                        default=None, required=False)
     parser.add_argument('--session', type=str, help='Session ID; value of the label associated with the "session" BIDS'
                                                     ' entity. If set, overrides the value in the config file.', default=None)
     parser.add_argument('--lesion_root', type=str, help='Root directory for the BIDS directory containing the lesion '
@@ -634,7 +630,6 @@ def main():
     parser.add_argument('--config', type=str, help='Path to the configuration file.', required=True)
 
     pargs = parser.parse_args()
-    # TODO: prioritize args over config file, parse, validate
     pals_config = PALSConfig(pargs.config)
 
     # config = json.load(open(pargs.config, 'r'))
@@ -653,8 +648,12 @@ def main():
     subject_list = []
     session_list = []
     if(no_subject or no_session):
-        dataset = bids.BIDSLayout(root=pals_config['BIDSRoot'],
-                                  derivatives=pals_config['BIDSRoot']).derivatives['stroke_preproc']
+        dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
+                                  derivatives=pals_config['BIDSRoot'])
+        derivatives_name = list(dataset_raw.derivatives.keys())[0]
+        print(f'Taking {derivatives_name} from derivatives dataset.')
+        dataset = dataset_raw.derivatives[derivatives_name]
+
     if(no_subject):
         subject_list = dataset.entities['subject'].unique()
     else:

@@ -13,6 +13,7 @@ from os.path import join
 bids.config.set_option('extension_initial_dot', True)
 from . import node_fetch
 from .config_parse import PALSConfig
+import warnings
 
 def pals(config: dict):
     # Get config file defining workflow
@@ -99,8 +100,12 @@ def pals(config: dict):
     # Lesion load calculation
     lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
                           name='overlap_calc', iterfield=['ref_mask'])
-    buf = os.listdir(config['ROIDir'])
-    roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
+    roi_list = []
+    if(os.path.exists(config['ROIDir'])):
+        buf = os.listdir(config['ROIDir'])
+        roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
+    else:
+        warnings.warn(f"ROIDir ({config['ROIDir']}) doesn't exist.")
     buf = config['ROIList']
     roi_list += [os.path.abspath(b) for b in buf]
     lesion_load.inputs.roi_list = roi_list
@@ -673,6 +678,7 @@ def main():
     print(f"Starting {num_threads} threads...")
     p = multiprocessing.Pool(num_threads)
     p.map(pals, config_list)
+
     return
 
 if __name__ == "__main__":

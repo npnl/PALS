@@ -19,6 +19,9 @@ class PALSConfig():
 
         # Parse additional values
         self.substitute_empty_outputs()
+
+        # Registration + space- entity
+        self.space_entity()
         return
 
     def __getitem__(self, item):
@@ -43,4 +46,18 @@ class PALSConfig():
         for k, v in self['Outputs'].items():
             if(len(v) == 0):
                 self['Outputs'][k] = self['Outputs']['Root']
+        return
+
+    def space_entity(self):
+        '''
+        Makes the config entry 'RegistrationOutputSpace' consistent with the analysis settings.
+        Returns
+        -------
+        None
+        '''
+        if(self['Analysis']['Registration']):
+            if(len(self['Outputs']['RegistrationOutputSpace']) == 0):
+                raise ValueError("Error in config file; config['Outputs']['RegistrationOutputSpace'] must be defined.")
+        else:
+            self['Outputs']['RegistrationOutputSpace'] = self['Outputs']['StartRegistrationSpace']
         return

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='PALS',
-    version='2.0.1',
+    version='2.0.2',
     packages=['PALS'],
     url='https://github.com/npnl/PALS',
     license='MIT',

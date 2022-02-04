@@ -14,7 +14,7 @@
   "Root": "/data1/pals/",
   "LesionLoadDatabase": "pals_lesionload.db",
   "LesionLoadTableName": "LESION",
-  "BrainExtractionSpace": "MNI152NLin2009aSym",
+  "StartRegistrationSpace": "MNI152NLin2009aSym",
   "RegistrationTransform": "",
   "Reorient": "",
   "BrainExtraction": "",
@@ -38,6 +38,7 @@
  "Subject": "",
  "Session": "",
  "LesionRoot": "data/",
+ "WhiteMatterSegmentationFile": "",
  "LesionEntities": {
   "suffix": "mask",
   "space": "MNI152NLin2009aSym",

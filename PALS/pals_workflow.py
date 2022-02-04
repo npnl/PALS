@@ -61,7 +61,7 @@ def pals(config: dict):
     bet = node_fetch.extraction_node(config, **config['BrainExtraction'])
     if('BrainExtraction' in config['Outputs'].keys()):
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       config['Outputs']['BrainExtractionSpace'] + '_desc-brain_mask{extension}'
+                       config['Outputs']['StartRegistrationSpace'] + '_desc-brain_mask{extension}'
         brain_mask_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
                                   name='brain_mask_sink', iterfield='src')
         brain_mask_out = join(config['Outputs']['BrainExtraction'], path_pattern.format(**entities))
@@ -74,7 +74,7 @@ def pals(config: dict):
     if('RegistrationTransform' in config['Outputs'].keys()):
 
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       config['Outputs']['BrainExtractionSpace'] + '_desc-transform.mat'
+                       config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
 
         registration_transform_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
@@ -84,118 +84,169 @@ def pals(config: dict):
         wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
 
     # Get mask
-    mask_loader = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
+    mask_path_fetcher = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
                                        subject=config['Subject'],
                                        index_derivatives=False,
                                        output_query={'mask': dict(**config['LesionEntities'],
                                                                   invalid_filters='allow')},
                                        extra_derivatives = [config['BIDSRoot']]
                                        ), name='mask_grabber')
-    # loader.inputs.extra_derivatives = [config['BIDSRoot']]
-    # loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)
 
     # Lesion load calculation
-    lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
-                          name='overlap_calc', iterfield=['ref_mask'])
-    roi_list = []
-    if(os.path.exists(config['ROIDir'])):
-        buf = os.listdir(config['ROIDir'])
-        roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
-    else:
-        warnings.warn(f"ROIDir ({config['ROIDir']}) doesn't exist.")
-    buf = config['ROIList']
-    roi_list += [os.path.abspath(b) for b in buf]
-    lesion_load.inputs.roi_list = roi_list
+    if(config['Analysis']['LesionLoadCalculation']):
+        lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
+                              name='overlap_calc', iterfield=['ref_mask'])
+        roi_list = []
+        if(os.path.exists(config['ROIDir'])):
+            buf = os.listdir(config['ROIDir'])
+            roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
+        else:
+            warnings.warn(f"ROIDir ({config['ROIDir']}) doesn't exist.")
+        buf = config['ROIList']
+        roi_list += [os.path.abspath(b) for b in buf]
+        lesion_load.inputs.roi_list = roi_list
 
-    # SQL output
-    sql_output = MapNode(Function(function=sql_writer, input_names=['data_dict', 'subject','session','database']),
-                         name='sql_output', iterfield=['data_dict'])
-    sql_output.inputs.subject = config['Subject']
-    sql_output.inputs.session = config['Session']
-    sql_output.inputs.database = config['Outputs']['LesionLoadDatabase']
+        # SQL output
+        sql_output = MapNode(Function(function=sql_writer, input_names=['data_dict', 'subject','session','database']),
+                             name='sql_output', iterfield=['data_dict'])
+        sql_output.inputs.subject = config['Subject']
+        sql_output.inputs.session = config['Session']
+        sql_output.inputs.database = config['Outputs']['LesionLoadDatabase']
 
-    # CSV output
-    csv_output = MapNode(Function(function=csv_writer, input_names=['filename', 'data_dict', 'subject', 'session']),
-                         name='csv_output', iterfield=['data_dict'])
-    csv_output.inputs.subject = config['Subject']
-    csv_output.inputs.session = config['Session']
-    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
-    csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
-    csv_output.inputs.filename = csv_out_filename
+        # CSV output
+        csv_output = MapNode(Function(function=csv_writer, input_names=['filename', 'data_dict', 'subject', 'session']),
+                             name='csv_output', iterfield=['data_dict'])
+        csv_output.inputs.subject = config['Subject']
+        csv_output.inputs.session = config['Session']
+        path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
+        csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+        csv_output.inputs.filename = csv_out_filename
+
+        wf.connect([(apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
+                    (lesion_load, csv_output, [('out_list', 'data_dict')])])
 
 
     ## Lesion correction
-    # T1 intensity normalization
-    t1_norm = MapNode(Function(function=rescale_image, input_names=['image', 'range_min', 'range_max', 'save_image'],
-                               output_names='out_file'), name='normalization', iterfield=['image'])
-    t1_norm.inputs.range_min = config['LesionCorrection']['ImageNormMin']
-    t1_norm.inputs.range_max = config['LesionCorrection']['ImageNormMax']
-    t1_norm.inputs.save_image = True
+    if(config['Analysis']['LesionCorrection']):
+        ## White matter removal node. Does the white matter correction; has multiple inputs that need to be supplied.
+        wm_removal = MapNode(Function(function=white_matter_correction, input_names=['image', 'wm_mask', 'lesion_mask',
+                                                                                     'max_difference_fraction'],
+                                      output_names=['out_data', 'corrected_volume']),
+                             name='wm_removal', iterfield=['image', 'wm_mask', 'lesion_mask'])
+        wm_removal.inputs.max_difference_fraction = config['LesionCorrection']['WhiteMatterSpread']
 
-    # White matter segmentation
-    wm_seg = MapNode(FAST(), name="wm_seg", iterfield='in_files')
-    wm_seg.inputs.out_basename="segmentation"
-    wm_seg.inputs.img_type = 1
-    wm_seg.inputs.number_classes=3
-    wm_seg.inputs.hyper = 0.1
-    wm_seg.inputs.iters_afterbias = 4
-    wm_seg.inputs.bias_lowpass = 20
-    wm_seg.inputs.segments = True
-    wm_seg.inputs.no_pve = True
+        ## File loaders
+        # Loads the subject image, passes it to wm_removal node
+        subject_image_loader = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+                                       name='file_load0', iterfield='in_filename')
+        wf.connect([(radio, subject_image_loader, [('out_file', 'in_filename')]),
+                    (subject_image_loader, wm_removal, [('out_image', 'image')])])
 
-    ex_last = MapNode(Function(function=extract_last, input_names=['in_list'], output_names='out_entry'),
-                      name='ex_last', iterfield='in_list')
+        # Loads the mask image, passes it to wm_removal node
+        mask_image_loader = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+                                             name='file_load2', iterfield='in_filename')
+        wf.connect([(mask_path_fetcher, mask_image_loader, [('mask', 'in_filename')]),
+                    (mask_image_loader, wm_removal, [('out_image', 'lesion_mask')])])
 
-    wm_removal = MapNode(Function(function=white_matter_correction, input_names=['image', 'wm_mask', 'lesion_mask',
-                                                                                  'max_difference_fraction'],
-                                  output_names=['out_data', 'corrected_volume']),
-                         name='wm_removal', iterfield=['image', 'wm_mask', 'lesion_mask'])
-    wm_removal.inputs.max_difference_fraction = config['LesionCorrection']['WhiteMatterSpread']
+        # Save lesion mask with white matter voxels removed
+        output_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
+                            name='image_writer0', iterfield=['image', 'reference'])
+        path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
+                       config['Outputs']['StartRegistrationSpace'] + '_desc-CorrectedLesion_mask{extension}'
+        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+        output_image.inputs.file_name = lesion_corrected_filename
+        wf.connect([(wm_removal, output_image, [('out_data','image')]),
+                    (mask_path_fetcher, output_image, [('mask', 'reference')])])
+
+
+        ## CSV output
+        csv_output_corr = MapNode(Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
+                                  name='csv_output_corr', iterfield=['data'])
+        csv_output_corr.inputs.subject = config['Subject']
+        csv_output_corr.inputs.session = config['Session']
+        csv_output_corr.inputs.data_name = 'CorrectedVolume'
+
+        path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
+        csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+        csv_output_corr.inputs.filename = csv_out_filename
+
+        wf.connect([(wm_removal, csv_output_corr, [('corrected_volume', 'data')])])
+
+        ## White matter segmentation; either do segmentation or load the file
+        if(config['Analysis']['WhiteMatterSegmentation']):
+            # Config is set to do white matter segmentation
+            # T1 intensity normalization
+            t1_norm = MapNode(Function(function=rescale_image, input_names=['image', 'range_min', 'range_max', 'save_image'],
+                                       output_names='out_file'), name='normalization', iterfield=['image'])
+            t1_norm.inputs.range_min = config['LesionCorrection']['ImageNormMin']
+            t1_norm.inputs.range_max = config['LesionCorrection']['ImageNormMax']
+            t1_norm.inputs.save_image = True
+            wf.connect([(bet, t1_norm, [('out_file', 'image')])])
+
+            # White matter segmentation
+            wm_seg = MapNode(FAST(), name="wm_seg", iterfield='in_files')
+            wm_seg.inputs.out_basename="segmentation"
+            wm_seg.inputs.img_type = 1
+            wm_seg.inputs.number_classes=3
+            wm_seg.inputs.hyper = 0.1
+            wm_seg.inputs.iters_afterbias = 4
+            wm_seg.inputs.bias_lowpass = 20
+            wm_seg.inputs.segments = True
+            wm_seg.inputs.no_pve = True
+            ex_last = MapNode(Function(function=extract_last, input_names=['in_list'], output_names='out_entry'),
+                              name='ex_last', iterfield='in_list')
+
+            file_load1 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+                                 name='file_load1', iterfield='in_filename')
+            # White matter output; only necessary if white matter is segmented
+            wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
+                             name='image_writer1', iterfield=['image', 'reference'])
+            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
+                           config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+            wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+            wm_map.inputs.file_name = wm_map_filename
+            wf.connect([(file_load1, wm_map, [('out_image', 'image')]),
+                        (mask_path_fetcher, wm_map, [('mask', 'reference')])])
+            # Connect nodes in workflow
+            wf.connect([(wm_seg, ex_last, [('tissue_class_files', 'in_list')]),
+                        (t1_norm, wm_seg, [('out_file', 'in_files')]),
+                        # (ex_last, wm_map, [('out_entry', 'image')]),
+                        (ex_last, file_load1, [('out_entry', 'in_filename')]),
+                        (file_load1, wm_removal, [('out_image', 'wm_mask')])])
+
+        elif(config['Analysis']['LesionCorrection']):
+            # No white matter segmentation should be done, but lesion correction is expected.
+            # White matter segmentation must be supplied
+            wm_seg_path = config['WhiteMatterSegmentationFile']
+            if(len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path)):
+                # Check if file exists at output
+                path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
+                               config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+                wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+                if(os.path.exists(wm_map_filename)):
+                    wm_seg_path = wm_map_filename
+            else:
+                raise ValueError('Config file is inconsistent; if WhiteMatterSegmentation is false but LesionCorrection'
+                                 ' is true, then WhiteMatterSegmentationFile must be defined and must exist.')
+            file_load1 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+                                 name='file_load1', iterfield='in_filename')
+            file_load1.inputs.in_filename = wm_seg_path
+
+            # Connect nodes in workflow
+            wf.connect([(file_load1, wm_removal, [('out_image', 'wm_mask')])])
+
 
     # Lesion correction; SQL output
-    sql_output_corr = MapNode(Function(function=sql_writer, input_names=['subject', 'session', 'database', 'table_name', 'data', 'data_name']),
-                              name='sql_output_corr', iterfield='data')
-    sql_output_corr.inputs.subject = config['Subject']
-    sql_output_corr.inputs.session = config['Session']
-    sql_output_corr.inputs.database = config['Outputs']['LesionLoadDatabase']
-    sql_output_corr.inputs.table_name = config['Outputs']['LesionLoadTableName']
-    sql_output_corr.inputs.data_name = 'CorrectedVolume'
-
-    # CSV output
-    csv_output_corr = MapNode(Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
-                         name='csv_output_corr', iterfield=['data'])
-    csv_output_corr.inputs.subject = config['Subject']
-    csv_output_corr.inputs.session = config['Session']
-    csv_output_corr.inputs.data_name = 'CorrectedVolume'
-
-    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
-    csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
-    csv_output_corr.inputs.filename = csv_out_filename
-
-
-    file_load0 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
-                        name='file_load0', iterfield='in_filename')
-    file_load1 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
-                         name='file_load1', iterfield='in_filename')
-    file_load2 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
-                         name='file_load2', iterfield='in_filename')
-
-    wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-                        name='image_writer1', iterfield=['image', 'reference'])
-    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                   config['Outputs']['BrainExtractionSpace'] + '_desc-WhiteMatter_mask{extension}'
-    wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
-    wm_map.inputs.file_name = wm_map_filename
-
-    out_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-                        name='image_writer0', iterfield=['image', 'reference'])
-    path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                   config['Outputs']['BrainExtractionSpace'] + '_desc-CorrectedLesion_mask{extension}'
-    lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
-    out_image.inputs.file_name = lesion_corrected_filename
+    # sql_output_corr = MapNode(Function(function=sql_writer, input_names=['subject', 'session', 'database', 'table_name', 'data', 'data_name']),
+    #                           name='sql_output_corr', iterfield='data')
+    # sql_output_corr.inputs.subject = config['Subject']
+    # sql_output_corr.inputs.session = config['Session']
+    # sql_output_corr.inputs.database = config['Outputs']['LesionLoadDatabase']
+    # sql_output_corr.inputs.table_name = config['Outputs']['LesionLoadTableName']
+    # sql_output_corr.inputs.data_name = 'CorrectedVolume'
 
     # Connecting workflow.
     wf.connect([
@@ -205,34 +256,9 @@ def pals(config: dict):
         # Lesion Load
         (bet, reg, [('out_file', 'in_file')]),
         (reg, apply_xfm, [('out_matrix_file', 'in_matrix_file')]),
-        (mask_loader, apply_xfm, [('mask', 'in_file')]),
-        (apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
-        #(lesion_load, sql_output, [('out_list', 'data_dict')]),
-        (lesion_load, csv_output, [('out_list', 'data_dict')]),
+        (mask_path_fetcher, apply_xfm, [('mask', 'in_file')]),
+        ])
 
-        (mask_loader, out_image, [('mask', 'reference')]),
-        (mask_loader, wm_map, [('mask', 'reference')]),
-
-        # Lesion WM correction
-        (bet, t1_norm, [('out_file', 'image')]),
-        (t1_norm, wm_seg, [('out_file', 'in_files')]),
-        (wm_seg, ex_last, [('tissue_class_files', 'in_list')]),
-        (ex_last, wm_map, [('out_entry', 'image')]),
-        (ex_last, file_load1, [('out_entry', 'in_filename')]),
-        (file_load1, wm_removal, [('out_image', 'wm_mask')]),
-
-        # (loader, file_load0, [('t1w', 'in_filename')]),
-        (radio, file_load0, [('out_file', 'in_filename')]),
-        (file_load0, wm_removal, [('out_image', 'image')]),
-
-        (mask_loader, file_load2, [('mask', 'in_filename')]),
-        (file_load2, wm_removal, [('out_image', 'lesion_mask')]),
-
-        # (wm_removal, sql_output_corr, [('corrected_volume', 'data')]),
-        (wm_removal, csv_output_corr, [('corrected_volume', 'data')]),
-        (wm_removal, out_image, [('out_data', 'image')])
-
-    ])
     graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
     wf.write_graph(graph2use='orig', dotfilename=join(graph_out, 'graph.dot'), format='png')
     os.remove(graph_out + 'graph.dot')

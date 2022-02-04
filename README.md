@@ -70,7 +70,7 @@ config.json
   "Root": "/data1/pals/",                       # str; Path to directory where to place the output.				        
   "LesionLoadDatabase": "pals_lesionload.db",   # str
   "LesionLoadTableName": "LESION",              # str
-  "BrainExtractionSpace": "MNI152NLin2009aSym",	# str; Value to use for "space" entity in BIDS output filename. 
+  "StartRegistrationSpace": "MNI152NLin2009aSym",	# str; Value to use for "space" entity in BIDS output filename. 
   "RegistrationTransform": "",                  # str; Optional. Path for saving registration transform. 
   "Reorient": "",					            # str; Optional. Path for saving reoriented volume.
   "BrainExtraction": "",                        # str; Optional. Path for saving the brain extracted volume.

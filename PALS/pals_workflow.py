@@ -14,6 +14,7 @@ bids.config.set_option('extension_initial_dot', True)
 from . import node_fetch
 from .config_parse import PALSConfig
 import warnings
+from . import utilities as util
 
 def pals(config: dict):
     # Get config file defining workflow
@@ -89,7 +90,7 @@ def pals(config: dict):
                                        index_derivatives=False,
                                        output_query={'mask': dict(**config['LesionEntities'],
                                                                   invalid_filters='allow')},
-                                       extra_derivatives = [config['BIDSRoot']]
+                                       extra_derivatives = [config['LesionRoot']]
                                        ), name='mask_grabber')
 
     # Apply reg file to lesion mask
@@ -681,9 +682,13 @@ def main():
     if(no_subject or no_session):
         dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
                                   derivatives=pals_config['BIDSRoot'])
-        derivatives_name = list(dataset_raw.derivatives.keys())[0]
-        print(f'Taking {derivatives_name} from derivatives dataset.')
-        dataset = dataset_raw.derivatives[derivatives_name]
+        deriv_list = list(dataset_raw.derivatives.keys())
+        if(len(deriv_list) > 0):
+            derivatives_name = list(dataset_raw.derivatives.keys())[0]
+            print(f'Taking {derivatives_name} from derivatives dataset.')
+            dataset = dataset_raw.derivatives[derivatives_name]
+        else:
+            dataset = dataset_raw
 
     if(no_subject):
         subject_list = dataset.entities['subject'].unique()
@@ -696,11 +701,15 @@ def main():
 
     config_list = []
     for sub in subject_list:
-        for ses in session_list:
+        subject_session_list = util.get_subject_sessions(dataset, sub)
+        session_overlap = set(subject_session_list).intersection(set(session_list))
+        for ses in session_overlap:
+            # Check that subject has the session
+
             config_list.append(create_modified_config_copy(pals_config,
                                                            subject=sub,
                                                            session=ses))
-    num_threads = min(pals_config['Multiprocessing'], len(subject_list))
+    num_threads = min(pals_config['Multiprocessing'], len(config_list))
     print(f"Starting {num_threads} threads...")
     p = multiprocessing.Pool(num_threads)
     p.map(pals, config_list)

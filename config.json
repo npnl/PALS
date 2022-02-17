@@ -14,7 +14,8 @@
   "Root": "/data1/pals/",
   "LesionLoadDatabase": "pals_lesionload.db",
   "LesionLoadTableName": "LESION",
-  "StartRegistrationSpace": "MNI152NLin2009aSym",
+  "StartRegistrationSpace": "",
+  "RegistrationOutputSpace": "",
   "RegistrationTransform": "",
   "Reorient": "",
   "BrainExtraction": "",
@@ -26,8 +27,7 @@
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "/data1/reference.",
-  "no_search": true
+  "reference": "/data1/reference",
  },
  "LesionCorrection": {
   "ImageNormMin": 0,

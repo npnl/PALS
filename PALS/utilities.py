@@ -3,7 +3,8 @@ import glob
 from os.path import join, sep, basename
 import nibabel as nb, nibabel.processing
 import numpy as np
-
+import bids
+from bids import BIDSLayout
 
 def gather_csv(pals_output_dir: str,
                output_name: str = 'pals.csv'):
@@ -126,3 +127,27 @@ def compute_roi_lesion_pct(pals_csv: str,
         data[roi_names_pct[roi_path]] = 100*data[roi_name] / roi_volume
     data.to_csv(output_csv)
     return
+
+
+def get_subject_sessions(bids_set: BIDSLayout,
+                         subject: str):
+    '''
+    Returns the list of sessions in a BIDS directory for a given subject.
+    Parameters
+    ----------
+    bids_set : BIDSLayout
+        BIDS dataset to check
+    subject : str
+        Subject ID to fetch sessions froms
+
+    Returns
+    -------
+    list [str]
+        List of sessions that a particular subject has.
+    '''
+    file_list = bids_set.get(subject=subject)
+    session_list = set()
+    for f in file_list:
+        sess = f.entities['session']
+        session_list.add(sess)
+    return list(session_list)

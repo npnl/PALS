@@ -23,7 +23,7 @@ matplotlib-inline==0.1.3
 networkx==2.6.2
 neurodocker==0.7.0
 nibabel==3.2.1
-nipype==1.6.1
+nipype~=1.7.0
 num2words==0.5.10
 numpy==1.21
 packaging==21.0

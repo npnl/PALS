@@ -239,22 +239,11 @@ def pals(config: dict):
             # Connect nodes in workflow
             wf.connect([(file_load1, wm_removal, [('out_image', 'wm_mask')])])
 
-
-    # Lesion correction; SQL output
-    # sql_output_corr = MapNode(Function(function=sql_writer, input_names=['subject', 'session', 'database', 'table_name', 'data', 'data_name']),
-    #                           name='sql_output_corr', iterfield='data')
-    # sql_output_corr.inputs.subject = config['Subject']
-    # sql_output_corr.inputs.session = config['Session']
-    # sql_output_corr.inputs.database = config['Outputs']['LesionLoadDatabase']
-    # sql_output_corr.inputs.table_name = config['Outputs']['LesionLoadTableName']
-    # sql_output_corr.inputs.data_name = 'CorrectedVolume'
-
     # Connecting workflow.
     wf.connect([
         # Starter
         (loader, radio, [('t1w', 'in_file')]),
         (radio, bet, [('out_file', 'in_file')]),
-        # Lesion Load
         (bet, reg, [('out_file', 'in_file')]),
         (reg, apply_xfm, [('out_matrix_file', 'in_matrix_file')]),
         (mask_path_fetcher, apply_xfm, [('mask', 'in_file')]),
@@ -677,27 +666,29 @@ def main():
     # If either Subject or Session is empty, assume that we'll be processing all subjects + sessions
     no_subject = len(pals_config['Subject']) == 0
     no_session = len(pals_config['Session']) == 0
-    subject_list = []
-    session_list = []
-    if(no_subject or no_session):
-        dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
+
+    dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
                                   derivatives=pals_config['BIDSRoot'])
-        deriv_list = list(dataset_raw.derivatives.keys())
-        if(len(deriv_list) > 0):
-            derivatives_name = list(dataset_raw.derivatives.keys())[0]
-            print(f'Taking {derivatives_name} from derivatives dataset.')
-            dataset = dataset_raw.derivatives[derivatives_name]
-        else:
-            dataset = dataset_raw
+    deriv_list = list(dataset_raw.derivatives.keys())
+    if(len(deriv_list) > 0):
+        derivatives_name = list(dataset_raw.derivatives.keys())[0]
+        print(f'Taking {derivatives_name} from derivatives dataset.')
+        dataset = dataset_raw.derivatives[derivatives_name]
+    else:
+        dataset = dataset_raw
 
     if(no_subject):
         subject_list = dataset.entities['subject'].unique()
-    else:
+    elif(pargs.subject is not None):
         subject_list = [pargs.subject]
+    else:
+        subject_list = [pals_config['Subject']]
     if(no_session):
         session_list = dataset.entities['session'].unique()
-    else:
+    elif(pargs.session is not None):
         session_list = [pargs.session]
+    else:
+        session_list = [pals_config['Session']]
 
     config_list = []
     for sub in subject_list:

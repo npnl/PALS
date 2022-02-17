@@ -148,6 +148,8 @@ def get_subject_sessions(bids_set: BIDSLayout,
     file_list = bids_set.get(subject=subject)
     session_list = set()
     for f in file_list:
-        sess = f.entities['session']
-        session_list.add(sess)
+        ents = f.entities
+        if('session' in ents):
+            sess = f.entities['session']
+            session_list.add(sess)
     return list(session_list)

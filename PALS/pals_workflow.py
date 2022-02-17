@@ -249,10 +249,14 @@ def pals(config: dict):
         (mask_path_fetcher, apply_xfm, [('mask', 'in_file')]),
         ])
 
-    graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
-    wf.write_graph(graph2use='orig', dotfilename=join(graph_out, 'graph.dot'), format='png')
-    os.remove(graph_out + 'graph.dot')
-    os.remove(graph_out + 'graph_detailed.dot')
+    try:
+        graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
+        wf.write_graph(graph2use='orig', dotfilename=join(graph_out, 'graph.dot'), format='png')
+        os.remove(graph_out + 'graph.dot')
+        os.remove(graph_out + 'graph_detailed.dot')
+    except OSError:
+        warnings.warn("graphviz not installed; can't produce graph. See http://www.graphviz.org/download/ for "
+                      "installation instructions.")
     wf.run()
     return wf
 

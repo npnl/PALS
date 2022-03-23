@@ -698,6 +698,9 @@ def main():
     p = multiprocessing.Pool(num_threads)
     p.map(pals, config_list)
 
+    # Gather .csv
+    output_csv_path = join(pals_config['Outputs']['Root'], 'pals.csv')
+    util.gather_csv(pals_output_dir=pals_config['Outputs']['Root'], output_name=output_csv_path)
     return
 
 if __name__ == "__main__":

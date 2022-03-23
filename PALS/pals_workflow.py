@@ -632,7 +632,11 @@ def create_modified_config_copy(config: dict,
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Pipeline for Analyzing Lesions after Stroke. Runs the PALS processing'
+                                                 ' pipeline on a BIDS dataset. Preprocessing includes reorientation '
+                                                 'to a common direction, registration, brain extraction, white matter '
+                                                 'segmentation, lesion correction, and lesion load calculation. Most '
+                                                 'options are controlled via the configuration file.')
     parser.add_argument('--root_dir', type=str, help='BIDS root directory containing the data. If set, overrides the'
                                                      ' value in the config file.', default=None, required=False)
     parser.add_argument('--subject', type=str, help='Subject ID; value of the label associated with the "subject" BIDS'

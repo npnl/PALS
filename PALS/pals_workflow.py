@@ -37,11 +37,6 @@ def pals(config: dict):
 
     entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
-    # SQL prep
-    sql_db = config['Outputs']['LesionLoadDatabase']
-    sqlalchemy.create_engine(f'sqlite:///{sql_db}', connect_args={'timeout': 15})
-
-
     # Reorient to radiological
     if(config['Analysis']['Reorient']):
         radio = MapNode(Reorient(orientation=config['Analysis']['Orientation']), name="reorientation", iterfield='in_file')
@@ -92,6 +87,8 @@ def pals(config: dict):
                                                                   invalid_filters='allow')},
                                        extra_derivatives = [config['LesionRoot']]
                                        ), name='mask_grabber')
+    if(config['Session'] is not None):
+        mask_path_fetcher.inputs.session = config['Session']
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)
@@ -109,13 +106,6 @@ def pals(config: dict):
         buf = config['ROIList']
         roi_list += [os.path.abspath(b) for b in buf]
         lesion_load.inputs.roi_list = roi_list
-
-        # SQL output
-        sql_output = MapNode(Function(function=sql_writer, input_names=['data_dict', 'subject','session','database']),
-                             name='sql_output', iterfield=['data_dict'])
-        sql_output.inputs.subject = config['Subject']
-        sql_output.inputs.session = config['Session']
-        sql_output.inputs.database = config['Outputs']['LesionLoadDatabase']
 
         # CSV output
         csv_output = MapNode(Function(function=csv_writer, input_names=['filename', 'data_dict', 'subject', 'session']),
@@ -700,7 +690,6 @@ def main():
         session_overlap = set(subject_session_list).intersection(set(session_list))
         for ses in session_overlap:
             # Check that subject has the session
-
             config_list.append(create_modified_config_copy(pals_config,
                                                            subject=sub,
                                                            session=ses))

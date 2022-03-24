@@ -10,44 +10,43 @@
   "LesionCorrection": true,
   "LesionLoadCalculation": true
  },
- "Outputs": {
-  "Root": "/data1/pals/",
-  "StartRegistrationSpace": "",
-  "RegistrationOutputSpace": "",
-  "RegistrationTransform": "",
-  "Reorient": "",
-  "BrainExtraction": "",
-  "LesionCorrected": ""
- },
  "BrainExtraction": {
   "frac": 0.5,
   "mask": true
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "/data1/reference",
+  "reference": "/data0/reference.nii",
  },
  "LesionCorrection": {
   "ImageNormMin": 0,
   "ImageNormMax": 255,
   "WhiteMatterSpread": 0.05
  },
- "BIDSRoot": "data/",
+ "BIDSRoot": "/data1/",
  "Subject": "",
  "Session": "",
- "LesionRoot": "data/",
+ "LesionRoot": "/data1/",
  "WhiteMatterSegmentationFile": "",
+ "ROIDir": "/data1/ROIs/",
+ "ROIList": [],
+ "Multiprocessing": 1,
+ "T1Entities": {
+  "desc": "T1FinalResampledNorm",
+  "space": "MNI152NLin2009aSym"
+ },
  "LesionEntities": {
   "suffix": "mask",
   "space": "MNI152NLin2009aSym",
   "label": "L"
  },
- "T1Entities": {
-  "desc": "T1FinalResampledNorm",
-  "space": "MNI152NLin2009aSym"
- },
- "Template": "MNI152_T1_2mm_brain.nii.gz",
- "ROIDir": "/data1/ROIs/",
- "ROIList": [],
- "Multiprocessing": 1
+ "Outputs": {
+  "Root": "/data1/pals/",
+  "StartRegistrationSpace": "",
+  "OutputRegistrationSpace": "",
+  "RegistrationTransform": "",
+  "Reorient": "",
+  "BrainExtraction": "",
+  "LesionCorrected": ""
+ }
 }

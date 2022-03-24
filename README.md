@@ -51,9 +51,7 @@ Lastly, you will need to update the configuration settings (`config.json) to spe
 
 ## PALS Configuration File<a name=config></a> 
 PALS can be configured to run similar pipelines that differ in their implementations. Here is the default `config.json`, with explanations of each variable:  
-```
-config.json
-
+```json
 {
  "Analysis": {
   "Reorient": true,                             # bool; Whether to standardize the orientation (e.g. radiological, neurological).
@@ -66,24 +64,13 @@ config.json
   "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
   "LesionLoadCalculation": true                 # bool; Whether to compute lesion load.
  },
- "Outputs": {
-  "Root": "/data1/pals/",                       # str; Path to directory where to place the output.				        
-  "LesionLoadDatabase": "pals_lesionload.db",   # str
-  "LesionLoadTableName": "LESION",              # str
-  "StartRegistrationSpace": "MNI152NLin2009aSym",	# str; Value to use for "space" entity in BIDS output filename. 
-  "RegistrationTransform": "",                  # str; Optional. Path for saving registration transform. 
-  "Reorient": "",					            # str; Optional. Path for saving reoriented volume.
-  "BrainExtraction": "",                        # str; Optional. Path for saving the brain extracted volume.
-  "LesionCorrected": ""                         # str; Optional. Path for saving the white matter-corrected lesions.
- },
  "BrainExtraction": {                           # Settings to pass to brain extraction; structure depends on Analysis['BrainExtractionMethod']
   "frac": 0.5,
   "mask": true
  },
  "Registration": {                              # Settings to pass to registration; structure depends on Analysis['RegistrationMethod']
   "cost_func": "normmi",
-  "reference": "/data1/mni_icbm152_t1_tal_nlin_sym_09a_brain.nii",
-  "no_search": false
+  "reference": "/data1/reference.nii"
  },
  "LesionCorrection": {                          # Settings for white matter correction.
   "ImageNormMin": 0,                            # Minimum value for image.
@@ -94,6 +81,10 @@ config.json
  "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects.
  "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions.
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.
+ "WhiteMatterSegmentationFile": "",             # str; Path to the white matter segmentation file; subject + session should be specified
+ "ROIDir": "ROIs",                              # str; Path to the directory containing ROI image files.
+ "ROIList": [],                                 # list; List of ROI files to use.
+ "Multiprocessing": 4,                          # int; Number of threads to use for multiprocessing. Has no effect unless more than 1 subject is being processed.
  "LesionEntities": {                            # BIDS entity:value pairs for identifying the lesion files. 
   "suffix": "mask",
   "space": "MNI152NLin2009aSym",
@@ -103,9 +94,15 @@ config.json
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
- "ROIDir": "ROIs",                             # str; Path to the directory containing ROI image files.
- "ROIList": [],                                # list; List of ROI files to use.
- "Multiprocessing": 16                         # int; Number of threads to use for multiprocessing. Has no effect unless more than 1 subject is being processed.
+"Outputs": {
+  "Root": "/data1/pals/",                       # str; Path to directory where to place the output.
+  "StartRegistrationSpace": "MNI152NLin2009aSym",   # str; Value to use for "space" entity in BIDS output filename. 
+  "OutputRegistrationSpace": "MNI152NLin2009aSym",  # str; Reserved for future use.    
+"RegistrationTransform": "",                    # str; Optional. Path for saving registration transform. 
+  "Reorient": "",                               # str; Optional. Path for saving reoriented volume.
+  "BrainExtraction": "",                        # str; Optional. Path for saving the brain extracted volume.
+  "LesionCorrected": ""                         # str; Optional. Path for saving the white matter-corrected lesions.
+ },
 }
 ```
 

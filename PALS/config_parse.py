@@ -50,14 +50,14 @@ class PALSConfig():
 
     def space_entity(self):
         '''
-        Makes the config entry 'RegistrationOutputSpace' consistent with the analysis settings.
+        Makes the config entry 'OutputRegistrationSpace' consistent with the analysis settings.
         Returns
         -------
         None
         '''
         if(self['Analysis']['Registration']):
-            if(len(self['Outputs']['RegistrationOutputSpace']) == 0):
-                raise ValueError("Error in config file; config['Outputs']['RegistrationOutputSpace'] must be defined.")
+            if(len(self['Outputs']['OutputRegistrationSpace']) == 0):
+                raise ValueError("Error in config file; config['Outputs']['OutputRegistrationSpace'] must be defined.")
         else:
-            self['Outputs']['RegistrationOutputSpace'] = self['Outputs']['StartRegistrationSpace']
+            self['Outputs']['OutputRegistrationSpace'] = self['Outputs']['StartRegistrationSpace']
         return

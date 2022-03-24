@@ -147,7 +147,7 @@ def pals(config: dict):
                             name='image_writer0', iterfield=['image', 'reference'])
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['StartRegistrationSpace'] + '_desc-CorrectedLesion_mask{extension}'
-        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'],   path_pattern.format(**entities))
         output_image.inputs.file_name = lesion_corrected_filename
         wf.connect([(wm_removal, output_image, [('out_data','image')]),
                     (mask_path_fetcher, output_image, [('mask', 'reference')])])

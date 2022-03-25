@@ -27,10 +27,10 @@ PALS expects its input data to be [BIDS-compatible](https://bids-specification.r
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. 
 
 ### Preparation for direct use<a name=start></a>
-PALS is implemented in Python 3.8; you will first need to install Python. We recommend that you also install the Python virtual environment.
+PALS is implemented in Python 3.8; you will first need to install Python. We recommend that you also install the Python virtual environment. A walkthrough of the installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
 
 You can install PALS using:
-`pip install -U https://github.com/npnl/PALS`  
+`pip install -U git+https://github.com/npnl/PALS`  
 
 You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
 - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)

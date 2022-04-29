@@ -1,10 +1,11 @@
 import pandas as pd
-import glob
+import glob, json
 from os.path import join, sep, basename
 import nibabel as nb, nibabel.processing
 import numpy as np
 import bids
 from bids import BIDSLayout
+import PALS
 
 def gather_csv(pals_output_dir: str,
                output_name: str = 'pals.csv'):
@@ -129,6 +130,40 @@ def compute_roi_lesion_pct(pals_csv: str,
     return
 
 
+def write_dataset_description(bids_root: str,
+                              bids_name: str = 'pals_output',
+                              bids_version: str = '1.6.0',
+                              authors: list = None
+                              ):
+    '''
+    Writes a dataset_description.json file in the `bids_root` directory.
+    Parameters
+    ----------
+    bids_root : str
+        Path to the BIDS root directory where the dataset_description.json file should be written.
+
+    Returns
+    -------
+    None
+    '''
+
+    if(authors is None):
+        authors = []
+
+    dset_desc = {}
+    dset_desc['Name'] = bids_name
+    dset_desc['BIDSVersion'] = bids_version
+    dset_desc['Authors'] = authors
+    dset_desc['PipelineDescription'] = {'Name': 'pals_output'}
+    dset_desc['GeneratedBy'] = [{'Name': 'pals', 'Version': PALS.__version__}]
+    dset_desc['SourceDatasets'] = [{}]
+
+    f = open(join(bids_root, 'dataset_description.json'), 'w')
+    json.dump(dset_desc, f)
+    f.close()
+    return
+
+
 def get_subject_sessions(bids_set: BIDSLayout,
                          subject: str):
     '''
@@ -153,3 +188,5 @@ def get_subject_sessions(bids_set: BIDSLayout,
             sess = f.entities['session']
             session_list.add(sess)
     return list(session_list)
+
+

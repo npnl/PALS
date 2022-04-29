@@ -62,7 +62,8 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction.
   "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation.
   "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
-  "LesionLoadCalculation": true                 # bool; Whether to compute lesion load.
+  "LesionLoadCalculation": true,                # bool; Whether to compute lesion load.
+  "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap.
  },
  "BrainExtraction": {                           # Settings to pass to brain extraction; structure depends on Analysis['BrainExtractionMethod']
   "frac": 0.5,
@@ -94,6 +95,10 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "desc": "T1FinalResampledNorm",
   "space": "MNI152NLin2009aSym"
  },
+  "HeatMap": {                                 # Settings for generating the heatmap
+  "Reference": "/data1/reference.nii",         # str; Overlays the heatmap on this image.
+  "Transparency": 0.4                          # int; Transparency to use when mixing the reference image and the heatmap. Smaller values darker reference and lighter heatmap.
+  },
 "Outputs": {
   "Root": "/data1/pals/",                       # str; Path to directory where to place the output.
   "StartRegistrationSpace": "MNI152NLin2009aSym",   # str; Value to use for "space" entity in BIDS output filename. 

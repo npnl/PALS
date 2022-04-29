@@ -8,7 +8,8 @@
   "BrainExtractionMethod": "BET",
   "WhiteMatterSegmentation": true,
   "LesionCorrection": true,
-  "LesionLoadCalculation": true
+  "LesionLoadCalculation": true,
+  "LesionHeatMap": true
  },
  "BrainExtraction": {
   "frac": 0.5,
@@ -40,6 +41,10 @@
   "space": "MNI152NLin2009aSym",
   "label": "L"
  },
+  "HeatMap": {
+   "Reference": "/data1/mni_icbm152_t1_tal_nlin_sym_09a_brain.nii",
+   "Transparency": 0.4
+   },
  "Outputs": {
   "Root": "/data1/pals/",
   "StartRegistrationSpace": "",

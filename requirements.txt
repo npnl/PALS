@@ -1,5 +1,6 @@
 backcall==0.2.0
 bids
+git+https://github.com/npnl/bidsio
 bids-validator==1.8.2
 certifi==2021.5.30
 charset-normalizer==2.0.4

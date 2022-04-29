@@ -7,7 +7,7 @@ from nipype.interfaces.utility import Function
 from nipype.interfaces.io import BIDSDataGrabber, DataSink, SQLiteSink
 from nipype.interfaces.image import Reorient
 from nipype.interfaces.fsl import FAST
-import pathlib, sqlalchemy
+import pathlib
 from copy import deepcopy
 from os.path import join
 bids.config.set_option('extension_initial_dot', True)
@@ -15,6 +15,10 @@ from . import node_fetch
 from .config_parse import PALSConfig
 import warnings
 from . import utilities as util
+from . import heatmap
+import nibabel as nb
+import numpy as np
+from matplotlib import pyplot as plt
 
 def pals(config: dict):
     # Get config file defining workflow
@@ -702,9 +706,39 @@ def main():
     p = multiprocessing.Pool(num_threads)
     p.map(pals, config_list)
 
+    # Write out dataset_description.json
+    util.write_dataset_description(bids_root=pals_config['Outputs']['Root'])
+
     # Gather .csv
     output_csv_path = join(pals_config['Outputs']['Root'], 'pals.csv')
     util.gather_csv(pals_output_dir=pals_config['Outputs']['Root'], output_name=output_csv_path)
+
+    # Check if we should create heatmap
+    if(pals_config['Analysis']['LesionHeatMap']):
+        # Load lesion masks, sum, then output at BIDSRoot
+        heatmap_output_path = join(pals_config['Outputs']['Root'], 'pals_mask_heatmap.nii.gz')
+        heatmap.create_mask_heatmap(mask_root=pals_config['LesionRoot'],
+                                    mask_entities=pals_config['LesionEntities'],
+                                    transform_derivatives_name='pals_output',
+                                    output_path=join(heatmap_output_path))
+        # Overlay on reference, if any
+        if('Reference' in pals_config['HeatMap']):
+            overlay_name = join(pals_config['Outputs']['Root'], 'pals_mask_heatmap_overlaid.nii.gz')
+            ref_image = nb.load(pals_config['HeatMap']['Reference'])
+            ref_data = ref_image.get_fdata()
+            # Normalize
+            ref_data = (ref_data - np.min(ref_data)) / (np.max(ref_data) - np.min(ref_data))
+
+            # Load heatmap
+            heatmap_image = nb.load(heatmap_output_path)
+            heatmap_data = heatmap_image.get_fdata()
+            heatmap_data = (heatmap_data - np.min(heatmap_data)) / (np.max(heatmap_data) - np.min(heatmap_data))
+
+            # Combine
+            alph = pals_config['HeatMap']['Transparency']
+            merged = alph*ref_data + (1-alph)*heatmap_data
+            merged_image = nb.Nifti1Image(merged, affine=ref_image.affine)
+            nb.save(merged_image, overlay_name)
     return
 
 if __name__ == "__main__":

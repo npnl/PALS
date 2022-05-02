@@ -38,7 +38,7 @@ You will also need to install the following software packages on your machine. T
   
 Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
-Lastly, you will need to update the configuration settings (`config.json`) to specify your settings. See [this section](#config) for how to do so.
+Lastly, you will need to update the configuration settings (`config.json`) to specify your settings. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity<a name=singularity></a>
 You will first need to download the PALS code: `git clone https://github.com/npnl/PALS`  

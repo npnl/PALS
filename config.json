@@ -17,7 +17,7 @@
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "/data0/reference.nii",
+  "reference": "/data0/reference.nii"
  },
  "LesionCorrection": {
   "ImageNormMin": 0,

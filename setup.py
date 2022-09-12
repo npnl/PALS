@@ -7,7 +7,7 @@ setup(
     url='https://github.com/npnl/PALS',
     license='MIT',
     author='AlexandreHutton',
-    author_email='ahutton@usc.edu',
+    author_email='erendizt@usc.edu',
     description='Pipeline for Analyzing Lesions after Stroke',
     setup_requires=['wheel'],
     install_requires=[

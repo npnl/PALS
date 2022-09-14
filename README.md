@@ -60,7 +60,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "RegistrationMethod": "FLIRT",                # str; Registration method.
   "BrainExtraction": true,                      # bool; Whether to perform brain extraction.
   "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction.
-  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation.
+  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, must provide file under "WhiteMatterSegmentationFile"
   "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
   "LesionLoadCalculation": true,                # bool; Whether to compute lesion load.
   "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap.
@@ -79,8 +79,8 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "WhiteMatterSpread": 0.05                     # The deviation of the white matter intensity as a fraction of the mean white matter intensity.
  },
  "BIDSRoot": "/data1/data",                     # str; Path to the BIDS root directory for the raw data.
- "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects.
- "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions.
+ "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects. Ex: r001s001
+ "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions. Ex: 1
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.
  "WhiteMatterSegmentationFile": "",             # str; Path to the white matter segmentation file; subject + session should be specified
  "ROIDir": "ROIs",                              # str; Path to the directory containing ROI image files.

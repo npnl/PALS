@@ -27,7 +27,7 @@ PALS expects its input data to be [BIDS-compatible](https://bids-specification.r
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. 
 
 ### Preparation for direct use<a name=start></a>
-PALS is implemented in Python 3.8; you will first need to install Python. We recommend that you also install the Python virtual environment. A walkthrough of the installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
+PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/). We recommend that you also install the [Python virtual environment](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref). A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
 
 You can install PALS using:
 `pip install -U git+https://github.com/npnl/PALS`  

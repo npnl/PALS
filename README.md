@@ -40,7 +40,9 @@ Note that if your intended pipeline won't use components that are dependent on a
 
 Lastly, you will need to update the configuration settings (`config.json`) to specify your settings. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
-### Preparation for Singularity<a name=singularity></a>
+### Preparation for Singularity (Optional) <a name=singularity></a>
+PALS will run from the command line through the previous installation steps. The following instructions are only for those who whish to run PALS through a Singularity container. 
+
 You will first need to download the PALS code: `git clone https://github.com/npnl/PALS`  
 [Singularity](https://sylabs.io/guides/3.9/user-guide/quick_start.html#quick-installation-steps) also needs to be installed on your system.
 

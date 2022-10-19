@@ -29,16 +29,18 @@ There are two ways to use PALS: directly via the pals_workflow.py Python code, o
 ### Preparation for direct use<a name=start></a>
 PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/). We recommend that you also install the [Python virtual environment](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref). A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
 
-You can install PALS using:
+1. You can install PALS through your terminal using:
 `pip install -U git+https://github.com/npnl/PALS`  
 
-You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
+2. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS` 
+
+3. You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
 - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
   - For running FLIRT and FAST.
   
 Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
-Lastly, you will need to update the configuration settings (`config.json`) to specify your settings. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
+4. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity (Optional) <a name=singularity></a>
 PALS will run from the command line through the previous installation steps. The following instructions are only for those who whish to run PALS through a Singularity container. 

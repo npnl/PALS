@@ -54,7 +54,7 @@ Using the provided Singularity file `pals_singularity.def`, you can build the im
 Lastly, you will need to update the configuration settings (`config.json) to specify your settings. See [this section](#config) for how to do so.
 
 ## PALS Configuration File<a name=config></a> 
-PALS can be configured to run similar pipelines that differ in their implementations. Here is the default `config.json`, with explanations of each variable:  
+PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. Here is the default `config.json`, with explanations of each variable:  
 ```json
 {
  "Analysis": {

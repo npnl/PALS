@@ -24,9 +24,9 @@ For additional information about the original implementation, see the publicatio
 PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "T1Entities" to match your data. Outputs are provided in BIDS derivatives.
 
 ## Getting Started<a name=start></a>
-There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. 
+There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
-### Preparation for direct use<a name=start></a>
+### Preparation for Direct Use<a name=start></a>
 PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/). We recommend that you also install the [Python virtual environment](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref). A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
 
 1. You can install PALS through your terminal using:
@@ -35,15 +35,17 @@ PALS is implemented in Python 3.8; you will first need to [install Python](https
 2. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS` 
 
 3. You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
-- [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
-  - For running FLIRT and FAST.
+    * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
+      * For running FLIRT and FAST.
+    * Python packages in [requirements.txt]()
+      * These can be installed in your virtual environment with bash command `pip install -r requirements.txt` 
   
-Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
+> Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
 4. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity (Optional) <a name=singularity></a>
-PALS will run from the command line through the previous installation steps. The following instructions are only for those who whish to run PALS through a Singularity container. 
+PALS will run from the command line through the previous installation steps. The following instructions are only for those who whish to run PALS through a Singularity container. Currently, Singularity requires a LINUX operating system to run. A Docker container for PALS, compatible with Windows & OS operating systems, is in development and will be available in 2023.
 
 You will first need to download the PALS code: `git clone https://github.com/npnl/PALS`  
 [Singularity](https://sylabs.io/guides/3.9/user-guide/quick_start.html#quick-installation-steps) also needs to be installed on your system.

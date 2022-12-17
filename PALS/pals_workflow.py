@@ -10,7 +10,6 @@ from nipype.interfaces.fsl import FAST
 import pathlib
 from copy import deepcopy
 from os.path import join
-bids.config.set_option('extension_initial_dot', True)
 from . import node_fetch
 from .config_parse import PALSConfig
 import warnings
@@ -19,12 +18,16 @@ from . import heatmap
 import nibabel as nb
 import numpy as np
 from matplotlib import pyplot as plt
+import scipy.ndimage as ndi
+
+bids.config.set_option('extension_initial_dot', True)
+
 
 def pals(config: dict):
     # Get config file defining workflow
     # configs = json.load(open(config_file, 'r'))
     print('Starting: initializing workflow.')
-    # Build pipelie
+    # Build pipeline
     wf = Workflow(name='PALS')
 
     # bidsLayout = bids.BIDSLayout(config['BIDSRoot'])
@@ -32,22 +35,23 @@ def pals(config: dict):
     loader = BIDSDataGrabber(index_derivatives=False)
     loader.inputs.base_dir = config['BIDSRoot']
     loader.inputs.subject = config['Subject']
-    if(config['Session'] is not None):
+    if config['Session'] is not None:
         loader.inputs.session = config['Session']
     loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
     loader.inputs.extra_derivatives = [config['BIDSRoot']]
-    loader = Node(loader,  name='BIDSgrabber')
-
+    loader = Node(loader, name='BIDSgrabber')
 
     entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
     # Reorient to radiological
-    if(config['Analysis']['Reorient']):
-        radio = MapNode(Reorient(orientation=config['Analysis']['Orientation']), name="reorientation", iterfield='in_file')
-        if('Reorient' in config['Outputs'].keys()):
+    if config['Analysis']['Reorient']:
+        radio = MapNode(Reorient(orientation=config['Analysis']['Orientation']), name="reorientation",
+                        iterfield='in_file')
+        if 'Reorient' in config['Outputs'].keys():
             reorient_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                     name='reorient_copy', iterfield='src')
-            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-' + config['Analysis']['Orientation'] + '_{suffix}{extension}'
+            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-' + config['Analysis'][
+                'Orientation'] + '_{suffix}{extension}'
             reorient_filename = join(config['Outputs']['Reorient'], path_pattern.format(**entities))
             pathlib.Path(os.path.dirname(reorient_filename)).mkdir(parents=True, exist_ok=True)
             reorient_sink.inputs.dst = reorient_filename
@@ -59,10 +63,10 @@ def pals(config: dict):
 
     # Brain extraction
     bet = node_fetch.extraction_node(config, **config['BrainExtraction'])
-    if('BrainExtraction' in config['Outputs'].keys()):
+    if 'BrainExtraction' in config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['StartRegistrationSpace'] + '_desc-brain_mask{extension}'
-        brain_mask_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
+        brain_mask_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                   name='brain_mask_sink', iterfield='src')
         brain_mask_out = join(config['Outputs']['BrainExtraction'], path_pattern.format(**entities))
         pathlib.Path(os.path.dirname(brain_mask_out)).mkdir(parents=True, exist_ok=True)
@@ -71,13 +75,13 @@ def pals(config: dict):
     ## Lesion load calculation
     # Registration
     reg = node_fetch.registration_node(config, **config['Registration'])
-    if('RegistrationTransform' in config['Outputs'].keys()):
-
+    if 'RegistrationTransform' in config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
 
-        registration_transform_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
-        registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src','dst']),
+        registration_transform_filename = join(config['Outputs']['RegistrationTransform'],
+                                               path_pattern.format(**entities))
+        registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                               name='registration_transf_sink', iterfield='src')
         pathlib.Path(os.path.dirname(registration_transform_filename)).mkdir(parents=True, exist_ok=True)
         registration_transform_sink.inputs.dst = registration_transform_filename
@@ -85,24 +89,24 @@ def pals(config: dict):
 
     # Get mask
     mask_path_fetcher = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
-                                       subject=config['Subject'],
-                                       index_derivatives=False,
-                                       output_query={'mask': dict(**config['LesionEntities'],
-                                                                  invalid_filters='allow')},
-                                       extra_derivatives = [config['LesionRoot']]
-                                       ), name='mask_grabber')
-    if(config['Session'] is not None):
+                                             subject=config['Subject'],
+                                             index_derivatives=False,
+                                             output_query={'mask': dict(**config['LesionEntities'],
+                                                                        invalid_filters='allow')},
+                                             extra_derivatives=[config['LesionRoot']]
+                                             ), name='mask_grabber')
+    if config['Session'] is not None:
         mask_path_fetcher.inputs.session = config['Session']
 
     # Apply reg file to lesion mask
     apply_xfm = node_fetch.apply_xfm_node(config)
 
     # Lesion load calculation
-    if(config['Analysis']['LesionLoadCalculation']):
+    if config['Analysis']['LesionLoadCalculation']:
         lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
                               name='overlap_calc', iterfield=['ref_mask'])
         roi_list = []
-        if(os.path.exists(config['ROIDir'])):
+        if os.path.exists(config['ROIDir']):
             buf = os.listdir(config['ROIDir'])
             roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
         else:
@@ -123,43 +127,44 @@ def pals(config: dict):
         wf.connect([(apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
                     (lesion_load, csv_output, [('out_list', 'data_dict')])])
 
-
-    ## Lesion correction
-    if(config['Analysis']['LesionCorrection']):
-        ## White matter removal node. Does the white matter correction; has multiple inputs that need to be supplied.
+    # #Lesion correction
+    if config['Analysis']['LesionCorrection']:
+        # White matter removal node. Does the white matter correction; has multiple inputs that need to be supplied.
         wm_removal = MapNode(Function(function=white_matter_correction, input_names=['image', 'wm_mask', 'lesion_mask',
                                                                                      'max_difference_fraction'],
                                       output_names=['out_data', 'corrected_volume']),
                              name='wm_removal', iterfield=['image', 'wm_mask', 'lesion_mask'])
         wm_removal.inputs.max_difference_fraction = config['LesionCorrection']['WhiteMatterSpread']
 
-        ## File loaders
+        # #File loaders
         # Loads the subject image, passes it to wm_removal node
-        subject_image_loader = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
-                                       name='file_load0', iterfield='in_filename')
+        subject_image_loader = MapNode(
+            Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+            name='file_load0', iterfield='in_filename')
         wf.connect([(radio, subject_image_loader, [('out_file', 'in_filename')]),
                     (subject_image_loader, wm_removal, [('out_image', 'image')])])
 
         # Loads the mask image, passes it to wm_removal node
-        mask_image_loader = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
-                                             name='file_load2', iterfield='in_filename')
+        mask_image_loader = MapNode(
+            Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
+            name='file_load2', iterfield='in_filename')
         wf.connect([(mask_path_fetcher, mask_image_loader, [('mask', 'in_filename')]),
                     (mask_image_loader, wm_removal, [('out_image', 'lesion_mask')])])
 
         # Save lesion mask with white matter voxels removed
         output_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
-                            name='image_writer0', iterfield=['image', 'reference'])
+                               name='image_writer0', iterfield=['image', 'reference'])
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        config['Outputs']['StartRegistrationSpace'] + '_desc-CorrectedLesion_mask{extension}'
-        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'],   path_pattern.format(**entities))
+        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
         output_image.inputs.file_name = lesion_corrected_filename
-        wf.connect([(wm_removal, output_image, [('out_data','image')]),
+        wf.connect([(wm_removal, output_image, [('out_data', 'image')]),
                     (mask_path_fetcher, output_image, [('mask', 'reference')])])
 
-
-        ## CSV output
-        csv_output_corr = MapNode(Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
-                                  name='csv_output_corr', iterfield=['data'])
+        # CSV output
+        csv_output_corr = MapNode(
+            Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
+            name='csv_output_corr', iterfield=['data'])
         csv_output_corr.inputs.subject = config['Subject']
         csv_output_corr.inputs.session = config['Session']
         csv_output_corr.inputs.data_name = 'CorrectedVolume'
@@ -170,12 +175,13 @@ def pals(config: dict):
 
         wf.connect([(wm_removal, csv_output_corr, [('corrected_volume', 'data')])])
 
-        ## White matter segmentation; either do segmentation or load the file
-        if(config['Analysis']['WhiteMatterSegmentation']):
+        # White matter segmentation; either do segmentation or load the file
+        if config['Analysis']['WhiteMatterSegmentation']:
             # Config is set to do white matter segmentation
             # T1 intensity normalization
-            t1_norm = MapNode(Function(function=rescale_image, input_names=['image', 'range_min', 'range_max', 'save_image'],
-                                       output_names='out_file'), name='normalization', iterfield=['image'])
+            t1_norm = MapNode(
+                Function(function=rescale_image, input_names=['image', 'range_min', 'range_max', 'save_image'],
+                         output_names='out_file'), name='normalization', iterfield=['image'])
             t1_norm.inputs.range_min = config['LesionCorrection']['ImageNormMin']
             t1_norm.inputs.range_max = config['LesionCorrection']['ImageNormMax']
             t1_norm.inputs.save_image = True
@@ -183,9 +189,9 @@ def pals(config: dict):
 
             # White matter segmentation
             wm_seg = MapNode(FAST(), name="wm_seg", iterfield='in_files')
-            wm_seg.inputs.out_basename="segmentation"
+            wm_seg.inputs.out_basename = "segmentation"
             wm_seg.inputs.img_type = 1
-            wm_seg.inputs.number_classes=3
+            wm_seg.inputs.number_classes = 3
             wm_seg.inputs.hyper = 0.1
             wm_seg.inputs.iters_afterbias = 4
             wm_seg.inputs.bias_lowpass = 20
@@ -212,17 +218,32 @@ def pals(config: dict):
                         (ex_last, file_load1, [('out_entry', 'in_filename')]),
                         (file_load1, wm_removal, [('out_image', 'wm_mask')])])
 
-        elif(config['Analysis']['LesionCorrection']):
+        elif config['Analysis']['LesionCorrection']:
             # No white matter segmentation should be done, but lesion correction is expected.
             # White matter segmentation must be supplied
             wm_seg_path = config['WhiteMatterSegmentationFile']
-            if(len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path)):
+
+            # White matter input; files should be in derivative folders
+            wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
+                             name='image_writer1', iterfield=['image', 'reference'])
+            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
+                           config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+            wm_seg_path = join(config['BIDSRoot'], path_pattern.format(**entities))
+
+            print("************************************" + wm_seg_path + "************************************")
+            if (os.path.exists(wm_seg_path)):
+                # keep file the same
+                wm_seg_path = wm_seg_path  # needs to be able to take in a folder!! ****
+            elif len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path):
                 # Check if file exists at output
                 path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                                config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+
                 wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
-                if(os.path.exists(wm_map_filename)):
+                # print("************************************ WM MAP FILENAME: " + wm_map_filename + "************************************")
+                if os.path.exists(wm_map_filename):
                     wm_seg_path = wm_map_filename
+
             else:
                 raise ValueError('Config file is inconsistent; if WhiteMatterSegmentation is false but LesionCorrection'
                                  ' is true, then WhiteMatterSegmentationFile must be defined and must exist.')
@@ -241,7 +262,7 @@ def pals(config: dict):
         (bet, reg, [('out_file', 'in_file')]),
         (reg, apply_xfm, [('out_matrix_file', 'in_matrix_file')]),
         (mask_path_fetcher, apply_xfm, [('mask', 'in_file')]),
-        ])
+    ])
 
     try:
         graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
@@ -301,11 +322,11 @@ def image_write(image, file_name, reference=None):
 
     '''
     import nibabel as nb
-    if(type(image) is not nb.Nifti1Image):
+    if type(image) is not nb.Nifti1Image:
         image = nb.load(image)
-    if(reference is not None):
+    if reference is not None:
         # try to load
-        if(type(reference) is not nb.Nifti1Image):
+        if type(reference) is not nb.Nifti1Image:
             print(f'Warning: {reference} should be Nifti1Image, not {type(reference)}')
             ref = nb.load(reference)
         else:
@@ -318,7 +339,8 @@ def image_write(image, file_name, reference=None):
     nb.save(new_img, filename=file_name)
     return
 
-def rescale_image(image, range_min: float=0, range_max: float=255, save_image: bool=False):
+
+def rescale_image(image, range_min: float = 0, range_max: float = 255, save_image: bool = False):
     '''
     Rescales the image values to be within the specified range.
     Parameters
@@ -341,7 +363,7 @@ def rescale_image(image, range_min: float=0, range_max: float=255, save_image: b
     import numpy as np
     import os
     # Get data
-    if(type(image) is str):
+    if type(image) is str:
         image = nb.load(image)
 
     data = image.get_fdata()
@@ -350,7 +372,7 @@ def rescale_image(image, range_min: float=0, range_max: float=255, save_image: b
     # Normalize data
     data = (data - data_min) / (data_max - data_min) * (range_max + range_min) - range_min
     rescaled = nb.Nifti1Image(data, affine=image.affine)
-    if(save_image):
+    if save_image:
         nb.save(rescaled, 'rescaled_image.nii.gz')
         return os.path.abspath('rescaled_image.nii.gz')
     else:
@@ -397,12 +419,12 @@ def white_matter_correction(image,
 
     # Get expected range
     mean_wm = np.mean(wm_sans_lesions[wm_sans_lesions != 0])
-    mean_dist = np.max(image_data)*max_difference_fraction/2
+    mean_dist = np.max(image_data) * max_difference_fraction / 2
     lower_thresh = mean_wm - mean_dist
     upper_thresh = mean_wm + mean_dist
 
     lesion_data = image_data * lesion_mask_data
-    corrected_lesion_data = lesion_mask_data*((lesion_data < lower_thresh) + (lesion_data >= upper_thresh))
+    corrected_lesion_data = lesion_mask_data * ((lesion_data < lower_thresh) + (lesion_data >= upper_thresh))
     corrected_lesion = nb.Nifti1Image(np.array(corrected_lesion_data, dtype=float),
                                       affine=lesion_mask.affine, header=lesion_mask.header)
 
@@ -444,9 +466,9 @@ def overlap(ref_mask: str, roi_list: list) -> str:
         overlap_val = np.sum(ref_dat * roi)
         overlap_list.append(overlap_val)
         base_roi = os.path.basename(roi_file)
-        if(base_roi.endswith('.nii.gz')):
+        if base_roi.endswith('.nii.gz'):
             base_roi = base_roi[:-len('.nii.gz')]
-        if(base_roi.endswith('.nii')):
+        if base_roi.endswith('.nii'):
             base_roi = base_roi[:-len('.nii')]
         overlap_dict[base_roi] = overlap_val
     filename = 'overlap_list'
@@ -457,7 +479,7 @@ def overlap(ref_mask: str, roi_list: list) -> str:
     return overlap_dict
 
 
-def csv_writer(filename: str, subject: str, session: str, data_dict: dict = None, data = None, data_name: str = None):
+def csv_writer(filename: str, subject: str, session: str, data_dict: dict = None, data=None, data_name: str = None):
     '''
     Writes dictionary to CSV file.
     Parameters
@@ -482,27 +504,26 @@ def csv_writer(filename: str, subject: str, session: str, data_dict: dict = None
     import pandas as pd
     import os
 
-
-    if(data_dict is None):
+    if data_dict is None:
         data_dict = {data_name: data}
-    if(os.path.exists(filename)):
+    if os.path.exists(filename):
         pdat = pd.read_csv(filename)
         pdat_cols = pdat.columns
         for col in data_dict.keys():
-            if(col not in pdat_cols):
+            if col not in pdat_cols:
                 pdat.insert(len(pdat), col, data_dict[col])
     else:
         pdat = pd.DataFrame(data_dict, [0])
-    if('session' not in pdat.columns):
+    if 'session' not in pdat.columns:
         pdat.insert(0, 'session', session)
-    if('subject' not in pdat.columns):
+    if 'subject' not in pdat.columns:
         pdat.insert(0, 'subject', subject)
     pdat.to_csv(filename, index=False)
     return
 
 
-
-def sql_writer(database: str, subject: str, session: str, data_dict: dict = None, table_name='LESION', data = None, data_name: str = None):
+def sql_writer(database: str, subject: str, session: str, data_dict: dict = None, table_name='LESION', data=None,
+               data_name: str = None):
     '''
     Writes dictioanry to SQL database
     Parameters
@@ -528,23 +549,22 @@ def sql_writer(database: str, subject: str, session: str, data_dict: dict = None
     import os
 
     # Create data_dict if not defined
-    if(data_dict is None):
+    if data_dict is None:
         data_dict = {data_name: data}
 
-
     create = False
-    if(not os.path.exists(database)):
+    if not os.path.exists(database):
         create = True
     else:
         com = sqlite3.connect(database)
         cursor = com.cursor()
         tables = list(cursor.execute("SELECT name FROM sqlite_master WHERE type='table';"))
         com.close()
-        if(len(tables) == 0):
+        if len(tables) == 0:
             create = True
-        elif(tables[0][0] != table_name):
+        elif tables[0][0] != table_name:
             create = True
-    if(create):
+    if create:
         com = sqlite3.connect(database)
         s = f'CREATE TABLE {table_name} ('
         s += 'subject TEXT NOT NULL,'
@@ -558,12 +578,12 @@ def sql_writer(database: str, subject: str, session: str, data_dict: dict = None
         com.execute(s)
         com.close()
     # Check if column needs to be added
-    if(data_name is not None):
+    if data_name is not None:
         com = sqlite3.connect(database)
         cursor = com.cursor()
         all = cursor.execute(f'select * from {table_name}')
         col_names = [d[0] for d in all.description]
-        if(data_name not in col_names):
+        if data_name not in col_names:
             # Add column
             cursor = com.cursor()
             cursor.execute(f'ALTER TABLE {table_name} ADD COLUMN {data_name}')
@@ -580,7 +600,7 @@ def sql_writer(database: str, subject: str, session: str, data_dict: dict = None
         print()
         com.execute(f'INSERT INTO {table_name} {keys} values{data}')
         com.commit()
-    except(sqlite3.IntegrityError):
+    except sqlite3.IntegrityError:
         print('updating')
         s = 'UPDATE LESION SET'
         for k, v in data_dict.items():
@@ -607,7 +627,6 @@ def extract_first(in_list: list) -> str:
     return in_list[0]
 
 
-
 def create_modified_config_copy(config: dict,
                                 subject: str = None,
                                 session: str = None) -> dict:
@@ -628,14 +647,82 @@ def create_modified_config_copy(config: dict,
         Config with updated values
     '''
     new_config = deepcopy(config)
-    if(subject is not None):
+    if subject is not None:
         new_config['Subject'] = subject
-    if(session is not None):
+    if session is not None:
         new_config['Session'] = session
     return new_config
 
 
+def get_bounds(image, dimension):
+    '''
+    Locates the edges of the lesions in the lesion mask in the x, y, and z directions.
+    Parameters
+    ----------
+    image
+        nb.load MRI image object of the heatmap lesion mask.
+    dimension
+        "x", "y", or "z"
+
+    Returns
+    -------
+    bounds
+        A 2 element list of the start and stop edge slice indices of the lesions.
+
+    '''
+    x_dim = image.shape[0]
+    y_dim = image.shape[1]
+    z_dim = image.shape[2]
+    bounds = [None] * 2  # create list to hold bound
+
+    if dimension == "x":
+        # loop through slices in order to get first bound
+        for i in range(x_dim):
+            if np.average(image.slicer[i:i + 1, ...].get_fdata()) > 0 and bounds[0] is None:
+                bounds[0] = i
+                break
+        # loop through slices in reverse to get second bound
+        for j in reversed(range(x_dim)):
+            if j == 0:
+                break
+            if np.average(image.slicer[j - 1:j, ...].get_fdata()) > 0 and bounds[1] is None:
+                bounds[1] = j
+                break
+        return bounds
+
+    elif dimension == "y":
+        # loop through slices in order to get first bound
+        for i in range(y_dim):
+            if np.average(image.slicer[:, i:i + 1, :].get_fdata()) > 0 and bounds[0] is None:
+                bounds[0] = i
+                break
+        # loop through slices in reverse to get second bound
+        for j in reversed(range(y_dim)):
+            if j == 0:
+                break
+            if np.average(image.slicer[:, j - 1:j, :].get_fdata()) > 0 and bounds[1] is None:
+                bounds[1] = j
+                break
+        return bounds
+
+    elif dimension == "z":
+        # loop through slices in order to get first bound
+        for i in range(z_dim):
+            if np.average(image.slicer[:, :, i:i + 1].get_fdata()) > 0 and bounds[0] is None:
+                bounds[0] = i
+                break
+        # loop through slices in reverse to get second bound
+        for j in reversed(range(z_dim)):
+            if j == 0:
+                break
+            if np.average(image.slicer[:, :, j - 1:j].get_fdata()) > 0 and bounds[1] is None:
+                bounds[1] = j
+                break
+        return bounds
+
+
 def main():
+    # print("********************************************testing!!!!!********************************************")
     parser = argparse.ArgumentParser(description='Pipeline for Analyzing Lesions after Stroke. Runs the PALS processing'
                                                  ' pipeline on a BIDS dataset. Preprocessing includes reorientation '
                                                  'to a common direction, registration, brain extraction, white matter '
@@ -647,22 +734,24 @@ def main():
                                                     ' entity. If set, overrides the value in the config file.',
                         default=None, required=False)
     parser.add_argument('--session', type=str, help='Session ID; value of the label associated with the "session" BIDS'
-                                                    ' entity. If set, overrides the value in the config file.', default=None)
+                                                    ' entity. If set, overrides the value in the config file.',
+                        default=None)
     parser.add_argument('--lesion_root', type=str, help='Root directory for the BIDS directory containing the lesion '
-                                                        'masks. If set, overrides the value in the config file.', default=None)
+                                                        'masks. If set, overrides the value in the config file.',
+                        default=None)
     parser.add_argument('--config', type=str, help='Path to the configuration file.', required=True)
 
     pargs = parser.parse_args()
     pals_config = PALSConfig(pargs.config)
 
     # config = json.load(open(pargs.config, 'r'))
-    if(pargs.root_dir is not None):
+    if pargs.root_dir is not None:
         pals_config['BIDSRoot'] = pargs.root_dir
-    if(pargs.subject is not None):
+    if pargs.subject is not None:
         pals_config['Subject'] = pargs.subject
-    if(pargs.session is not None):
+    if pargs.session is not None:
         pals_config['Session'] = pargs.session
-    if(pargs.lesion_root is not None):
+    if pargs.lesion_root is not None:
         pals_config['LesionRoot'] = pargs.lesion_root
 
     # If either Subject or Session is empty, assume that we'll be processing all subjects + sessions
@@ -672,22 +761,22 @@ def main():
     dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
                                   derivatives=pals_config['BIDSRoot'])
     deriv_list = list(dataset_raw.derivatives.keys())
-    if(len(deriv_list) > 0):
+    if len(deriv_list) > 0:
         derivatives_name = list(dataset_raw.derivatives.keys())[0]
         print(f'Taking {derivatives_name} from derivatives dataset.')
         dataset = dataset_raw.derivatives[derivatives_name]
     else:
         dataset = dataset_raw
 
-    if(no_subject):
+    if no_subject:
         subject_list = dataset.entities['subject'].unique()
-    elif(pargs.subject is not None):
+    elif pargs.subject is not None:
         subject_list = [pargs.subject]
     else:
         subject_list = [pals_config['Subject']]
-    if(no_session):
+    if no_session:
         session_list = dataset.entities['session'].unique()
-    elif(pargs.session is not None):
+    elif pargs.session is not None:
         session_list = [pargs.session]
     else:
         session_list = [pals_config['Session']]
@@ -714,7 +803,7 @@ def main():
     util.gather_csv(pals_output_dir=pals_config['Outputs']['Root'], output_name=output_csv_path)
 
     # Check if we should create heatmap
-    if(pals_config['Analysis']['LesionHeatMap']):
+    if pals_config['Analysis']['LesionHeatMap']:
         # Load lesion masks, sum, then output at BIDSRoot
         heatmap_output_path = join(pals_config['Outputs']['Root'], 'pals_mask_heatmap.nii.gz')
         heatmap.create_mask_heatmap(mask_root=pals_config['LesionRoot'],
@@ -722,12 +811,13 @@ def main():
                                     transform_derivatives_name='pals_output',
                                     output_path=join(heatmap_output_path))
         # Overlay on reference, if any
-        if('Reference' in pals_config['HeatMap']):
+        if 'Reference' in pals_config['HeatMap']:
             overlay_name = join(pals_config['Outputs']['Root'], 'pals_mask_heatmap_overlaid.nii.gz')
             ref_image = nb.load(pals_config['HeatMap']['Reference'])
             ref_data = ref_image.get_fdata()
             # Normalize
-            ref_data = (ref_data - np.min(ref_data)) / (np.max(ref_data) - np.min(ref_data))
+            ref_data = (ref_data - np.min(ref_data)) / (
+                    np.max(ref_data) - np.min(ref_data))  # is this actually normalizing??
 
             # Load heatmap
             heatmap_image = nb.load(heatmap_output_path)
@@ -736,10 +826,135 @@ def main():
 
             # Combine
             alph = pals_config['HeatMap']['Transparency']
-            merged = alph*ref_data + (1-alph)*heatmap_data
+            merged = alph * ref_data + (1 - alph) * heatmap_data
             merged_image = nb.Nifti1Image(merged, affine=ref_image.affine)
             nb.save(merged_image, overlay_name)
+
+            #  check the bounds of the lesions
+            x_bounds = get_bounds(heatmap_image, "x")
+            y_bounds = get_bounds(heatmap_image, "y")
+            z_bounds = get_bounds(heatmap_image, "z")
+
+            # ########### PNGS WITH CROPPED RANGES ###############
+            # also save as 8 equally distanced PNG files
+            png_output_path = join(pals_config['Outputs']['Root'], 'heatmap_png')
+            pathlib.Path(os.path.dirname(png_output_path)).mkdir(parents=True, exist_ok=True)
+            if not os.path.exists(png_output_path):
+                os.mkdir(png_output_path)
+
+            sag_slices = []
+            coronal_slices = []
+            axial_slices = []
+
+            # #### SAGITTAL SLICES ###
+            fig_rows = 3
+            fig_cols = 3
+            cbar_loc = [0.9, 0.15, 0.03, 0.65]
+            tick_font_size = 16
+
+            sag_fig, sag_axs = plt.subplots(nrows=fig_rows, ncols=fig_cols, layout="compressed", figsize=(10, 10))
+            sag_fig.patch.set_facecolor('black')
+            x_step = round((x_bounds[1] - x_bounds[0]) // 8) - 1
+
+            for idx, x_slice in enumerate(range(x_bounds[0], x_bounds[1], x_step)):
+                ref_png_slice = ref_data[x_slice, :, :]
+                mask_png_slice = heatmap_data[x_slice, :, :]
+                sag_slices.append([ref_png_slice, mask_png_slice])
+                sag_axs.flat[idx].imshow(ndi.rotate(ref_png_slice, 90), cmap='bone')
+                im = sag_axs.flat[idx].imshow(ndi.rotate(mask_png_slice, 90), cmap='inferno', alpha=0.5)
+                im.set_clim(0, 1)
+                sag_axs.flat[idx].axis('off')
+
+            sag_fig.tight_layout()
+            plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
+            cax = plt.axes(cbar_loc)
+            cbar = plt.colorbar(im, ax=sag_axs.ravel().tolist(), cax=cax)
+            cbar.set_ticks([0, 1], color="white")
+            cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
+            cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
+            cbar.set_label('No. Subjects', color="white", size=tick_font_size)
+            plt.savefig(
+                png_output_path + '/pals_mask_overlaid_sagittal.png')
+            plt.clf()
+
+            # #### CORONAL SLICES ###
+            cor_fig, cor_axs = plt.subplots(nrows=3, ncols=3, layout="compressed", figsize=(10, 10))
+            cor_fig.patch.set_facecolor('black')
+            y_step = round((y_bounds[1] - y_bounds[0]) // 8)
+
+            for idx, y_slice in enumerate(range(y_bounds[0], y_bounds[1], y_step)):
+                ref_png_slice = ref_data[:, y_slice, :]
+                mask_png_slice = heatmap_data[:, y_slice, :]
+                coronal_slices.append([ref_png_slice, mask_png_slice])
+                cor_axs.flat[idx].imshow(ndi.rotate(ref_png_slice, 90), cmap='bone')
+                im = cor_axs.flat[idx].imshow(ndi.rotate(mask_png_slice, 90), cmap='inferno', alpha=0.5)
+                im.set_clim(0, 1)
+                cor_axs.flat[idx].axis('off')
+
+            cor_fig.tight_layout()
+            plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
+            cax = plt.axes(cbar_loc)
+            cbar = plt.colorbar(im, ax=cor_axs.ravel().tolist(), cax=cax)
+            cbar.set_ticks([0, 1], color="white")
+            cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
+            cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
+            cbar.set_label('No. Subjects', color="white", size=tick_font_size)
+            plt.savefig(
+                png_output_path + '/pals_mask_overlaid_coronal_slice.png')
+            plt.clf()
+
+            # #### AXIAL SLICES ###
+            axial_fig, axial_axs = plt.subplots(nrows=3, ncols=3, layout="compressed", figsize=(10, 10))
+            axial_fig.patch.set_facecolor('black')
+            z_step = round((z_bounds[1] - z_bounds[0]) // 8)
+
+            for idx, z_slice in enumerate(range(z_bounds[0], z_bounds[1], z_step)):
+                ref_png_slice = ref_data[:, :, z_slice]
+                mask_png_slice = heatmap_data[:, :, z_slice]
+                axial_slices.append([ref_png_slice, mask_png_slice])
+                axial_axs.flat[idx].imshow(ndi.rotate(ref_png_slice, 90), cmap='bone')
+                im = axial_axs.flat[idx].imshow(ndi.rotate(mask_png_slice, 90), cmap='inferno', alpha=0.5)
+                im.set_clim(0, 1)
+                axial_axs.flat[idx].axis('off')
+
+            axial_fig.tight_layout()
+            plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
+            cax = plt.axes(cbar_loc)
+            cbar = plt.colorbar(im, ax=axial_axs.ravel().tolist(), cax=cax)
+            cbar.set_ticks([0, 1], color="white")
+            cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
+            cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
+            cbar.set_label('No. Subjects', color="white", size=tick_font_size)
+            plt.savefig(
+                png_output_path + '/pals_mask_overlaid_axial_slice.png')
+            plt.clf()
+
+            # MAKE FIGURE WITH 3 ORIENTATIONS
+            full_fig, full_axs = plt.subplots(nrows=1, ncols=3, layout="compressed", figsize=(7, 2.5),
+                                              gridspec_kw={'width_ratios': [5, 4.25, 3.75]})
+            full_fig.patch.set_facecolor('black')
+            full_slices = [sag_slices[4], coronal_slices[4], axial_slices[4]]
+            for idx, f_slice in enumerate(full_slices):
+                full_axs.flat[idx].imshow(ndi.rotate(f_slice[0], 90), cmap='bone')
+                im = full_axs.flat[idx].imshow(ndi.rotate(f_slice[1], 90), cmap='inferno', alpha=0.5)
+                im.set_clim(0, 1)
+                full_axs.flat[idx].axis('off')
+
+            full_fig.tight_layout()
+            plt.subplots_adjust(bottom=0.05, right=0.9, top=0.9)
+            f_cbar_loc = [0.91, 0.1, 0.03, 0.75]
+            cax = plt.axes(f_cbar_loc)
+            cbar = plt.colorbar(im, ax=axial_axs.ravel().tolist(), cax=cax)
+            cbar.set_ticks([0, 1])
+            cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
+            cbar.ax.tick_params(color='white')
+            cbar.set_label('No. Subjects', color="white")
+            plt.savefig(
+                png_output_path + '/pals_mask_overlaid.png')
+            plt.clf()
+
     return
+
 
 if __name__ == "__main__":
     main()

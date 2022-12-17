@@ -23,6 +23,15 @@ For additional information about the original implementation, see the publicatio
 ## Expected Data Structure<a name=datastructure></a>
 PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "T1Entities" to match your data. Outputs are provided in BIDS derivatives.
 
+The naming conventions of the input must be as follows:
+
+**Main Image**: 
+  * Unregistered: `sub-{subject}_ses-{session}_T1.nii.gz`
+  * Registered: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc_T1.nii.gz`
+  
+**White Matter Segmentation File**: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc-WhiteMatter_mask.nii.gz`
+
+
 ## Getting Started<a name=start></a>
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
@@ -66,7 +75,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "RegistrationMethod": "FLIRT",                # str; Registration method.
   "BrainExtraction": true,                      # bool; Whether to perform brain extraction.
   "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction.
-  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, must provide file under "WhiteMatterSegmentationFile"
+  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, must place file in same location as the input files in the BIDS structure. 
   "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
   "LesionLoadCalculation": true,                # bool; Whether to compute lesion load.
   "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap.
@@ -88,7 +97,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
  "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects. Ex: r001s001
  "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions. Ex: 1
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.
- "WhiteMatterSegmentationFile": "",             # str; Path to the white matter segmentation file; subject + session should be specified
+ "WhiteMatterSegmentationFile": "",             # str; Leave empty - files are automatically referenced.
  "ROIDir": "ROIs",                              # str; Path to the directory containing ROI image files.
  "ROIList": [],                                 # list; List of ROI files to use.
  "Multiprocessing": 4,                          # int; Number of threads to use for multiprocessing. Has no effect unless more than 1 subject is being processed.
@@ -102,7 +111,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "space": "MNI152NLin2009aSym"
  },
   "HeatMap": {                                 # Settings for generating the heatmap
-  "Reference": "/data1/reference.nii",         # str; Overlays the heatmap on this image.
+  "Reference": "/data1/reference.nii",         # str; Overlays the heatmap on this image and creates NIFTI file with overlay and NITFI file with the mask only. Also produces 4 PNGS: 9 slices of the lesions from sagittal, axial, and coronal orientations (3 images) and an image with a cross-section of each orientation.
   "Transparency": 0.4                          # int; Transparency to use when mixing the reference image and the heatmap. Smaller values darker reference and lighter heatmap.
   },
 "Outputs": {

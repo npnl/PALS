@@ -54,7 +54,7 @@ PALS is implemented in Python 3.8; you will first need to [install Python](https
 4. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity (Optional) <a name=singularity></a>
-PALS will run from the command line through the previous installation steps. The following instructions are only for those who whish to run PALS through a Singularity container. Currently, Singularity requires a LINUX operating system to run. A Docker container for PALS, compatible with Windows & OS operating systems, is in development and will be available in 2023.
+PALS will run from the command line through the previous installation steps. The following instructions are only for those who wish to run PALS through a Singularity container. Currently, Singularity requires a LINUX operating system to run. A Docker container for PALS, compatible with Windows & OS operating systems, is in development.
 
 You will first need to download the PALS code: `git clone https://github.com/npnl/PALS`  
 [Singularity](https://sylabs.io/guides/3.9/user-guide/quick_start.html#quick-installation-steps) also needs to be installed on your system.

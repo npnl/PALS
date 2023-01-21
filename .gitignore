@@ -11,3 +11,6 @@ PALS/d3.js
 PALS/graph.json
 PALS/graph1.json
 PALS/index.html
+.idea/
+lib/
+pyvenv.cfg

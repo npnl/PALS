@@ -113,6 +113,7 @@ def pals(config: dict):
             warnings.warn(f"ROIDir ({config['ROIDir']}) doesn't exist.")
         buf = config['ROIList']
         roi_list += [os.path.abspath(b) for b in buf]
+        roi_list.sort(reverse=True)
         lesion_load.inputs.roi_list = roi_list
 
         # CSV output
@@ -230,8 +231,7 @@ def pals(config: dict):
                            config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
             wm_seg_path = join(config['BIDSRoot'], path_pattern.format(**entities))
 
-            print("************************************" + wm_seg_path + "************************************")
-            if (os.path.exists(wm_seg_path)):
+            if os.path.exists(wm_seg_path):
                 # keep file the same
                 wm_seg_path = wm_seg_path  # needs to be able to take in a folder!! ****
             elif len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path):
@@ -240,7 +240,6 @@ def pals(config: dict):
                                config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
 
                 wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
-                # print("************************************ WM MAP FILENAME: " + wm_map_filename + "************************************")
                 if os.path.exists(wm_map_filename):
                     wm_seg_path = wm_map_filename
 
@@ -458,6 +457,8 @@ def overlap(ref_mask: str, roi_list: list) -> str:
     ref_dat = nb.load(ref_mask).get_fdata()
     overlap_dict['UncorrectedVolume'] = np.sum(ref_dat)
 
+    # alphabetize ROI list
+    roi_list.sort()
     # Compute overlap for each mask
     for roi_file in roi_list:
         roi_image = nb.load(roi_file)
@@ -722,7 +723,6 @@ def get_bounds(image, dimension):
 
 
 def main():
-    # print("********************************************testing!!!!!********************************************")
     parser = argparse.ArgumentParser(description='Pipeline for Analyzing Lesions after Stroke. Runs the PALS processing'
                                                  ' pipeline on a BIDS dataset. Preprocessing includes reorientation '
                                                  'to a common direction, registration, brain extraction, white matter '
@@ -793,6 +793,9 @@ def main():
     num_threads = min(pals_config['Multiprocessing'], len(config_list))
     print(f"Starting {num_threads} threads...")
     p = multiprocessing.Pool(num_threads)
+    print("***************PRINTING PALS AND CONFIG LIST*************")
+    print(type(pals))
+    print(config_list)
     p.map(pals, config_list)
 
     # Write out dataset_description.json

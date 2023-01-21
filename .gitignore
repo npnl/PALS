@@ -1,0 +1,13 @@
+# ignore local data
+BIDS
+config_files
+data
+venv
+.DS_Store
+PALS.egg-info/
+PALS/.DS_Store
+build
+PALS/d3.js
+PALS/graph.json
+PALS/graph1.json
+PALS/index.html

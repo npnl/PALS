@@ -793,9 +793,6 @@ def main():
     num_threads = min(pals_config['Multiprocessing'], len(config_list))
     print(f"Starting {num_threads} threads...")
     p = multiprocessing.Pool(num_threads)
-    print("***************PRINTING PALS AND CONFIG LIST*************")
-    print(type(pals))
-    print(config_list)
     p.map(pals, config_list)
 
     # Write out dataset_description.json

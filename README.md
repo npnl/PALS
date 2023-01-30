@@ -111,7 +111,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "space": "MNI152NLin2009aSym"
  },
   "HeatMap": {                                 # Settings for generating the heatmap
-  "Reference": "/data1/reference.nii",         # str; Overlays the heatmap on this image and creates NIFTI file with overlay and NITFI file with the mask only. Also produces 4 PNGS: 9 slices of the lesions from sagittal, axial, and coronal orientations (3 images) and an image with a cross-section of each orientation.
+  "Reference": "/data1/reference.nii",         # str; Overlays the heatmap on this image and creates NIFTI file with overlay and NITFI file with the mask only. Also produces 4 PNGS: 9 slices of the lesions from sagittal, axial, and coronal orientations (3 images) and an image with a cross-section of each orientation. If your images are pre-registered, you MUST use your own reference image used for their registration.
   "Transparency": 0.4                          # int; Transparency to use when mixing the reference image and the heatmap. Smaller values darker reference and lighter heatmap.
   },
 "Outputs": {

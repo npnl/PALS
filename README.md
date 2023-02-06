@@ -39,7 +39,7 @@ There are two ways to use PALS: directly via the pals_workflow.py Python code, o
 PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/). We recommend that you also install the [Python virtual environment](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref). A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
 
 1. You can install PALS through your terminal using:
-`pip install -U git+https://github.com/npnl/PALS`  
+`python3.8 -m pip install -U git+https://github.com/npnl/PALS`  
 
 2. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS` 
 

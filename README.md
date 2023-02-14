@@ -50,11 +50,11 @@ A walkthrough of the PALS installation is [available on YouTube](https://youtu.b
     * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
       * For running FLIRT and FAST.
     * Python packages in [requirements.txt]()
-      * These can be installed in your virtual environment with bash command `pip install -r requirements.txt` 
+      * These can be installed in your virtual environment with bash command `python3.8 -m pip install -r requirements.txt` 
   
 > Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
-7. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
+7. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 5. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity (Optional) <a name=singularity></a>
 PALS will run from the command line through the previous installation steps. The following instructions are only for those who wish to run PALS through a Singularity container. Currently, Singularity requires a LINUX operating system to run. A Docker container for PALS, compatible with Windows & OS operating systems, is in development.

@@ -36,14 +36,17 @@ The naming conventions of the input must be as follows:
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
 ### Preparation for Direct Use<a name=start></a>
-PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/). We recommend that you also install the [Python virtual environment](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref). A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g).
-
-1. You can install PALS through your terminal using:
+A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g). The command prompts for each step below are in gray.
+1. PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
+2. We recommend that you also install the Python virtual environment [Virtualenv](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref).
+    `python3.8 -m pip install virtualenv`
+3. Create a virtual environment in your worksapce for PALS with `virtualenv pals_venv` and activate the environment with`activate pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
+4. Install PALS through your terminal using:
 `python3.8 -m pip install -U git+https://github.com/npnl/PALS`  
 
-2. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS` 
+5. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS` 
 
-3. You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
+6. You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
     * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
       * For running FLIRT and FAST.
     * Python packages in [requirements.txt]()
@@ -51,7 +54,7 @@ PALS is implemented in Python 3.8; you will first need to [install Python](https
   
 > Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
-4. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
+7. Lastly, you will need to update the configuration settings (`config.json`) to specify your settings in the PALS directory you downloaded in step 2. See [this section](#config) for how to do so. You can download the [sample config file](https://github.com/npnl/PALS/blob/main/config.json) directly from this repo.
 
 ### Preparation for Singularity (Optional) <a name=singularity></a>
 PALS will run from the command line through the previous installation steps. The following instructions are only for those who wish to run PALS through a Singularity container. Currently, Singularity requires a LINUX operating system to run. A Docker container for PALS, compatible with Windows & OS operating systems, is in development.

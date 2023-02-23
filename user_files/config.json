@@ -17,19 +17,19 @@
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "{/user/path}/reference.nii"
+  "reference": "~/PALS/user_files/MNI152_T1_2mm_brain.nii.gz"
  },
  "LesionCorrection": {
   "ImageNormMin": 0,
   "ImageNormMax": 255,
   "WhiteMatterSpread": 0.05
  },
- "BIDSRoot": "{/user/path/to}/BIDS/derivative/",
+ "BIDSRoot": "/data1/data",
  "Subject": "",
  "Session": "",
- "LesionRoot": "{/user/path/to}/BIDS/derivative/",
+ "LesionRoot": "/data1/data",
  "WhiteMatterSegmentationFile": "",
- "ROIDir": "{/user/path}/PALS/user_files/ROIs/",
+ "ROIDir": "~/PALS/user_files/ROIs",
  "ROIList": [],
  "Multiprocessing": 1,
  "T1Entities": {
@@ -42,13 +42,13 @@
   "label": "L"
  },
   "HeatMap": {
-   "Reference": "{/user/path}/reference.nii",
+   "Reference": "~/PALS/user_files/MNI152_T1_2mm_brain.nii.gz"
    "Transparency": 0.4
    },
  "Outputs": {
-  "Root": "{/user/path}/output/",
+  "Root": "/data1/output",
   "StartRegistrationSpace": "",
-  "OutputRegistrationSpace": "",
+  "OutputRegistrationSpace": "MNI152NLin2009aSym",
   "RegistrationTransform": "",
   "Reorient": "",
   "BrainExtraction": "",

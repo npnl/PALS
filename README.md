@@ -29,6 +29,8 @@ The naming conventions of the input must be as follows:
   * Unregistered: `sub-{subject}_ses-{session}_T1.nii.gz`
   * Registered: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc_T1.nii.gz`
   
+**Lesion Mask**: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_label-L_desc-T1lesion_mask.nii.gz`
+  
 **White Matter Segmentation File**: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc-WhiteMatter_mask.nii.gz`
 
 
@@ -38,9 +40,9 @@ There are two ways to use PALS: directly via the pals_workflow.py Python code, o
 ### Preparation for Direct Use<a name=start></a>
 A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g). The command prompts for each step below are in gray.
 1. PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
-2. We recommend that you also install the Python virtual environment [Virtualenv](https://docs.python-guide.org/dev/virtualenvs/#virtualenvironments-ref).
-    `python3.8 -m pip install virtualenv`
-3. Create a virtual environment in your worksapce for PALS with `virtualenv pals_venv --python=python3.8` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
+2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+    `python3.8 -m pip install --user virtualenv`
+3. Create a virtual environment in your worksapce for PALS with `venv pals_venv --python=python3.8` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
 4. Install PALS through your terminal using:
 `python3.8 -m pip install -U git+https://github.com/npnl/PALS`  
 
@@ -100,7 +102,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
  "Subject": "",                                 # str; ID of the subject to run. If blank, runs all subjects. Ex: r001s001
  "Session": "",                                 # str; ID of the session to run. If blank, runs all sessions. Ex: 1
  "LesionRoot": "/data1/",                       # str; Path to the BIDS root directory for the lesion masks.
- "WhiteMatterSegmentationFile": "",             # str; Leave empty - files are automatically referenced.
+ "WhiteMatterSegmentationRoot": "",             # str; Path to the BIDS root directory for the white matter segmentation files.
  "ROIDir": "ROIs",                              # str; Path to the directory containing ROI image files.
  "ROIList": [],                                 # list; List of ROI files to use.
  "Multiprocessing": 4,                          # int; Number of threads to use for multiprocessing. Has no effect unless more than 1 subject is being processed.

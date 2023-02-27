@@ -222,18 +222,18 @@ def pals(config: dict):
         elif config['Analysis']['LesionCorrection']:
             # No white matter segmentation should be done, but lesion correction is expected.
             # White matter segmentation must be supplied
-            wm_seg_path = config['WhiteMatterSegmentationFile']
+            wm_seg_path = config['WhiteMatterSegmentationRoot']
 
             # White matter input; files should be in derivative folders
             wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                              name='image_writer1', iterfield=['image', 'reference'])
             path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                            config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
-            wm_seg_path = join(config['BIDSRoot'], path_pattern.format(**entities))
+            wm_seg_path = join(wm_seg_path, path_pattern.format(**entities))
 
             if os.path.exists(wm_seg_path):
                 # keep file the same
-                wm_seg_path = wm_seg_path  # needs to be able to take in a folder!! ****
+                wm_seg_path = wm_seg_path
             elif len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path):
                 # Check if file exists at output
                 path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
@@ -245,7 +245,7 @@ def pals(config: dict):
 
             else:
                 raise ValueError('Config file is inconsistent; if WhiteMatterSegmentation is false but LesionCorrection'
-                                 ' is true, then WhiteMatterSegmentationFile must be defined and must exist.')
+                                 ' is true, then WhiteMatterSegmentationRoot must be defined and must exist.')
             file_load1 = MapNode(Function(function=image_load, input_names=['in_filename'], output_names='out_image'),
                                  name='file_load1', iterfield='in_filename')
             file_load1.inputs.in_filename = wm_seg_path
@@ -869,7 +869,7 @@ def main():
             plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
             cax = plt.axes(cbar_loc)
             cbar = plt.colorbar(im, ax=sag_axs.ravel().tolist(), cax=cax)
-            cbar.set_ticks([0, 1], color="white")
+            cbar.set_ticks([0, 1], labels=['0', str(num_threads)], color="white")
             cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
             cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
             cbar.set_label('No. Subjects', color="white", size=tick_font_size)
@@ -895,7 +895,7 @@ def main():
             plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
             cax = plt.axes(cbar_loc)
             cbar = plt.colorbar(im, ax=cor_axs.ravel().tolist(), cax=cax)
-            cbar.set_ticks([0, 1], color="white")
+            cbar.set_ticks([0, 1], labels=['0', str(num_threads)], color="white")
             cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
             cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
             cbar.set_label('No. Subjects', color="white", size=tick_font_size)
@@ -921,7 +921,7 @@ def main():
             plt.subplots_adjust(bottom=0.05, right=0.89, top=0.95)
             cax = plt.axes(cbar_loc)
             cbar = plt.colorbar(im, ax=axial_axs.ravel().tolist(), cax=cax)
-            cbar.set_ticks([0, 1], color="white")
+            cbar.set_ticks([0, 1], labels=['0', str(num_threads)], color="white")
             cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
             cbar.ax.tick_params(axis="y", labelsize=tick_font_size)
             cbar.set_label('No. Subjects', color="white", size=tick_font_size)
@@ -945,7 +945,7 @@ def main():
             f_cbar_loc = [0.91, 0.1, 0.03, 0.75]
             cax = plt.axes(f_cbar_loc)
             cbar = plt.colorbar(im, ax=axial_axs.ravel().tolist(), cax=cax)
-            cbar.set_ticks([0, 1])
+            cbar.set_ticks([0, 1], labels=['0', str(num_threads)])
             cbar.ax.set_yticklabels(['0', str(num_threads)], color="white")
             cbar.ax.tick_params(color='white')
             cbar.set_label('No. Subjects', color="white")

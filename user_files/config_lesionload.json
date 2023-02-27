@@ -1,12 +1,12 @@
 {
  "Analysis": {
-  "Reorient": true,
+  "Reorient": false,
   "Orientation": "LAS",
-  "Registration": true,
+  "Registration": false,
   "RegistrationMethod": "FLIRT",
-  "BrainExtraction": true,
+  "BrainExtraction": false,
   "BrainExtractionMethod": "BET",
-  "WhiteMatterSegmentation": true,
+  "WhiteMatterSegmentation": false,
   "LesionCorrection": true,
   "LesionLoadCalculation": true,
   "LesionHeatMap": true

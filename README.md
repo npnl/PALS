@@ -42,7 +42,7 @@ A walkthrough of the PALS installation is [available on YouTube](https://youtu.b
 1. PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
 2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
     `python3.8 -m pip install --user virtualenv`
-3. Create a virtual environment in your worksapce for PALS with `venv pals_venv --python=python3.8` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
+3. Create a virtual environment in your worksapce for PALS with `python3.8 -m venv pals_venv` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
 4. Install PALS through your terminal using:
 `python3.8 -m pip install -U git+https://github.com/npnl/PALS`  
 

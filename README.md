@@ -160,3 +160,6 @@ Placeholder values:
 - X: subject ID
 - Y: session ID
 - SPACE: String indicating the space the image is in (e.g. MNI152NLin2009aSym)
+
+## Citing PALS<a name=citation></a>
+If you use PALS for you paper, please cite the original PALS publication in [Frontier in Neuroinformatics](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).

@@ -1,0 +1,15 @@
+{
+	"Name": "ATLAS",
+	"BIDSVersion": "1.6.0",
+	"Authors": ["ENIGMA Stroke Recovery - ATLAS Subgroup"],
+	"PipelineDescription": {
+		"Name": "ATLAS"
+	},
+	"GeneratedBy": [{
+		"Name": "ATLAS",
+		"Version": "2.0"
+		}],
+	"SourceDatasets": [{
+		"URL": "http://fcon_1000.projects.nitrc.org/indi/retro/atlas.html"
+		}]
+}

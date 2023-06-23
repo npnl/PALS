@@ -82,16 +82,16 @@ Here is the default `config.json`, with explanations of each variable:
 ```json
 {
  "Analysis": {
-  "Reorient": true,                             # bool; Whether to standardize the orientation (e.g. radiological, neurological). Options: True, False.
-  "Orientation": "LAS",                         # str; Orientation to standardize to. 
-  "Registration": true,                         # bool; Whether to perform registration to a common template. Options: True, False.
+  "Reorient": true,                             # bool; Whether to standardize the orientation (e.g. radiological, neurological). Options: true, false.
+  "Orientation": "LAS",                         # str; Orientation to standardize to. Options: L/R (left/right), A/P (anterior/posterior), I/S (inferior/superior). Default is LAS.
+  "Registration": true,                         # bool; Whether to perform registration to a common template. Options: true, false.
   "RegistrationMethod": "FLIRT",                # str; Registration method. Options: FLIRT (default) or leave blank (no registration).
-  "BrainExtraction": true,                      # bool; Whether to perform brain extraction. Options: True, False.
+  "BrainExtraction": true,                      # bool; Whether to perform brain extraction. Options: true, false.
   "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction. Options: BET (default) or leave blank (no brain extraction).
-  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. Options: True, False. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure. 
-  "LesionCorrection": true,                     # bool; Whether to perform lesion correction. Options: True, False. If true, requires white matter segmentation file.
-  "LesionLoadCalculation": true,                # bool; Whether to compute lesion load. Options: True, False. If true, requires white matter segmentation file.
-  "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap. Options: True, False. If true, requires white matter segmentation file.
+  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. Options: true, false. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure. 
+  "LesionCorrection": true,                     # bool; Whether to perform lesion correction. Options: true, false. If true, requires white matter segmentation file.
+  "LesionLoadCalculation": true,                # bool; Whether to compute lesion load. Options: true, false. If true, requires white matter segmentation file.
+  "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap. Options: true, false. If true, requires white matter segmentation file.
  },
  "BrainExtraction": {                           # Settings to pass to brain extraction; structure depends on Analysis['BrainExtractionMethod']
   "frac": 0.5,
@@ -157,6 +157,7 @@ The precise output will depend on the analysis flags you set, but here is a list
   - The input data reoriented to LAS. "LAS" will change to match your requested orientation.
 - `sub-X_ses-Y_desc-LesionLoad.csv`
   - A .csv file containing the lesion load in each of the requested regions of interest. Units are in voxels.
+  - `UncorrectedVolume` column contains the total number voxels. `CorrectedVolume` subtracts the white matter voxels (if `WhiteMatterSegmentation` is set to `true` in the config file) from `UncorrectedVolume`.
 - `sub-X_ses-Y_space-SPACE_desc-CorrectedLesion_mask.nii.gz`  
   - The lesion mask after white matter correction; note that the quality of the mask depends on the quality of the white matter segmentation.
 - `sub-X_ses-Y_space-SPACE_desc-transform.mat`

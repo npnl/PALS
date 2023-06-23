@@ -1,0 +1,19 @@
+{
+	"Name": "stroke_preproc",
+	"BIDSVersion": "1.6.0",
+	"Authors": ["NPNL"],
+	"PipelineDescription": {
+		"Name": "stroke_preproc"
+	},
+	"GeneratedBy": [{
+		"Name": "stroke_preprocessing",
+		"Version": "1.0",
+		"Container": {
+			"Type": "singularity",
+			"Tag": "None"
+			}
+		}],
+	"SourceDatasets": [{
+		"URL": "c2023.c.ini.usc.edu:/ifs/loni/faculty/sliew/enigma/new/BIDS/"
+		}]
+}

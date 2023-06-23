@@ -71,7 +71,7 @@ Using the provided Singularity file `pals_singularity.def`, you can build the im
 Lastly, you will need to update the configuration settings (`config.json) to specify your settings. See [this section](#config) for how to do so.
 
 ## PALS Configuration File<a name=config></a> 
-PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory.
+PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. We have also provided quickstart configuration files for lesion load calculation and heatmap generation.
 
 Here are the relevant lines to update when running the LesionLoad quickstart file:
 

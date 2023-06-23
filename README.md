@@ -75,16 +75,16 @@ PALS can be configured to run similar pipelines that differ in their implementat
 ```json
 {
  "Analysis": {
-  "Reorient": true,                             # bool; Whether to standardize the orientation (e.g. radiological, neurological).
-  "Orientation": "LAS",                         # str; Orientation to standardize to.
-  "Registration": true,                         # bool; Whether to perform registration to a common template.
-  "RegistrationMethod": "FLIRT",                # str; Registration method. Currently only supports FSL's FMRIB's Linear Image Registration Tool (FLIRT).
-  "BrainExtraction": true,                      # bool; Whether to perform brain extraction.
-  "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction. Currently only supports FSL's Brain Extraction Tool (BET).
-  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure. 
-  "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
-  "LesionLoadCalculation": true,                # bool; Whether to compute lesion load.
-  "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap.
+  "Reorient": true,                             # bool; Whether to standardize the orientation (e.g. radiological, neurological). Options: True, False.
+  "Orientation": "LAS",                         # str; Orientation to standardize to. 
+  "Registration": true,                         # bool; Whether to perform registration to a common template. Options: True, False.
+  "RegistrationMethod": "FLIRT",                # str; Registration method. Options: FLIRT (default) or leave blank (no registration).
+  "BrainExtraction": true,                      # bool; Whether to perform brain extraction. Options: True, False.
+  "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction. Options: BET (default) or leave blank (no brain extraction).
+  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. Options: True, False. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure. 
+  "LesionCorrection": true,                     # bool; Whether to perform lesion correction. Options: True, False. If true, requires white matter segmentation file.
+  "LesionLoadCalculation": true,                # bool; Whether to compute lesion load. Options: True, False. If true, requires white matter segmentation file.
+  "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap. Options: True, False. If true, requires white matter segmentation file.
  },
  "BrainExtraction": {                           # Settings to pass to brain extraction; structure depends on Analysis['BrainExtractionMethod']
   "frac": 0.5,

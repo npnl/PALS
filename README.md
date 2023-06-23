@@ -27,12 +27,13 @@ The naming conventions of the input must be as follows:
 
 **Main Image**: 
   * Unregistered: `sub-{subject}_ses-{session}_T1.nii.gz`
-  * Registered: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc_T1.nii.gz`
+  * Registered: `sub-{subject}_ses-{session}_space-{space}_desc_T1.nii.gz`. 
   
-**Lesion Mask**: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_label-L_desc-T1lesion_mask.nii.gz`
+**Lesion Mask**: `sub-{subject}_ses-{session}_space-{space}_label-L_desc-T1lesion_mask.nii.gz`. 
   
-**White Matter Segmentation File**: `sub-{subject}_ses-{session}_space-MNI152NLin2009aSym_desc-WhiteMatter_mask.nii.gz`
+**White Matter Segmentation File**: `sub-{subject}_ses-{session}_space-{space}_desc-WhiteMatter_mask.nii.gz`. 
 
+Where 'space' should be the name of the reference image or 'orig' if unregistered. For example `sub-01_ses-R001_space-orig_desc_T1.nii.gz`
 
 ## Getting Started<a name=start></a>
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
@@ -52,7 +53,7 @@ A walkthrough of the PALS installation is [available on YouTube](https://youtu.b
     * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
       * For running FLIRT and FAST.
     * Python packages in [requirements.txt]()
-      * These can be installed in your virtual environment with bash command `python3.8 -m pip install -r requirements.txt` 
+      * These can be installed in your virtual environment with bash command `python3.8 -m pip install -r user_files/requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
   
 > Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 

@@ -2,7 +2,7 @@
 ## Contents
 1. [Introduction](#intro).
 2. [Expected Data Structure](#datastructure)  
-3. [Getting started](#start)  
+3. [Getting started: Installation Guide](#start)  
   3.1. [Direct use](#direct)  
   3.2. [Singularity](#singularity)
    
@@ -35,7 +35,7 @@ The naming conventions of the input must be as follows:
 
 Where 'space' should be the name of the reference image or 'orig' if unregistered. For example `sub-01_ses-R001_space-orig_desc_T1.nii.gz`
 
-## Getting Started<a name=start></a>
+## Getting Started: Installation Guide <a name=start></a>
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
 ### Preparation for Direct Use<a name=start></a>

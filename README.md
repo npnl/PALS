@@ -71,12 +71,26 @@ Using the provided Singularity file `pals_singularity.def`, you can build the im
 Lastly, you will need to update the configuration settings (`config.json) to specify your settings. See [this section](#config) for how to do so.
 
 ## PALS Configuration File<a name=config></a> 
-PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. We have also provided quickstart configuration files for lesion load calculation and heatmap generation.
+PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. We have also provided 4 quickstart configuration files for lesion load calculation and heatmap generation. The relevant lines to edit are hightlighted below:
 
-Here are the relevant lines to update when running the LesionLoad quickstart file:
+### 1) LesionLoad,Correction, Heatmap quickstart file: runs lesion load, lesion correction, and heatmap calculations
+
+![lesionloadcorheat quickstart](img/config_lesionloadcorrectionheatmap_ref.png)
+
+### 2) Lesion Correction quickstart file: runs lesion correction calculations
+
+![lesioncorrection quickstart](img/config_lesioncorrection_ref.png)
+
+### 3) Lesion Load quickstart file: runs lesion load calculations
 
 ![lesionload quickstart](img/config_lesionload_ref.png)
 
+### 4) Lesion Heatmap: created heatmap
+
+![lesionheatmap quickstart](img/config_lesionheatmap_ref.png)
+
+
+### Full Configuration File Breakdown
 
 Here is the default `config.json`, with explanations of each variable:  
 ```json

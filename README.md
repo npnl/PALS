@@ -53,7 +53,7 @@ A walkthrough of the PALS installation is [available on YouTube](https://youtu.b
     * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
       * For running FLIRT and FAST.
     * Python packages in [requirements.txt]()
-      * These can be installed in your virtual environment with bash command `python3.8 -m pip install -r user_files/requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
+      * These can be installed in your virtual environment with bash command `python3.8 -m pip install -r requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
   
 > Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 

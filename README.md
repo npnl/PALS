@@ -81,7 +81,7 @@ PALS can be configured to run similar pipelines that differ in their implementat
   "RegistrationMethod": "FLIRT",                # str; Registration method.
   "BrainExtraction": true,                      # bool; Whether to perform brain extraction.
   "BrainExtractionMethod": "BET",               # str; Method to use for brain extraction.
-  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, must place file in same location as the input files in the BIDS structure. 
+  "WhiteMatterSegmentation": true,              # bool; Whether to do white matter segmentation. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure. 
   "LesionCorrection": true,                     # bool; Whether to perform lesion correction.
   "LesionLoadCalculation": true,                # bool; Whether to compute lesion load.
   "LesionHeatMap": true                         # bool; Whether to combine the lesions into a heatmap.

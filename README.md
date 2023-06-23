@@ -157,7 +157,7 @@ The precise output will depend on the analysis flags you set, but here is a list
   - The input data reoriented to LAS. "LAS" will change to match your requested orientation.
 - `sub-X_ses-Y_desc-LesionLoad.csv`
   - A .csv file containing the lesion load in each of the requested regions of interest. Units are in voxels.
-  - `UncorrectedVolume` column contains the total number voxels. `CorrectedVolume` subtracts the white matter voxels (if `WhiteMatterSegmentation` is set to `true` in the config file) from `UncorrectedVolume`.
+  - `UncorrectedVolume` column contains the total number voxels. `CorrectedVolume` subtracts the white matter voxels (if `LesionCorrection` is set to `true` in the config file) from `UncorrectedVolume`.
 - `sub-X_ses-Y_space-SPACE_desc-CorrectedLesion_mask.nii.gz`  
   - The lesion mask after white matter correction; note that the quality of the mask depends on the quality of the white matter segmentation.
 - `sub-X_ses-Y_space-SPACE_desc-transform.mat`

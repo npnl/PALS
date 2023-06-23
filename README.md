@@ -38,7 +38,7 @@ Where 'space' should be the name of the reference image or 'orig' if unregistere
 ## Getting Started: Installation Guide <a name=start></a>
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
-### Preparation for Direct Use<a name=start></a>
+### Preparation for Direct Use (recommended)<a name=start></a>
 A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g). The command prompts for each step below are in gray.
 1. PALS is implemented in Python 3.8; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
 2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).

@@ -7,8 +7,8 @@
   "BrainExtraction": false,
   "BrainExtractionMethod": "BET",
   "WhiteMatterSegmentation": false,
-  "LesionCorrection": false,
-  "LesionLoadCalculation": true,
+  "LesionCorrection": true,
+  "LesionLoadCalculation": false,
   "LesionHeatMap": false
  },
  "BrainExtraction": {
@@ -28,7 +28,7 @@
  "Subject": "",
  "Session": "",
  "LesionRoot": "/data1/data",
- "WhiteMatterSegmentationRoot": "/data1/data",
+ "WhiteMatterSegmentationRoot": "",
  "ROIDir": "~/PALS/user_files/ROIs",
  "ROIList": [],
  "Multiprocessing": 1,
@@ -46,7 +46,7 @@
    "Transparency": 0.4
    },
  "Outputs": {
-  "Root": "/data1/output_lesionload",
+  "Root": "/data1/output_lesioncorrection",
   "StartRegistrationSpace": "",
   "OutputRegistrationSpace": "MNI152NLin2009aSym",
   "RegistrationTransform": "",

@@ -7,9 +7,9 @@
   "BrainExtraction": false,
   "BrainExtractionMethod": "BET",
   "WhiteMatterSegmentation": false,
-  "LesionCorrection": false,
+  "LesionCorrection": true,
   "LesionLoadCalculation": true,
-  "LesionHeatMap": false
+  "LesionHeatMap": true
  },
  "BrainExtraction": {
   "frac": 0.5,
@@ -17,7 +17,7 @@
  },
  "Registration": {
   "cost_func": "normmi",
-  "reference": "data1/data/reference.nii.gz"
+  "reference": "/data1/data/reference.nii.gz"
  },
  "LesionCorrection": {
   "ImageNormMin": 0,
@@ -42,11 +42,11 @@
   "label": "L"
  },
   "HeatMap": {
-   "Reference": "",
+   "Reference": "/data1/data/reference.nii.gz",
    "Transparency": 0.4
    },
  "Outputs": {
-  "Root": "/data1/output_lesionload",
+  "Root": "/data1/output_heatmap",
   "StartRegistrationSpace": "",
   "OutputRegistrationSpace": "MNI152NLin2009aSym",
   "RegistrationTransform": "",

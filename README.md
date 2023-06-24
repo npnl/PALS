@@ -7,7 +7,20 @@
   3.2. [Singularity](#singularity)
    
 4. [PALS Configuration File](#config)
-5. [Running PALS](#running)
+   
+   4.1 Quickstart files
+   
+   4.1.2 [Lesion Correction, Load, and Heatmap](#lesionloadcorheat)
+   
+   4.1.2 [Lesion Correction](#lesioncorrection)
+   
+   4.1.2 [Lesion Load](#lesionload)
+   
+   4.1.2 [Heatmap](#heatmap)
+   
+   4.1.2 [Full Configuration File Breakdown](#fullconfig)
+   
+6. [Running PALS](#running)
 
 ## What is PALS?<a name=intro></a>
 PALS is a pipeline for reliably preprocessing images of subjects with stroke lesions. The pipeline is implemented using [Nipype](https://nipype.readthedocs.io/en/latest/), with several modules:
@@ -38,7 +51,7 @@ Where 'space' should be the name of the reference image or 'orig' if unregistere
 ## Getting Started: Installation Guide <a name=start></a>
 There are two ways to use PALS: directly via the pals_workflow.py Python code, or by using the Singularity definition file provided. The first method will require you to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt). The second method only requires that you have [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) installed and will run the code as a container.
 
-### Preparation for Direct Use (recommended)<a name=start></a>
+### Preparation for Direct Use (recommended)<a name=direct></a>
 A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/8PN3tR34L6g). The command prompts for each step below are in gray.
 1. PALS is implemented in Python 3.8.16; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
 2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
@@ -71,26 +84,26 @@ Using the provided Singularity file `pals_singularity.def`, you can build the im
 Lastly, you will need to update the configuration settings (`config.json) to specify your settings. See [this section](#config) for how to do so.
 
 ## PALS Configuration File<a name=config></a> 
-PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. We have also provided 4 quickstart configuration files for lesion load calculation and heatmap generation. The relevant lines to edit are hightlighted below:
+PALS can be configured to run similar pipelines that differ in their implementations. The configuration file is located in the PALS main directory. We have also provided [4 quickstart configuration files](https://github.com/npnl/PALS/tree/main/user_files/quickstart) for lesion load calculation and heatmap generation. The relevant lines to edit are hightlighted below:
 
-### 1) LesionLoad,Correction, Heatmap quickstart file: runs lesion load, lesion correction, and heatmap calculations
+### 1) LesionLoad,Correction, Heatmap quickstart file: runs lesion load, lesion correction, and heatmap calculations <a name=lesionloadcorheat></a>
 
 ![lesionloadcorheat quickstart](img/config_lesionloadcorrectionheatmap_ref.png)
 
-### 2) Lesion Correction quickstart file: runs lesion correction calculations
+### 2) Lesion Correction quickstart file: runs lesion correction calculations <a name=lesioncorrection></a>
 
 ![lesioncorrection quickstart](img/config_lesioncorrection_ref.png)
 
-### 3) Lesion Load quickstart file: runs lesion load calculations
+### 3) Lesion Load quickstart file: runs lesion load calculations <a name=lesionload></a>
 
 ![lesionload quickstart](img/config_lesionload_ref.png)
 
-### 4) Lesion Heatmap: created heatmap
+### 4) Lesion Heatmap: created heatmap <a name=heatmap></a>
 
 ![lesionheatmap quickstart](img/config_lesionheatmap_ref.png)
 
 
-### Full Configuration File Breakdown
+### Full Configuration File Breakdown <a name=fullconfig></a>
 
 Here is the default `config.json`, with explanations of each variable:  
 ```json

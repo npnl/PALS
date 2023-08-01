@@ -1,0 +1,11 @@
+.git
+.cache
+GUI/
+ROIs/
+data/
+images/
+utils/
+logs/
+pages/
+mappings/
+*.pyc

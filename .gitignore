@@ -19,3 +19,10 @@ graph.json
 graph1.json
 index.html
 .eggs/
+user_files/output_test
+*.pyc 
+.ipynb_checkpoints/
+*.ipynb
+song.wav
+logs/*
+

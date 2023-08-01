@@ -1,4 +1,5 @@
 import argparse
+from multiprocessing.managers import ValueProxy
 import bids
 import os
 import multiprocessing
@@ -23,63 +24,64 @@ import scipy.ndimage as ndi
 bids.config.set_option('extension_initial_dot', True)
 
 
-def pals(config: dict):
+def pals(pals_config: dict, progress_string: ValueProxy):
     # Get config file defining workflow
     # configs = json.load(open(config_file, 'r'))
     print('Starting: initializing workflow.')
+    progress_string.value = str(progress_string.value) + 'Starting: pals workflow for subject: {0}, session: {1}\n'.format(pals_config['Subject'], pals_config['Session'])
     # Build pipeline
     wf = Workflow(name='PALS')
 
     # bidsLayout = bids.BIDSLayout(config['BIDSRoot'])
     # Get data
     loader = BIDSDataGrabber(index_derivatives=False)
-    loader.inputs.base_dir = config['BIDSRoot']
-    loader.inputs.subject = config['Subject']
-    if config['Session'] is not None:
-        loader.inputs.session = config['Session']
-    loader.inputs.output_query = {'t1w': dict(**config['T1Entities'], invalid_filters='allow')}
-    loader.inputs.extra_derivatives = [config['BIDSRoot']]
+    loader.inputs.base_dir = pals_config['BIDSRoot']
+    loader.inputs.subject = pals_config['Subject']
+    if pals_config['Session'] is not None:
+        loader.inputs.session = pals_config['Session']
+    loader.inputs.output_query = {'t1w': dict(**pals_config['T1Entities'], invalid_filters='allow')}
+    loader.inputs.extra_derivatives = [pals_config['BIDSRoot']]
     loader = Node(loader, name='BIDSgrabber')
 
-    entities = {'subject': config['Subject'], 'session': config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
+    entities = {'subject': pals_config['Subject'], 'session': pals_config['Session'], 'suffix': 'T1w', 'extension': '.nii.gz'}
 
     # Reorient to radiological
-    if config['Analysis']['Reorient']:
-        radio = MapNode(Reorient(orientation=config['Analysis']['Orientation']), name="reorientation",
+    if pals_config['Analysis']['Reorient']:
+        radio = MapNode(Reorient(orientation=pals_config['Analysis']['Orientation']), name="reorientation",
                         iterfield='in_file')
-        if 'Reorient' in config['Outputs'].keys():
+        if 'Reorient' in pals_config['Outputs'].keys():
             reorient_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                     name='reorient_copy', iterfield='src')
-            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-' + config['Analysis'][
+            path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-' + pals_config['Analysis'][
                 'Orientation'] + '_{suffix}{extension}'
-            reorient_filename = join(config['Outputs']['Reorient'], path_pattern.format(**entities))
+            reorient_filename = join(pals_config['Outputs']['Reorient'], path_pattern.format(**entities))
             pathlib.Path(os.path.dirname(reorient_filename)).mkdir(parents=True, exist_ok=True)
             reorient_sink.inputs.dst = reorient_filename
             wf.connect([(radio, reorient_sink, [('out_file', 'src')])])
-
+            
     else:
         radio = MapNode(Function(function=infile_to_outfile, input_names='in_file', output_names='out_file'),
                         name='identity', iterfield='in_file')
 
     # Brain extraction
-    bet = node_fetch.extraction_node(config, **config['BrainExtraction'])
-    if 'BrainExtraction' in config['Outputs'].keys():
+    bet = node_fetch.extraction_node(pals_config, **pals_config['BrainExtraction'])
+    if 'BrainExtraction' in pals_config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       config['Outputs']['StartRegistrationSpace'] + '_desc-brain_mask{extension}'
+                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-brain_mask{extension}'
         brain_mask_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                   name='brain_mask_sink', iterfield='src')
-        brain_mask_out = join(config['Outputs']['BrainExtraction'], path_pattern.format(**entities))
+        brain_mask_out = join(pals_config['Outputs']['BrainExtraction'], path_pattern.format(**entities))
         pathlib.Path(os.path.dirname(brain_mask_out)).mkdir(parents=True, exist_ok=True)
         brain_mask_sink.inputs.dst = brain_mask_out
 
     ## Lesion load calculation
     # Registration
-    reg = node_fetch.registration_node(config, **config['Registration'])
-    if 'RegistrationTransform' in config['Outputs'].keys():
+    reg = node_fetch.registration_node(pals_config, **pals_config['Registration'])
+    if 'RegistrationTransform' in pals_config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
+                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
 
-        registration_transform_filename = join(config['Outputs']['RegistrationTransform'],
+        registration_transform_filename = join(pals_config['Outputs']['RegistrationTransform'],
                                                path_pattern.format(**entities))
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                               name='registration_transf_sink', iterfield='src')
@@ -88,30 +90,30 @@ def pals(config: dict):
         wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
 
     # Get mask
-    mask_path_fetcher = Node(BIDSDataGrabber(base_dir=config['LesionRoot'],
-                                             subject=config['Subject'],
+    mask_path_fetcher = Node(BIDSDataGrabber(base_dir=pals_config['LesionRoot'],
+                                             subject=pals_config['Subject'],
                                              index_derivatives=False,
-                                             output_query={'mask': dict(**config['LesionEntities'],
+                                             output_query={'mask': dict(**pals_config['LesionEntities'],
                                                                         invalid_filters='allow')},
-                                             extra_derivatives=[config['LesionRoot']]
+                                             extra_derivatives=[pals_config['LesionRoot']]
                                              ), name='mask_grabber')
-    if config['Session'] is not None:
-        mask_path_fetcher.inputs.session = config['Session']
+    if pals_config['Session'] is not None:
+        mask_path_fetcher.inputs.session = pals_config['Session']
 
     # Apply reg file to lesion mask
-    apply_xfm = node_fetch.apply_xfm_node(config)
+    apply_xfm = node_fetch.apply_xfm_node(pals_config)
 
     # Lesion load calculation
-    if config['Analysis']['LesionLoadCalculation']:
+    if pals_config['Analysis']['LesionLoadCalculation']:
         lesion_load = MapNode(Function(function=overlap, input_names=['ref_mask', 'roi_list'], output_names='out_list'),
                               name='overlap_calc', iterfield=['ref_mask'])
         roi_list = []
-        if os.path.exists(config['ROIDir']):
-            buf = os.listdir(config['ROIDir'])
-            roi_list = [os.path.abspath(os.path.join(config['ROIDir'], b)) for b in buf]
+        if os.path.exists(pals_config['ROIDir']):
+            buf = os.listdir(pals_config['ROIDir'])
+            roi_list = [os.path.abspath(os.path.join(pals_config['ROIDir'], b)) for b in buf]
         else:
-            warnings.warn(f"ROIDir ({config['ROIDir']}) doesn't exist.")
-        buf = config['ROIList']
+            warnings.warn(f"ROIDir ({pals_config['ROIDir']}) doesn't exist.")
+        buf = pals_config['ROIList']
         roi_list += [os.path.abspath(b) for b in buf]
         roi_list.sort(reverse=True)
         lesion_load.inputs.roi_list = roi_list
@@ -119,23 +121,23 @@ def pals(config: dict):
         # CSV output
         csv_output = MapNode(Function(function=csv_writer, input_names=['filename', 'data_dict', 'subject', 'session']),
                              name='csv_output', iterfield=['data_dict'])
-        csv_output.inputs.subject = config['Subject']
-        csv_output.inputs.session = config['Session']
+        csv_output.inputs.subject = pals_config['Subject']
+        csv_output.inputs.session = pals_config['Session']
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
-        csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+        csv_out_filename = join(pals_config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
         csv_output.inputs.filename = csv_out_filename
 
         wf.connect([(apply_xfm, lesion_load, [('out_file', 'ref_mask')]),
                     (lesion_load, csv_output, [('out_list', 'data_dict')])])
 
     # #Lesion correction
-    if config['Analysis']['LesionCorrection']:
+    if pals_config['Analysis']['LesionCorrection']:
         # White matter removal node. Does the white matter correction; has multiple inputs that need to be supplied.
         wm_removal = MapNode(Function(function=white_matter_correction, input_names=['image', 'wm_mask', 'lesion_mask',
                                                                                      'max_difference_fraction'],
                                       output_names=['out_data', 'corrected_volume']),
                              name='wm_removal', iterfield=['image', 'wm_mask', 'lesion_mask'])
-        wm_removal.inputs.max_difference_fraction = config['LesionCorrection']['WhiteMatterSpread']
+        wm_removal.inputs.max_difference_fraction = pals_config['LesionCorrection']['WhiteMatterSpread']
 
         # #File loaders
         # Loads the subject image, passes it to wm_removal node
@@ -156,8 +158,8 @@ def pals(config: dict):
         output_image = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                                name='image_writer0', iterfield=['image', 'reference'])
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       config['Outputs']['StartRegistrationSpace'] + '_desc-CorrectedLesion_mask{extension}'
-        lesion_corrected_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-CorrectedLesion_mask{extension}'
+        lesion_corrected_filename = join(pals_config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
         output_image.inputs.file_name = lesion_corrected_filename
         wf.connect([(wm_removal, output_image, [('out_data', 'image')]),
                     (mask_path_fetcher, output_image, [('mask', 'reference')])])
@@ -166,25 +168,25 @@ def pals(config: dict):
         csv_output_corr = MapNode(
             Function(function=csv_writer, input_names=['filename', 'subject', 'session', 'data', 'data_name']),
             name='csv_output_corr', iterfield=['data'])
-        csv_output_corr.inputs.subject = config['Subject']
-        csv_output_corr.inputs.session = config['Session']
+        csv_output_corr.inputs.subject = pals_config['Subject']
+        csv_output_corr.inputs.session = pals_config['Session']
         csv_output_corr.inputs.data_name = 'CorrectedVolume'
 
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_desc-LesionLoad.csv'
-        csv_out_filename = join(config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
+        csv_out_filename = join(pals_config['Outputs']['RegistrationTransform'], path_pattern.format(**entities))
         csv_output_corr.inputs.filename = csv_out_filename
 
         wf.connect([(wm_removal, csv_output_corr, [('corrected_volume', 'data')])])
 
         # White matter segmentation; either do segmentation or load the file
-        if config['Analysis']['WhiteMatterSegmentation']:
+        if pals_config['Analysis']['WhiteMatterSegmentation']:
             # Config is set to do white matter segmentation
             # T1 intensity normalization
             t1_norm = MapNode(
                 Function(function=rescale_image, input_names=['image', 'range_min', 'range_max', 'save_image'],
                          output_names='out_file'), name='normalization', iterfield=['image'])
-            t1_norm.inputs.range_min = config['LesionCorrection']['ImageNormMin']
-            t1_norm.inputs.range_max = config['LesionCorrection']['ImageNormMax']
+            t1_norm.inputs.range_min = pals_config['LesionCorrection']['ImageNormMin']
+            t1_norm.inputs.range_max = pals_config['LesionCorrection']['ImageNormMax']
             t1_norm.inputs.save_image = True
             wf.connect([(bet, t1_norm, [('out_file', 'image')])])
 
@@ -207,8 +209,8 @@ def pals(config: dict):
             wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                              name='image_writer1', iterfield=['image', 'reference'])
             path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                           config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
-            wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+                           pals_config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+            wm_map_filename = join(pals_config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
             wm_map.inputs.file_name = wm_map_filename
             wf.connect([(file_load1, wm_map, [('out_image', 'image')]),
                         (mask_path_fetcher, wm_map, [('mask', 'reference')])])
@@ -219,16 +221,16 @@ def pals(config: dict):
                         (ex_last, file_load1, [('out_entry', 'in_filename')]),
                         (file_load1, wm_removal, [('out_image', 'wm_mask')])])
 
-        elif config['Analysis']['LesionCorrection']:
+        elif pals_config['Analysis']['LesionCorrection']:
             # No white matter segmentation should be done, but lesion correction is expected.
             # White matter segmentation must be supplied
-            wm_seg_path = config['WhiteMatterSegmentationRoot']
+            wm_seg_path = pals_config['WhiteMatterSegmentationRoot']
 
             # White matter input; files should be in derivative folders
             wm_map = MapNode(Function(function=image_write, input_names=['image', 'reference', 'file_name']),
                              name='image_writer1', iterfield=['image', 'reference'])
             path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                           config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+                           pals_config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
             wm_seg_path = join(wm_seg_path, path_pattern.format(**entities))
 
             if os.path.exists(wm_seg_path):
@@ -237,9 +239,9 @@ def pals(config: dict):
             elif len(wm_seg_path) == 0 or not os.path.exists(wm_seg_path):
                 # Check if file exists at output
                 path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                               config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
+                               pals_config['Outputs']['StartRegistrationSpace'] + '_desc-WhiteMatter_mask{extension}'
 
-                wm_map_filename = join(config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
+                wm_map_filename = join(pals_config['Outputs']['LesionCorrected'], path_pattern.format(**entities))
                 if os.path.exists(wm_map_filename):
                     wm_seg_path = wm_map_filename
 
@@ -264,7 +266,7 @@ def pals(config: dict):
     ])
 
     try:
-        graph_out = config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
+        graph_out = pals_config['Outputs']['LesionCorrected'] + '/sub-{subject}/ses-{session}/anat/'.format(**entities)
         wf.write_graph(graph2use='orig', dotfilename=join(graph_out, 'graph.dot'), format='png')
         os.remove(graph_out + 'graph.dot')
         os.remove(graph_out + 'graph_detailed.dot')
@@ -272,6 +274,7 @@ def pals(config: dict):
         warnings.warn("graphviz not installed; can't produce graph. See http://www.graphviz.org/download/ for "
                       "installation instructions.")
     wf.run()
+    progress_string.value = str(progress_string.value) + 'Completed: pals workflow for subject: {0}, session: {1}\n'.format(pals_config['Subject'], pals_config['Session'])
     return wf
 
 
@@ -770,12 +773,14 @@ def main():
 
     if no_subject:
         subject_list = dataset.entities['subject'].unique()
+        print(subject_list)
     elif pargs.subject is not None:
         subject_list = [pargs.subject]
     else:
         subject_list = [pals_config['Subject']]
     if no_session:
         session_list = dataset.entities['session'].unique()
+        print(session_list)
     elif pargs.session is not None:
         session_list = [pargs.session]
     else:

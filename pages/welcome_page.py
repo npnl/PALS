@@ -23,13 +23,13 @@ class WelcomePage(BaseInputPage, object):
 		lf_main = LabelFrame(self, text='Main Modules', padx=15, font='Helvetica 14 bold')
 		lf_main.grid(row=self.starting_row+2, column=0, columnspan=3, sticky='WE', padx=5, pady=(15, 0), ipadx=5, ipady=5)
 
-		lb_radiological_convention = LabelToolTip(lf_main, text="1. Reorient to radiological convention", tool_tip_text=self.controller.desc.rad_reorient)
+		lb_radiological_convention = LabelToolTip(lf_main, text="1. Reorient to radiological convention", tool_tip_text=self.controller.desc.reorient)
 		lb_radiological_convention.grid(row=0, column=1, sticky="W", pady=3)
 
 		chk_radiological_convention = Checkbutton(lf_main, variable=controller.b_radiological_convention, command=lambda : self.setEntryState(en_orientation_method, self.controller.b_radiological_convention))
 		chk_radiological_convention.grid(row=0, column=0, sticky='W', pady=3)
 
-		lb_orientation_method = LabelToolTip(lf_main, text="Orientation", tool_tip_text=self.controller.desc.rad_reorient)
+		lb_orientation_method = LabelToolTip(lf_main, text="Orientation", tool_tip_text=self.controller.desc.orientation)
 		lb_orientation_method.grid(row=1, column=1, sticky="W", padx=(20,0),pady=(3,10))
 
 		en_orientation_method = Entry(lf_main, textvariable=controller.sv_orientation_method, width = 46)
@@ -48,7 +48,7 @@ class WelcomePage(BaseInputPage, object):
 		chk_registration = Checkbutton(lf_main, variable=controller.b_registration, command=lambda : self.setEntryState(en_registration_method, self.controller.b_registration))
 		chk_registration.grid(row=2, column=0, sticky='W', pady=3)
 
-		lb_registration_method = LabelToolTip(lf_main, text="Registration method", tool_tip_text=self.controller.desc.registration)
+		lb_registration_method = LabelToolTip(lf_main, text="Registration method", tool_tip_text=self.controller.desc.registration_method)
 		lb_registration_method.grid(row=3, column=1, sticky="W", padx=(20,0),pady=(3,10))
 
 		en_registration_method = Entry(lf_main, textvariable=controller.sv_registration_method, width = 46)
@@ -68,26 +68,26 @@ class WelcomePage(BaseInputPage, object):
 		chk_brain_extraction = Checkbutton(lf_main, variable=controller.b_brain_extraction, command=lambda : self.setEntryState(en_brain_extraction_method, self.controller.b_brain_extraction))
 		chk_brain_extraction.grid(row=4, column=0, sticky='W', pady=3)
 
-		lb_brain_extraction_method = LabelToolTip(lf_main, text="Brain extraction method", tool_tip_text=self.controller.desc.registration)
+		lb_brain_extraction_method = LabelToolTip(lf_main, text="Brain extraction method", tool_tip_text=self.controller.desc.brain_extraction_method)
 		lb_brain_extraction_method.grid(row=5, column=1, sticky="W", padx=(20,0), pady=(3,10))
 
 		en_brain_extraction_method = Entry(lf_main, textvariable=controller.sv_brain_extraction_method, width = 46)
 		en_brain_extraction_method.config(state='disabled')
 		en_brain_extraction_method.grid(row=5, column=2, sticky="W", pady=(3,10))
 
-		lb_wm_segmentation = LabelToolTip(lf_main, text="4. White Matter Segmentation", tool_tip_text=self.controller.desc.wm_segmentation)
+		lb_wm_segmentation = LabelToolTip(lf_main, text="4. White Matter Segmentation", tool_tip_text=self.controller.desc.white_matter_segmentation)
 		lb_wm_segmentation.grid(row=6, column=1, sticky="W", pady=3)
 
 		chk_wm_segmentation = Checkbutton(lf_main, variable=controller.b_wm_segmentation, command=lambda : controller.b_wm_segmentation_lc.set(not controller.b_wm_segmentation))
 		chk_wm_segmentation.grid(row=6, column=0, sticky='W', pady=3)
 
-		lb_wm_correction = LabelToolTip(lf_main, text="5. Lesion correction for white matter voxels", tool_tip_text=self.controller.desc.wm_correction)
+		lb_wm_correction = LabelToolTip(lf_main, text="5. Lesion correction for white matter voxels", tool_tip_text=self.controller.desc.lesion_correction)
 		lb_wm_correction.grid(row=7, column=1, sticky="W", pady=3)
 
 		chk_wm_correction = Checkbutton(lf_main, variable=controller.b_wm_correction, command=self.setOne)
 		chk_wm_correction.grid(row=7, column=0, sticky='W', pady=3)
 
-		lb_lesion_load = LabelToolTip(lf_main, text="6. Lesion load calculation", tool_tip_text=self.controller.desc.lesion_load)
+		lb_lesion_load = LabelToolTip(lf_main, text="6. Lesion load calculation", tool_tip_text=self.controller.desc.lesion_load_calculation)
 		lb_lesion_load.grid(row=8, column=1,  sticky="W", pady=3)
 
 		chk_ll_calculation = Checkbutton(lf_main, variable=controller.b_ll_calculation, command=self.setOne)
@@ -99,25 +99,9 @@ class WelcomePage(BaseInputPage, object):
 		chk_lesion_heatmap = Checkbutton(lf_main, variable=controller.b_lesion_heatmap, command=self.setOne)
 		chk_lesion_heatmap.grid(row=9, column=0, sticky='W', pady=3)
 
-		# lf_visual_qc = LabelFrame(self, text='Stand Alone Module', padx=15, font='Helvetica 14 bold')
-		# lf_visual_qc.grid(row=self.starting_row+3, column=0, columnspan=3, sticky='WE', padx=5, pady=(15, 0), ipadx=5, ipady=5)
-		# lf_visual_qc.grid_rowconfigure(0, weight=1)
-
-		# lb_visual_qc = LabelToolTip(lf_visual_qc, text="4. Perform visual quality control only", tool_tip_text=self.controller.desc.visual_qc)
-		# lb_visual_qc.grid(row=0, column=1, sticky="W", pady=3)
-
-		# chk_visual_qc = Checkbutton(lf_visual_qc, variable=controller.b_visual_qc, command=self.setTwo)
-		# chk_visual_qc.grid(row=0, column=0, sticky='W', pady=3)
-
 
 		wrapper = Frame(self)
 		wrapper.grid(row=self.starting_row+4, column=0, columnspan=3, sticky='w', padx=20, pady=(20, 10))
-
-		# lb_opt_out = Label(wrapper, text="By default, PALS will pause to allow for visual QC to ensure quality assurance after each processing step.\nUncheck to opt out of pausing.", justify="left")
-		# lb_opt_out.grid(row=0, column=1, sticky="W")
-
-		# self.chk_out_out = Checkbutton(wrapper, variable=controller.b_pause_for_qc, command=lambda: self.pauseQCPopup())
-		# self.chk_out_out.grid(row=0, column=0, sticky='W')
 
 		# self.silentMode()
 

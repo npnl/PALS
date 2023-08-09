@@ -17,13 +17,13 @@ class RegistrationInputPage(BaseInputPage, object):
 		lf_reg.grid_rowconfigure(0, weight=1)
 		lf_reg.grid_columnconfigure(3, weight=1)
 
-		lb_cost_func = LabelToolTip(lf_reg, text="1. Cost Function", tool_tip_text=self.controller.desc.output_dir)
+		lb_cost_func = LabelToolTip(lf_reg, text="1. Cost Function", tool_tip_text=self.controller.desc.reg_ext_cost_func)
 		lb_cost_func.grid(row=0, column=0, sticky="W", pady=3)
 
 		en_cost_func = Entry(lf_reg, textvariable=controller.sv_reg_cost_func, width = 46)
 		en_cost_func.grid(row=0, column=1, sticky="W", pady=3)
 
-		lb_reg_ref = LabelToolTip(lf_reg, text="2. Reference", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_reg_ref = LabelToolTip(lf_reg, text="2. Reference", tool_tip_text=self.controller.desc.reg_ext_reference)
 		lb_reg_ref.grid(row=1, column=0, sticky="W", pady=3)
 
 		en_reg_ref = Entry(lf_reg, textvariable=controller.sv_reg_reference, width = 46)

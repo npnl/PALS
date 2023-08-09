@@ -86,6 +86,7 @@ class MainWindow(tk.Tk):
 		self.sv_session = StringVar(self)
 		self.sv_wm_seg_root = StringVar(self)
 		self.sv_lesion_root = StringVar(self)
+		self.sv_multiprocessing = StringVar(self)
 		self.b_same_anatomical_space = BooleanVar(self)
 
 		self.sv_t1_desc.set('')
@@ -97,6 +98,7 @@ class MainWindow(tk.Tk):
 		self.sv_session.set('')
 		self.sv_wm_seg_root.set('')
 		self.sv_lesion_root.set('')
+		self.sv_multiprocessing.set('1')
 		self.b_same_anatomical_space.set(False)
 
 		#Directory Output Page
@@ -119,13 +121,13 @@ class MainWindow(tk.Tk):
 		self.b_brain_ext_mask = BooleanVar(self)
 
 		self.sv_brain_ext_frac.set('0.5')
-		self.b_brain_ext_mask.set(False)
+		self.b_brain_ext_mask.set(True)
 
 		#Registration Page
 		self.sv_reg_cost_func = StringVar(self)
 		self.sv_reg_reference = StringVar(self)
 
-		self.sv_reg_cost_func.set('')
+		self.sv_reg_cost_func.set('normmi')
 		self.sv_reg_reference.set('')
 
 		#White Matter Correction Page
@@ -161,19 +163,8 @@ class MainWindow(tk.Tk):
 		self.sv_heatmap_reference = StringVar(self)
 
 		self.sv_heatmap_transparency.set('0.4')
-
-		#Default ROI Popup
-		# all_rois = rois.getROIs(self)
-		# self.default_corticospinal_tract_roi = all_rois[0]
-		# self.default_freesurfer_cortical_roi = all_rois[1]
-		# self.default_freesurfer_subcortical_roi =  all_rois[2]
-		# self.default_custom_rois = []
 		self.default_roi_paths = None
 
-		# #FreeSurfer Rois
-		# all_rois = rois.getROIs(self)
-		# self.freesurfer_cortical_roi = all_rois[1]
-		# self.freesurfer_subcortical_roi =  all_rois[2]
 		self.fs_roi_paths = None
 		self.fs_roi_codes = None
 

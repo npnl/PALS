@@ -76,7 +76,7 @@ class operations():
         pals_config['WhiteMatterSegmentationRoot'] = self.controller.sv_wm_seg_root.get().strip()
         pals_config['ROIDir'] = self.controller.sv_roi_dir.get().strip()
         pals_config['ROIList'] = []
-        pals_config['Multiprocessing'] = 4
+        pals_config['Multiprocessing'] = int(self.controller.sv_multiprocessing.get().strip())
 
         pals_config['Outputs'] = {
             'Root': self.controller.sv_output_dir.get().strip(),

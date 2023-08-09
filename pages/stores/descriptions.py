@@ -60,3 +60,49 @@ class Descriptions(object):
 		# for subject-specific FS popup page
 		self.verify_FS = "FreeSurfer must have been already completed on all subjects prior to selecting this option. Each subject directory MUST contain an aparc+aseg.mgz and T1.mgz file for this module to run properly."
 
+
+		self.reorient = "This module will check that all subject inputs are in the same orientation, flag subjects that have mismatched input orientations, and convert all remaining inputs to radiological convention. This is recommended for all datasets, and especially for multi-site data."
+		self.orientation = "Orientation to standardize to. Options: L/R (left/right), A/P (anterior/posterior), I/S (inferior/superior). Default is LAS."
+		self.registration = "This module will perform registration to a common template."
+		self.registration_method = "Registration method. Example: FLIRT (default) or leave blank (no registration)."
+		self.brain_extraction = "This module will perform brain extraction."
+		self.brain_extraction_method = "Method to use for brain extraction. Options: BET (default) or leave blank (no brain extraction)."
+		self.white_matter_segmentation = "This module will perform white matter segmentation. If false, and you want to perform LesionCorrection, you must place file in same location as the input files in the BIDS structure."
+		self.lesion_correction = "This module will perform lesion correction. If true, requires white matter segmentation file."
+		self.lesion_load_calculation = "This module will compute lesion load."
+		self.lesion_heatmap = "This module will combine the lesions into a heatmap."
+
+		self.lc_image_norm_min = "Minimum value for image."
+		self.lc_image_norm_max = "Maximum value for image."
+		self.lc_wm_spread = "The deviation of the white matter intensity as a fraction of the mean white matter intensity."
+		
+		self.bids_root_dir = "Directory path to the BIDS root directory for the raw data."
+		self.input_subject = "ID of the subject to run. Runs all subjects if left blank. Ex: r001s001"
+		self.input_session = "ID of the session to run. Runs all sessions if left blank. Ex: 1"
+		self.input_lesion_root = "Path to the BIDS root directory for the lesion masks."
+		self.white_matter_segmentation_root = "Path to the BIDS root directory for the white matter segmentation files."
+		self.input_ROIDir = "Path to the directory containing ROI image files."
+		self.input_multiprocessing = "Number of threads to use for multiprocessing. Has no effect unless more than one subject is being processed."
+
+		self.lesion_identifier_space = "Provide the space for your lesion file. For example, put 'MNIEx2009aEx' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii"
+		self.lesion_identifier_label = "Provide the label for your lesion file. For example, put 'L' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii"
+		self.lesion_identifier_suffix = "Provide the suffix for your lesion file. For example, put 'mask' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii"
+		
+		self.reg_ext_reference = "Path to reference file"
+		self.reg_ext_cost_func = "Cost function for registration"
+
+		self.T1_identifier_space = "Provide the space for your T1 file. For example, put 'MNIEx2009aEx' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_desc-T1FinalResampledNorm.nii"
+		self.T1_identifier_desc = "Provide the desc for your T1 file. For example, put 'T1FinalResampledNorm' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_desc-T1FinalResampledNorm.nii"
+
+		self.heatmap_reference = "Overlays the heatmap on this image and creates NIFTI file with overlay and NITFI file with the mask only. Also produces 4 PNGS: 9 slices of the lesions from sagittal, axial, and coronal orientations (3 images) and an image with a cross-section of each orientation. If your images are pre-registered, you MUST use your own reference image used for their registration."
+		self.heatmap_transparency = "Transparency to use when mixing the reference image and the heatmap. Smaller values darker reference and lighter heatmap."
+
+		self.output_root = "Path to directory where to place the output."
+		self.start_reg_space = "Value to use for \"space\" entity in BIDS output filename."
+		self.output_reg_space = "Reserved for future use." 
+		self.output_reg_transform = "Path for saving registration transform."
+		self.output_reorient = "Path for saving reoriented volume."
+		self.output_brain_extraction = "Path for saving the brain extracted volume."
+		self.output_lesion_correction = "Path for saving the white matter-corrected lesions."
+
+

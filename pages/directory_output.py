@@ -17,7 +17,7 @@ class DirectoryOutputPage(BaseInputPage, object):
 		lf_output_inputs.grid_rowconfigure(0, weight=1)
 		lf_output_inputs.grid_columnconfigure(3, weight=1)
 
-		lb_output = LabelToolTip(lf_output_inputs, text="1. Root Directory", tool_tip_text=self.controller.desc.output_dir)
+		lb_output = LabelToolTip(lf_output_inputs, text="1. Root Directory", tool_tip_text=self.controller.desc.output_root)
 		lb_output.grid(row=0, column=0, sticky="W", pady=3)
 
 		button_out = tk.Button(lf_output_inputs, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_output_dir, 'Output Directory'))
@@ -26,37 +26,37 @@ class DirectoryOutputPage(BaseInputPage, object):
 		en_output_dir = Entry(lf_output_inputs, textvariable=controller.sv_output_dir, width = 46)
 		en_output_dir.grid(row=0, column=1, sticky="W", pady=3)
 
-		lb_start_reg_space = LabelToolTip(lf_output_inputs, text="2. Start Registration Space", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_start_reg_space = LabelToolTip(lf_output_inputs, text="2. Start Registration Space", tool_tip_text=self.controller.desc.start_reg_space)
 		lb_start_reg_space.grid(row=1, column=0, sticky="W", pady=3)
 
 		en_start_reg_space = Entry(lf_output_inputs, textvariable=controller.sv_out_start_reg_space, width = 46)
 		en_start_reg_space.grid(row=1, column=1, sticky="W", pady=3)
 
-		lb_output_reg_space = LabelToolTip(lf_output_inputs, text="3. Output Registration Space", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_output_reg_space = LabelToolTip(lf_output_inputs, text="3. Output Registration Space", tool_tip_text=self.controller.desc.output_reg_space)
 		lb_output_reg_space.grid(row=2, column=0, sticky="W", pady=3)
 
 		en_output_reg_space = Entry(lf_output_inputs, textvariable=controller.sv_output_reg_space, width = 46)
 		en_output_reg_space.grid(row=2, column=1, sticky="W", pady=3)
 
-		lb_reg_transform = LabelToolTip(lf_output_inputs, text="4. Registration Transform", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_reg_transform = LabelToolTip(lf_output_inputs, text="4. Registration Transform", tool_tip_text=self.controller.desc.output_reg_transform)
 		lb_reg_transform.grid(row=3, column=0, sticky="W", pady=3)
 
 		en_reg_transform = Entry(lf_output_inputs, textvariable=controller.sv_out_reg_transform, width = 46)
 		en_reg_transform.grid(row=3, column=1, sticky="W", pady=3)
 
-		lb_reorient = LabelToolTip(lf_output_inputs, text="5. Reorient", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_reorient = LabelToolTip(lf_output_inputs, text="5. Reorient", tool_tip_text=self.controller.desc.output_reorient)
 		lb_reorient.grid(row=4, column=0, sticky="W", pady=3)
 
 		en_reorient = Entry(lf_output_inputs, textvariable=controller.sv_out_reorient, width = 46)
 		en_reorient.grid(row=4, column=1, sticky="W", pady=3)
 
-		lb_brain_extraction = LabelToolTip(lf_output_inputs, text="6. Brain Registration", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_brain_extraction = LabelToolTip(lf_output_inputs, text="6. Brain Registration", tool_tip_text=self.controller.desc.output_brain_extraction)
 		lb_brain_extraction.grid(row=5, column=0, sticky="W", pady=3)
 
 		en_brain_extraction = Entry(lf_output_inputs, textvariable=controller.sv_out_brain_registration, width = 46)
 		en_brain_extraction.grid(row=5, column=1, sticky="W", pady=3)
 
-		lb_lesion_corr = LabelToolTip(lf_output_inputs, text="7. Lesion Corrected", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_lesion_corr = LabelToolTip(lf_output_inputs, text="7. Lesion Corrected", tool_tip_text=self.controller.desc.output_lesion_correction)
 		lb_lesion_corr.grid(row=6, column=0, sticky="W", pady=3)
 
 		en_lesion_corr = Entry(lf_output_inputs, textvariable=controller.sv_out_lesion_corr, width = 46)

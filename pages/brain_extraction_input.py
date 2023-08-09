@@ -17,13 +17,13 @@ class BrainExtractionInputPage(BaseInputPage, object):
 		lf_brain.grid_rowconfigure(0, weight=1)
 		lf_brain.grid_columnconfigure(3, weight=1)
 
-		lb_start_reg_space = LabelToolTip(lf_brain, text="1. Mask", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_start_reg_space = LabelToolTip(lf_brain, text="1. Mask")
 		lb_start_reg_space.grid(row=0, column=1, sticky="W", pady=3)
 
 		chk_brain_extraction = Checkbutton(lf_brain, variable=controller.b_brain_extraction)
 		chk_brain_extraction.grid(row=0, column=0, sticky='W', pady=3)
 
-		lb_output = LabelToolTip(lf_brain, text="2. Frac", tool_tip_text=self.controller.desc.output_dir)
+		lb_output = LabelToolTip(lf_brain, text="2. Frac")
 		lb_output.grid(row=1, column=1, sticky="W", pady=3)
 
 		en_output_dir = Entry(lf_brain, textvariable=controller.sv_brain_ext_frac, width = 46)

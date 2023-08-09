@@ -18,7 +18,7 @@ class DirectoryInputPage(BaseInputPage, object):
 		lf_inputs.grid_rowconfigure(0, weight=1)
 		lf_inputs.grid_columnconfigure(3, weight=1)
 
-		lb_input = LabelToolTip(lf_inputs, text="1. BIDS Root Directory", tool_tip_text=self.controller.desc.input_dir)
+		lb_input = LabelToolTip(lf_inputs, text="1. BIDS Root Directory", tool_tip_text=self.controller.desc.bids_root_dir)
 		lb_input.grid(row=0, column=0, sticky="W", pady=3)
 
 		button1 = tk.Button(lf_inputs, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_input_dir, 'Input Directory'))
@@ -27,7 +27,7 @@ class DirectoryInputPage(BaseInputPage, object):
 		en_input_dir = Entry(lf_inputs, textvariable=controller.sv_input_dir, width = 46)
 		en_input_dir.grid(row=0, column=1, sticky="W", pady=3)
 
-		lb_roi_dir = LabelToolTip(lf_inputs, text="2. ROIs Directory", tool_tip_text=self.controller.desc.input_dir)
+		lb_roi_dir = LabelToolTip(lf_inputs, text="2. ROIs Directory", tool_tip_text=self.controller.desc.input_ROIDir)
 		lb_roi_dir.grid(row=1, column=0, sticky="W", pady=3)
 
 		button_roi = tk.Button(lf_inputs, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_roi_dir, 'ROI Directory'))
@@ -51,13 +51,13 @@ class DirectoryInputPage(BaseInputPage, object):
 		lf_t1_identifier.grid_columnconfigure(3, weight=0)
 		lf_t1_identifier.configure(borderwidth=0, relief='flat')
 
-		lb_t1_identifier_desc = LabelToolTip(lf_t1_identifier, text="Desc", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_t1_identifier_desc = LabelToolTip(lf_t1_identifier, text="Desc", tool_tip_text=self.controller.desc.T1_identifier_desc)
 		lb_t1_identifier_desc.grid(row=0, column=1, sticky="W", padx=(100, 20), pady=3)
 
 		en_t1_identifier_desc = Entry(lf_t1_identifier, textvariable=controller.sv_t1_desc, width = 46)
 		en_t1_identifier_desc.grid(row=0, column=2, sticky="W", pady=3)
 
-		lb_t1_identifier_space = LabelToolTip(lf_t1_identifier, text="Space", tool_tip_text=self.controller.desc.t1_identifier)
+		lb_t1_identifier_space = LabelToolTip(lf_t1_identifier, text="Space", tool_tip_text=self.controller.desc.T1_identifier_space)
 		lb_t1_identifier_space.grid(row=1, column=1, sticky="W", padx=(100, 20), pady=3)
 
 		en_t1_identifier_space = Entry(lf_t1_identifier, textvariable=controller.sv_t1_space, width = 46)
@@ -69,37 +69,37 @@ class DirectoryInputPage(BaseInputPage, object):
 		lf_lm_identifier.grid_columnconfigure(3, weight=0)
 		lf_lm_identifier.configure(borderwidth=0, relief='flat')
 
-		lb_lm_identifier_suffix = LabelToolTip(lf_lm_identifier, text="Suffix", tool_tip_text=self.controller.desc.lm_identifier)
+		lb_lm_identifier_suffix = LabelToolTip(lf_lm_identifier, text="Suffix", tool_tip_text=self.controller.desc.lesion_identifier_suffix)
 		lb_lm_identifier_suffix.grid(row=0, column=1, sticky="W", padx=(100, 20), pady=3)
 
 		en_lm_identifier_suffix = Entry(lf_lm_identifier, textvariable=controller.sv_lesion_mask_suffix, width = 46)
 		en_lm_identifier_suffix.grid(row=0, column=2, sticky="W", pady=3)
 
-		lb_lm_identifier_space = LabelToolTip(lf_lm_identifier, text="Space", tool_tip_text=self.controller.desc.lm_identifier)
+		lb_lm_identifier_space = LabelToolTip(lf_lm_identifier, text="Space", tool_tip_text=self.controller.desc.lesion_identifier_space)
 		lb_lm_identifier_space.grid(row=1, column=1, sticky="W", padx=(100, 20), pady=3)
 
 		en_lm_identifier_space = Entry(lf_lm_identifier, textvariable=controller.sv_lesion_mask_space, width = 46)
 		en_lm_identifier_space.grid(row=1, column=2, sticky="W", pady=3)
 
-		lb_lm_identifier_label = LabelToolTip(lf_lm_identifier, text="Label", tool_tip_text=self.controller.desc.lm_identifier)
+		lb_lm_identifier_label = LabelToolTip(lf_lm_identifier, text="Label", tool_tip_text=self.controller.desc.lesion_identifier_label)
 		lb_lm_identifier_label.grid(row=2, column=1, sticky="W", padx=(100, 20), pady=3)
 
 		en_lm_identifier_label = Entry(lf_lm_identifier, textvariable=controller.sv_lesion_mask_label, width = 46)
 		en_lm_identifier_label.grid(row=2, column=2, sticky="W", pady=3)
 
-		lb_subject = LabelToolTip(lf_inputs, text="5. Subject", tool_tip_text=self.controller.desc.input_dir)
+		lb_subject = LabelToolTip(lf_inputs, text="5. Subject", tool_tip_text=self.controller.desc.input_subject)
 		lb_subject.grid(row=4, column=0, sticky="W", pady=3)
 
 		en_subject = Entry(lf_inputs, textvariable=controller.sv_subject, width = 46)
 		en_subject.grid(row=4, column=1, sticky="W", pady=3)
 
-		lb_session = LabelToolTip(lf_inputs, text="6. Session", tool_tip_text=self.controller.desc.input_dir)
+		lb_session = LabelToolTip(lf_inputs, text="6. Session", tool_tip_text=self.controller.desc.input_session)
 		lb_session.grid(row=5, column=0, sticky="W", pady=3)
 
 		en_session = Entry(lf_inputs, textvariable=controller.sv_session, width = 46)
 		en_session.grid(row=5, column=1, sticky="W", pady=3)
 
-		lb_wm_seg_root = LabelToolTip(lf_inputs, text="7. White Matter Segmentation Root", tool_tip_text=self.controller.desc.input_dir)
+		lb_wm_seg_root = LabelToolTip(lf_inputs, text="7. White Matter Segmentation Directory", tool_tip_text=self.controller.desc.white_matter_segmentation_root)
 		lb_wm_seg_root.grid(row=6, column=0, sticky="W", pady=3)
 
 		en_wm_seg_root = Entry(lf_inputs, textvariable=controller.sv_wm_seg_root, width = 46)
@@ -108,7 +108,7 @@ class DirectoryInputPage(BaseInputPage, object):
 		button_wm_seg_root = tk.Button(lf_inputs, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_wm_seg_root, 'WM Segmentation Root'))
 		button_wm_seg_root.grid(row=6, column=2, sticky='W', padx=5, pady=3)
 
-		lb_lesion_root = LabelToolTip(lf_inputs, text="8. Lesion Root", tool_tip_text=self.controller.desc.input_dir)
+		lb_lesion_root = LabelToolTip(lf_inputs, text="8. Lesion Root Directory", tool_tip_text=self.controller.desc.input_lesion_root)
 		lb_lesion_root.grid(row=7, column=0, sticky="W", pady=3)
 
 		en_lesion_root = Entry(lf_inputs, textvariable=controller.sv_lesion_root, width = 46)
@@ -117,8 +117,14 @@ class DirectoryInputPage(BaseInputPage, object):
 		button_lesion_root = tk.Button(lf_inputs, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_lesion_root, 'Lesion Root'))
 		button_lesion_root.grid(row=7, column=2, sticky='W', padx=5, pady=3)
 
+		lb_multiprocessing = LabelToolTip(lf_inputs, text="9. Multiprocessing", tool_tip_text=self.controller.desc.input_multiprocessing)
+		lb_multiprocessing.grid(row=8, column=0, sticky="W", pady=3)
+
+		en_multiprocessing = Entry(lf_inputs, textvariable=controller.sv_multiprocessing, width = 46)
+		en_multiprocessing.grid(row=8, column=1, sticky="W", pady=3)
+
 		wrapper = Frame(lf_inputs)
-		wrapper.grid(row=8, column=0, sticky="WE", columnspan=3, pady=(3, 20))
+		wrapper.grid(row=9, column=0, sticky="WE", columnspan=3, pady=(3, 20))
 		wrapper.grid_rowconfigure(0, weight=1)
 		wrapper.grid_columnconfigure(2, weight=1)
 
@@ -154,10 +160,8 @@ class DirectoryInputPage(BaseInputPage, object):
 			return
 		if not self.isValidPath(self.controller.sv_wm_seg_root.get()) and \
 			not self.controller.b_wm_segmentation.get() and \
-			(self.controller.b_wm_correction.get() \
-			or self.controller.b_lesion_heatmap.get() \
-			or self.controller.b_ll_calculation.get()):
-			self.setRequiredInputError('White Matter Segmentation Root is required for Lesion Correction, Lesion Load Calculation and Lesion heatmap')
+			self.controller.b_wm_correction.get():
+			self.setRequiredInputError('White Matter Segmentation Root is required for Lesion Correction')
 			return
 		if self.controller.b_ll_calculation.get() \
 			and not self.isValidPath(self.controller.sv_lesion_root.get().strip()):

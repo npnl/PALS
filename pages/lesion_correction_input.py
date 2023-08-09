@@ -28,7 +28,7 @@ class LesionCorrInputPage(BaseInputPage, object):
 		lb_wm_seg = LabelToolTip(lf_wm_seg, text="Has white matter segmentation already been performed on all subjects?", tool_tip_text=self.controller.desc.wm_seg)
 		lb_wm_seg.grid(row=0, column=1, columnspan=2, sticky="W", pady=3)
 
-		lb_wm_id = LabelToolTip(lf_wm_seg, text="White matter segmentation root", tool_tip_text=self.controller.desc.wm_identifier)
+		lb_wm_id = LabelToolTip(lf_wm_seg, text="White matter segmentation root", tool_tip_text=self.controller.desc.white_matter_segmentation_root)
 		lb_wm_id.grid(row=1, column=1, sticky="W", pady=(3, 20))
 
 		button_wm_seg_root = tk.Button(lf_wm_seg, text='Browse', command=lambda : self.chooseDir(self, controller, controller.sv_wm_seg_root, 'WM Segmentation Root'))
@@ -46,19 +46,19 @@ class LesionCorrInputPage(BaseInputPage, object):
 		lf_lc_inputs.grid_rowconfigure(4, weight=1)
 		lf_lc_inputs.grid_columnconfigure(3, weight=1)
 
-		lb_img_norm_min= LabelToolTip(lf_lc_inputs, text="Image Norm Min", tool_tip_text=self.controller.desc.percent)
+		lb_img_norm_min= LabelToolTip(lf_lc_inputs, text="Image Norm Min", tool_tip_text=self.controller.desc.lc_image_norm_min)
 		lb_img_norm_min.grid(row=0, column=0, sticky="W", pady=3)
 
 		en_img_norm_min = Entry(lf_lc_inputs, textvariable=controller.sv_img_norm_min, width = 5)
 		en_img_norm_min.grid(row=0, column=2, sticky="E", pady=3)
 
-		lb_img_norm_max= LabelToolTip(lf_lc_inputs, text="Image Norm Max", tool_tip_text=self.controller.desc.percent)
+		lb_img_norm_max= LabelToolTip(lf_lc_inputs, text="Image Norm Max", tool_tip_text=self.controller.desc.lc_image_norm_max)
 		lb_img_norm_max.grid(row=1, column=0, sticky="W", pady=3)
 
 		en_img_norm_max = Entry(lf_lc_inputs, textvariable=controller.sv_img_norm_max, width = 5)
 		en_img_norm_max.grid(row=1, column=2, sticky="E", pady=3)
 
-		lb_wm_spread= LabelToolTip(lf_lc_inputs, text="White Matter Spread", tool_tip_text=self.controller.desc.percent)
+		lb_wm_spread= LabelToolTip(lf_lc_inputs, text="White Matter Spread", tool_tip_text=self.controller.desc.lc_wm_spread)
 		lb_wm_spread.grid(row=2, column=0, sticky="W", pady=3)
 
 		en_wm_spread = Entry(lf_lc_inputs, textvariable=controller.sv_wm_spread, width = 5)

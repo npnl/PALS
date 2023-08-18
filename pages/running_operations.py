@@ -13,7 +13,7 @@ import traceback
 from functools import partial
 from .components import HyperlinkManager
 from .components import createToolTip
-from PALS.pals_operations import operations
+from PALS.pals_operations import Operations
 
 
 class RunningOperationsPage(BaseInputPage, object):
@@ -24,7 +24,7 @@ class RunningOperationsPage(BaseInputPage, object):
 		self.need_subjects_file = False
 
 		self.downloaded_file_path = '~/Downloads/'
-		self.operation = operations(self.controller)
+		self.operation = Operations(False, controller=self.controller)
 
 		self.start = tk.Button(self, text='Start Execution', command=lambda : self.executeCommand())
 		self.start.grid(row=self.starting_row, column=0, sticky='W', padx=5, pady=3)

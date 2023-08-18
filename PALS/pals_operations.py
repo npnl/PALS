@@ -24,10 +24,58 @@ from .pals_workflow import pals, create_modified_config_copy, get_bounds
 
 bids.config.set_option('extension_initial_dot', True)
 
-class operations():
-    def __init__(self, controller):
-        self.controller = controller
-        self.pals_config = self.build_pals_config()
+class Operations():    
+    def __init__(self, silent, config_path = '', pargs = {}, controller = None):
+        if (silent):
+            self.pals_config = self.read_pals_config(config_path, pargs)
+            self.silent = True
+        else:
+            self.controller = controller
+            self.pals_config = self.build_pals_config()
+            self.silent = False
+
+
+    def read_pals_config(self, config_path, pargs):
+        pals_config = PALSConfig(config_path)
+
+        # config = json.load(open(pargs.config, 'r'))
+        if pargs.root_dir is not None:
+            pals_config['BIDSRoot'] = pargs.root_dir
+        if pargs.subject is not None:
+            pals_config['Subject'] = pargs.subject
+        if pargs.session is not None:
+            pals_config['Session'] = pargs.session
+        if pargs.lesion_root is not None:
+            pals_config['LesionRoot'] = pargs.lesion_root
+        no_subject = len(pals_config['Subject']) == 0
+        no_session = len(pals_config['Session']) == 0
+
+        dataset_raw = bids.BIDSLayout(root=pals_config['BIDSRoot'],
+                                  derivatives=pals_config['BIDSRoot'])
+        deriv_list = list(dataset_raw.derivatives.keys())
+        if len(deriv_list) > 0:
+            derivatives_name = list(dataset_raw.derivatives.keys())[0]
+            print(f'Taking {derivatives_name} from derivatives dataset.')
+            dataset = dataset_raw.derivatives[derivatives_name]
+        else:
+            dataset = dataset_raw
+
+        if no_subject:
+            subject_list = dataset.entities['subject'].unique()
+            print(subject_list)
+        elif pargs.subject is not None:
+            subject_list = [pargs.subject]
+        else:
+            subject_list = [pals_config['Subject']]
+        if no_session:
+            session_list = dataset.entities['session'].unique()
+            print(session_list)
+        elif pargs.session is not None:
+            session_list = [pargs.session]
+        else:
+            session_list = [pals_config['Session']]
+            print(pals_config)
+        return pals_config
 
     def build_pals_config(self):
         pals_config={}
@@ -101,7 +149,8 @@ class operations():
 
 
     def startExecution(self):
-        self.controller.updateProgressBar(0)
+        if (not self.silent):
+            self.controller.updateProgressBar(0)
         # If either Subject or Session is empty, assume that we'll be processing all subjects + sessions
         no_subject = len(self.pals_config['Subject']) == 0
         no_session = len(self.pals_config['Session']) == 0
@@ -111,7 +160,10 @@ class operations():
         deriv_list = list(dataset_raw.derivatives.keys())
         if len(deriv_list) > 0:
             derivatives_name = list(dataset_raw.derivatives.keys())[0]
-            self.controller.updateMessage(f'Taking {derivatives_name} from derivatives dataset.')
+            if (self.silent):
+                print(f'Taking {derivatives_name} from derivatives dataset.')
+            else:
+                self.controller.updateMessage(f'Taking {derivatives_name} from derivatives dataset.')
             dataset = dataset_raw.derivatives[derivatives_name]
         else:
             dataset = dataset_raw
@@ -141,7 +193,10 @@ class operations():
                                                             subject=sub,
                                                             session=ses))
         num_threads = min(self.pals_config['Multiprocessing'], len(config_list))
-        self.controller.updateMessage(f'Starting {num_threads} threads...')
+        if (self.silent):
+            print(f'Starting {num_threads} threads...')
+        else:
+            self.controller.updateMessage(f'Starting {num_threads} threads...')
         
         manager = multiprocessing.Manager()
         error_string = manager.Value(str, "")
@@ -149,7 +204,10 @@ class operations():
         with multiprocessing.Pool(num_threads) as p:
             results = p.starmap(pals, [(config, error_string) for config in config_list])
         print(error_string.value)
-        self.controller.updateMessage(error_string.value)
+        if (self.silent):
+            print(error_string.value)
+        else:
+            self.controller.updateMessage(error_string.value)
         # p = multiprocessing.Pool(num_threads)
         # p.map(pals, config_list)
 
@@ -319,9 +377,15 @@ class operations():
                 plt.savefig(
                     png_output_path + '/pals_mask_overlaid.png')
                 plt.clf()
-            self.controller.updateMessage('Lesion heatmaps generated')
-        self.controller.updateMessage('Operations complete. You may close the application')
-        self.controller.updateProgressBar(100)
+            if (self.silent):
+                print('Lesion heatmaps generated')
+            else:
+                self.controller.updateMessage('Lesion heatmaps generated')
+        if (self.silent):
+            print('Operations complete. You may close the application')
+        else:
+            self.controller.updateMessage('Operations complete. You may close the application')
+            self.controller.updateProgressBar(100)
         return
 
 

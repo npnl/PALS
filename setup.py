@@ -21,6 +21,6 @@ setup(
         'matplotlib'
     ],
     entry_points={
-        'console_scripts': ['PALS=PALS.pals_workflow:main']
+        'console_scripts': ['PALS=run_pals:main']
     }
 )

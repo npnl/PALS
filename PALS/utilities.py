@@ -31,7 +31,8 @@ def gather_csv(pals_output_dir: str,
 
     csv_output = pd.read_csv(csv_list[0])
     for csv in csv_list[1:]:
-        csv_output = csv_output.append(pd.read_csv(csv))
+        csv_output = pd.concat([csv_output, pd.read_csv(csv)], ignore_index=True)
+        #csv_output = csv_output.append(pd.read_csv(csv))
     csv_output.set_index('subject', inplace=True)
     csv_output.sort_index(inplace=True)
     if(sep in output_name):

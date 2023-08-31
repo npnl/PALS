@@ -55,12 +55,12 @@ The command prompts for each step below are in gray.
 
 PALS can be installed directly via the run_pals.py Python code. Additionally, you will have to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt).
 
-1. PALS is implemented in Python 3.8.16; you will first need to [install Python](https://www.python.org/downloads/release/python-3810/).
+1. PALS is implemented in Python 3.9.0; you will first need to [install Python](https://www.python.org/downloads/release/python-390/).
 2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
-   `python3.8 -m pip install --user virtualenv`
-3. Create a virtual environment in your worksapce for PALS with `python3.8 -m venv pals_venv` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
+   `python3.9 -m pip install --user virtualenv`
+3. Create a virtual environment in your worksapce for PALS with `python3.9 -m venv pals_venv` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
 4. Install PALS through your terminal using:
-   `python3.8 -m pip install -U git+https://github.com/npnl/PALS`
+   `python3.9 -m pip install -U git+https://github.com/npnl/PALS`
 
 5. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS`
 
@@ -68,7 +68,7 @@ PALS can be installed directly via the run_pals.py Python code. Additionally, yo
    - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
      - For running FLIRT and FAST.
    - Python packages in [requirements.txt]()
-     - These can be installed in your virtual environment with bash command `python3.8 -m pip install -r requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
+     - These can be installed in your virtual environment with bash command `python3.9 -m pip install -r requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
 
 > Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
 
@@ -76,7 +76,7 @@ PALS can be installed directly via the run_pals.py Python code. Additionally, yo
 
 Once the configuration file is set, you can run PALS from the command line:  
 For direct use:  
-`python3.8 run_pals.py`
+`python3.9 run_pals.py`
 
 PALS will prompt for required inputs through GUI, apply the desired pipeline, then return the output in a BIDS directory specified by info in the 'Outputs' input.
 

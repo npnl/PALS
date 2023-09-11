@@ -5,7 +5,7 @@ class Descriptions(object):
 
 		self.rad_reorient = "This module will check that all subject inputs are in the same orientation, flag subjects that have mismatched input orientations, and convert all remaining inputs to radiological convention. This is recommended for all datasets, and especially for multi-site data."
 
-		self.registration = "Whether to perform registration to a commong template. For example, FLIRT by default"
+		self.registration = "Whether to perform registration to a commong template. For example, FLIRT (FMRIB's Linear Image Registration Tool) is used by default. FLIRT is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration."
 		
 		self.brain_extraction = "Whether to perform brain extraction"
 
@@ -64,9 +64,9 @@ class Descriptions(object):
 		self.reorient = "This module will check that all subject inputs are in the same orientation, flag subjects that have mismatched input orientations, and convert all remaining inputs to radiological convention. This is recommended for all datasets, and especially for multi-site data."
 		self.orientation = "Orientation to standardize to. Options: L/R (left/right), A/P (anterior/posterior), I/S (inferior/superior). Default is LAS."
 		self.registration = "This module will perform registration to a common template."
-		self.registration_method = "Registration method. Example: FLIRT (default) or leave blank (no registration)."
+		self.registration_method = "Registration method. For example, FLIRT (FMRIB's Linear Image Registration Tool) is used by default. FLIRT is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration."
 		self.brain_extraction = "This module will perform brain extraction."
-		self.brain_extraction_method = "Method to use for brain extraction. Options: BET (default) or leave blank (no brain extraction)."
+		self.brain_extraction_method = "Method to use for brain extraction. For example, BET (Brain Extraction Tool) is used by default. BET deletes non-brain tissue from an image of the whole head."
 		self.white_matter_segmentation = "This module will perform white matter segmentation. If false, and you want to perform LesionCorrection, you must place file in same location as the input files in the BIDS structure."
 		self.lesion_correction = "This module will perform lesion correction. If true, requires white matter segmentation file."
 		self.lesion_load_calculation = "This module will compute lesion load."
@@ -104,5 +104,3 @@ class Descriptions(object):
 		self.output_reorient = "Path for saving reoriented volume."
 		self.output_brain_extraction = "Path for saving the brain extracted volume."
 		self.output_lesion_correction = "Path for saving the white matter-corrected lesions."
-
-

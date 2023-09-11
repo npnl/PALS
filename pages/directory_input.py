@@ -163,9 +163,9 @@ class DirectoryInputPage(BaseInputPage, object):
 			self.controller.b_wm_correction.get():
 			self.setRequiredInputError('White Matter Segmentation Root is required for Lesion Correction')
 			return
-		if self.controller.b_ll_calculation.get() \
+		if (self.controller.b_registration.get () or self.controller.b_ll_calculation.get() or self.controller.b_lesion_heatmap.get()) \
 			and not self.isValidPath(self.controller.sv_lesion_root.get().strip()):
-			self.setRequiredInputError('Lesion Root input is invalid and required for Lesion Load Calculation and Lesion Heatmap')
+			self.setRequiredInputError('Lesion Root input is invalid and required for Registration, Lesion Load Calculation and Lesion Heatmap')
 			return
 		super(DirectoryInputPage, self).moveToNextPage()
 

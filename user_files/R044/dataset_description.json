@@ -6,7 +6,7 @@
 		"Name": "stroke_preproc"
 	},
 	"GeneratedBy": [{
-		"Name": "stroke_preprocessing",
+		"Name": "stroke preprocessing",
 		"Version": "1.0",
 		"Container": {
 			"Type": "singularity",

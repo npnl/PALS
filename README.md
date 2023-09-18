@@ -48,7 +48,7 @@ Where 'space' should be the name of the reference image or 'orig' if unregistere
 
 ### Direct Use <a name=direct></a>
 
-A video walkthrough of the PALS installation will be uploaded soon. 
+A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/_fVoZSyoErs). The command prompts for each step below are in gray.
 
 #### Pre-installation steps <a name=pre-install></a>
 The command prompts for each step below are in gray.
@@ -93,6 +93,8 @@ __NOTE: this requires 12Gb of free space on your hard drive to run__
 4. Store the config file in a separate directory. Here, we have moved our config file to our `/settings` directory
 
 #### Running PALS <a name=docker-running></a>
+A walkthrough of the PALS installation using docker is [available on YouTube](https://youtu.be/_fVoZSyoErs).
+
 1. Make sure that your Docker process is already running. You can do this by executing the following command on the terminal.
     ```
     docker run hello-world

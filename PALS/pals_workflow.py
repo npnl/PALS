@@ -79,7 +79,7 @@ def pals(pals_config: dict, progress_string: ValueProxy):
     reg = node_fetch.registration_node(pals_config, **pals_config['Registration'])
     if 'RegistrationTransform' in pals_config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
-                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-transform.nii.gz'
+                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
 
         registration_transform_filename = join(pals_config['Outputs']['RegistrationTransform'],
                                                path_pattern.format(**entities))

@@ -79,15 +79,22 @@ def pals(pals_config: dict, progress_string: ValueProxy):
     reg = node_fetch.registration_node(pals_config, **pals_config['Registration'])
     if 'RegistrationTransform' in pals_config['Outputs'].keys():
         path_pattern = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
+                       pals_config['Outputs']['StartRegistrationSpace'] + '_desc-transform.mat'
+        path_pattern_nifti = 'sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_space-' + \
                        pals_config['Outputs']['StartRegistrationSpace'] + '_desc-transform.nii.gz'
-
         registration_transform_filename = join(pals_config['Outputs']['RegistrationTransform'],
                                                path_pattern.format(**entities))
+        registration_nifti_filename = join(pals_config['Outputs']['RegistrationTransform'],
+                                               path_pattern_nifti.format(**entities))
         registration_transform_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
                                               name='registration_transf_sink', iterfield='src')
+        registration_nifti_sink = MapNode(Function(function=copyfile, input_names=['src', 'dst']),
+                                              name='registration_nifti_sink', iterfield='src')
         pathlib.Path(os.path.dirname(registration_transform_filename)).mkdir(parents=True, exist_ok=True)
         registration_transform_sink.inputs.dst = registration_transform_filename
-        wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')])])
+        registration_nifti_sink.inputs.dst = registration_nifti_filename
+        wf.connect([(reg, registration_transform_sink, [('out_matrix_file', 'src')]), 
+                    (reg, registration_nifti_sink, [('out_file', 'src')])])
 
     # Get mask
     mask_path_fetcher = Node(BIDSDataGrabber(base_dir=pals_config['LesionRoot'],

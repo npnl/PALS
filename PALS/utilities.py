@@ -28,17 +28,18 @@ def gather_csv(pals_output_dir: str,
 
     glob_path = join(pals_output_dir, '*', '*', '*', '*.csv')
     csv_list = glob.glob(glob_path)
+    if csv_list:
+        csv_output = pd.read_csv(csv_list[0])
+        for csv in csv_list[1:]:
+            csv_output = pd.concat([csv_output, pd.read_csv(csv)], ignore_index=True)
+            #csv_output = csv_output.append(pd.read_csv(csv))
+        csv_output.set_index('subject', inplace=True)
+        csv_output.sort_index(inplace=True)
+        if(sep in output_name):
+            csv_output.to_csv(output_name, index='subject')
+        else:
+            csv_output.to_csv(join(pals_output_dir, output_name), index='subject')
 
-    csv_output = pd.read_csv(csv_list[0])
-    for csv in csv_list[1:]:
-        csv_output = pd.concat([csv_output, pd.read_csv(csv)], ignore_index=True)
-        #csv_output = csv_output.append(pd.read_csv(csv))
-    csv_output.set_index('subject', inplace=True)
-    csv_output.sort_index(inplace=True)
-    if(sep in output_name):
-        csv_output.to_csv(output_name, index='subject')
-    else:
-        csv_output.to_csv(join(pals_output_dir, output_name), index='subject')
     return
 
 def apply_numerical_thresh(pals_csv: str,

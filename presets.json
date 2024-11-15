@@ -1,0 +1,6 @@
+{
+    "ants_path" : "/usr/local/ANTs/bin",
+    "fsl_path" : "/usr/local/fsl-6.0.7.10/bin",
+    "rois_path" : "/ifs/loni/faculty/sliew/enigma/new/Mahir/scratchpad/PALS_revision/ROIs",
+    "template_directory" : "/ifs/loni/faculty/sliew/enigma/new/Mahir/scratchpad/PALS_revision/templates"
+}

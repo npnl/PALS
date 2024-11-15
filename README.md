@@ -1,320 +1,261 @@
 # Pipeline for Analyzing Lesions after Stroke (PALS)
 
+**Current Version:** 2.0.1 (Last updated 11/18/2024)
+
 ## Contents
 
 1. [What is PALS?](#intro)
-2. [Expected Data Structure](#datastructure)
-3. [Getting started: Installation Guide](#start)  
-    1. [Direct use](#direct)
-        1. [Pre-installation steps](#pre-install)
-        2. [Running PALS](#running)
-    2. [Docker Container](#docker)
-        1.  [Preparing your directories](#docker-dir-prep)
-        2. [Running PALS](#docker-running)
-4. [PALS Configuration Definition](#inputs)
-5. [Outputs](#outputs)
+    1. [Pipeline Overview](#pipeline-overview)
+2. [Installation](#installation)
+    1. [Dependences](#dependences)
+    2. [PALS Installation](#pals-installation)
+3. [Expected Data Structure](#datastructure)
+4. [Usage](#usage)  
+    1. [Before First Use](#before-first-use)
+    2. [Running Using Command Line Inputs](#cli-inputs)
+    3. [Running Using Configuration File](#config-inputs)
+    4. [Running Multiple Configurations Files](#multiple-configs)
+5. [Configuration Options](#config)
+6. [Outputs](#outputs)
+7. [Planned Developments](#planned-developments)
+8. [Citing PALS](#citation)
 
 ## What is PALS?<a name=intro></a>
 
-PALS is a pipeline for reliably preprocessing images of subjects with stroke lesions. The pipeline is implemented using [Nipype](https://nipype.readthedocs.io/en/latest/), with several modules:
+PALS is a flexible, scalable toolbox to facilitate image processing and analysis for subjects with stroke lesions. The pipeline requires two inputs: a T1-weighted MRI image and a stroke segmentation mask. 
 
-- Reorientation to radiological convention (LAS, left is right)
-- Lesion correction for healthy white matter
-- Lesion load calculation by ROI
+For additional information about the original implementation, please see the publication in [Frontier in Neuroinformatics](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).
 
-Here is a visualization of the workflow:  
-![pals_workflow](img/pals_workflow.png)
+### Pipeline Overview
 
-For additional information about the original implementation, see the publication in [Frontier in Neuroinformatics](https://www.frontiersin.org/articles/10.3389/fninf.2018.00063/full).
+The PALS pipeline consists of six modules.
+
+1. Reorientation to MNI Standard (via FSL fslreorient2std)
+2. Intensity Inhomogeneity Correction (via ANTs N4BiasFieldCorrection)
+3. Brain Extraction (via FSL BET)
+4. Registration to MNI Template (via FSL FLIRT)
+5. Lesion load calculation
+6. Quality check of processing outputs
+
+## Installation
+
+Installing the PALS code requires roughly 23.4 MB of space, exclusive of dependencies. 
+
+### Dependencies
+
+PALS requires the ANTs and FSL neuroimaging packages to run in entirety. If not already installed, please follow the links below to find instructions to install each package:
+
+- [ANTs](https://github.com/ANTsX/ANTs)
+- [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
+
+Be sure to add each to your PATH variable in the command line. 
+
+PALS also uses Python to run the pipeline. PALS was developed and tested on Python 3.8 and 3.10, but should be compatible with any Python version after 3.8. If you do not already have Python installed, we link to the official distribution to [install Python](https://www.python.org/downloads).
+
+We recommend that you also install the Python virtual environment manager [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+
+### PALS Installation
+
+1. <a name=venv></a>Create a virtual environment in your workspace for PALS with `python -m venv pals_venv` and activate the environment with `source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
+
+2. Navigate to a folder of your choice on your computer, then clone the PALS repository to your computer:
+    `git clone https://github.com/npnl/PALS`
+
+3. Navigate into the `PALS` folder:
+    `cd PALS`
+
+4. Install the Python package dependencies:
+    `python -m pip install -r requirements.txt`
 
 ## Expected Data Structure<a name=datastructure></a>
 
-PALS expects its input data to be [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) but does not expect any particular values for the BIDS entities. You will need to modify the [configuration file](#config) to set "LesionEntities" and "T1Entities" to match your data. Outputs are provided in BIDS derivatives.
+PALS is designed to have outputs saved to a BIDS derivatives folder. While PALS generates outputs in [BIDS-compatible](https://bids-specification.readthedocs.io/en/stable/) format, it does not require inputs to be in BIDS-compatible structure. 
 
-The naming conventions of the input must be as follows:
+However, we do recommend adhering to the BIDS structure as much as possible by specifying `SESSION_ID` to the BIDS format of `sub-[SUBJECT]_ses-[SESSION]`.
 
-**Main Image**:
+## Usage
 
-- Unregistered: `sub-{subject}_ses-{session}_T1.nii.gz`
-- Registered: `sub-{subject}_ses-{session}_space-{space}_desc_T1.nii.gz`.
+PALS is currently developed to run only in the command line. There are two ways to run PALS: (1) using command line inputs, or (2) using a config (short for *configuration*) JSON file. 
 
-**Lesion Mask**: `sub-{subject}_ses-{session}_space-{space}_label-L_desc-T1lesion_mask.nii.gz`.
+Please note that a full run of the PALS pipeline requires at least 2GB of RAM (ideal is 8GB of RAM), and roughly 65 MB of storage.
 
-**White Matter Segmentation File**: `sub-{subject}_ses-{session}_space-{space}_desc-WhiteMatter_mask.nii.gz`.
+The following sections describe how to run PALS using each method.
 
-Where 'space' should be the name of the reference image or 'orig' if unregistered. For example `sub-01_ses-R001_space-orig_desc_T1.nii.gz`
+### Before First Use
 
-## Getting Started: Installation Guide <a name=start></a>
+1. Navigate to the PALS repository, and open the `presets.json` in a text editor.
 
-### Direct Use <a name=direct></a>
+2. The JSON file should look like this initially:
 
-A walkthrough of the PALS installation is [available on YouTube](https://youtu.be/_fVoZSyoErs). The command prompts for each step below are in gray.
+```{json}
+{
+    "ants_path" : "",
+    "fsl_path" : "",
+    "rois_path" : "",
+    "template_directory" : ""
+}
+```
 
-#### Pre-installation steps <a name=pre-install></a>
-The command prompts for each step below are in gray.
+For each key, be sure to fill the value according to the following instructions:
 
-PALS can be installed directly via the run_pals.py Python code. Additionally, you will have to install the python packages listed in [requirements.txt](https://github.com/npnl/PALS/blob/main/requirements.txt).
+- `ants_path` : This variable sets the path to your ANTs binaries. In your terminal, type `which N4BiasFieldCorrection` and copy the path to this key's value. Remove "/N4BiasFieldCorrection" to ensure the path is set to the ANTs binaries folder.
+- `fsl_path` : This variable sets the path to your FSL binaries. In your terminal, type `which flirt` and copy the path to this key's value. Remove "/flirt" to ensure the path is set to the FSL binaries folder.
+- `rois_path` : This variable sets the path to the ROIs used to determine lesion load. The PALS repository includes a standard set for your convenience. This key's value should be `[path/to/PALS]/ROIs`.
+- `template_directory` : This variable sets the path to the MNI templates used to register the T1 images. The PALS repository includes this for your convenience. This key's value should be `[path/to/PALS]/templates`.
 
-1. PALS is implemented in Python 3.9.0; you will first need to [install Python](https://www.python.org/downloads/release/python-390/).
-2. We recommend that you also install the Python virtual environment [Virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
-   `python3.9 -m pip install --user virtualenv`
-3. Create a virtual environment in your worksapce for PALS with `python3.9 -m venv pals_venv` and activate the environment with`source pals_venv/bin/activate`. You can deactivate the environment by typing `deactivate` in the command line when not using PALS. You will need to activate the environment every time before use.
-4. Install PALS through your terminal using:
-   `python3.9 -m pip install -U git+https://github.com/npnl/PALS`
+3. Save the `presets.json` file with the filled values. 
 
-5. Additionally, you will need to download the PALS code to your workspace: `git clone https://github.com/npnl/PALS`
+### Running Using Command Line Inputs<a name=cli-inputs></a>
 
-6. You will also need to install the following software packages on your machine. This is the full list of required neuroimaging packages:
-   - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki)
-     - For running FLIRT and FAST.
-   - Python packages in [requirements.txt]()
-     - These can be installed in your virtual environment with bash command `python3.9 -m pip install -r requirements.txt`. Run this command when you have 'cd'ed, or entered, into the cloned PALS directory on the command line: `~/PALS`. This command MUST be run when you have activated your virtual environment as in step 3.
+Running PALS using the command line inputs is the simplest way to run the pipeline on a single scan. Running PALS this way will use the default configuration.
 
-> Note that if your intended pipeline won't use components that are dependent on a particular package, it does not need to be installed. E.g., if you plan to use FLIRT for registration, you don't need to install ANTs.
+The required inputs are: (1) the scan identifier (we refer to this as `SESSION_ID`); (2) the path to the T1 image; (3) the path to the lesion mask; and (4) the output directory to save the results. 
 
-#### Running PALS<a name=running></a>
+1. Activate the [PALS virtual environment](#venv). Navigate to the PALS repository. To run PALS, type the following (replacing the values in square brackets with your actual values):
 
-Once the configuration file is set, you can run PALS from the command line:  
-For direct use:  
-`python3.9 run_pals.py`
+    `python run_pals.py -s [SESSION_ID] -i [PATH_TO_IMAGE] -l [PATH_TO_LESIONMASK] -o [OUTPUT_DIRECTORY]`
 
-PALS will prompt for required inputs through GUI, apply the desired pipeline, then return the output in a BIDS directory specified by info in the 'Outputs' input.
+2. Once PALS is run, the outputs will be saved. Information about the outputs can be found in the [outputs section](#outputs).
 
-### Docker Container <a name=docker></a>
+### Running Using Configuration File<a name=config-inputs></a>
 
-Docker must be installed to run PALS in a Docker container. You can follow instructions from [here](https://docs.docker.com/docker-for-mac/install/) to install the Docker software on your system. Once Docker is installed, follow the instructions below to run PALS.
+Running PALS with a config (short for *configuration*) JSON file offers greater flexibility in processing data. It allows you to customize the pipeline to suit your preferences and enables programmatic generation of JSON files, reducing the need for manual input.
 
-__NOTE: this requires 12Gb of free space on your hard drive to run__
+1. Using a text editor or other means, generate a config file and save as a json file. A sample is provided in the PALS repository and below for your reference, with default values prefilled. Information about the config options can be found in the [config section](#config).
 
-#### Preparing your directories <a name=docker-dir-prep></a>
-1. Gather all subjects on which you want to perform PALS operations into a single data directory. This directory should contain sub-directories with subject ID's for each subject and all reference files (see [Expected Data Structure](#datastructure)). For example, here we will call this directory `/subjects`.
-2. Create another directory which would contain the result files after running PALS on the input subjects. We will call this directory  `/results` in our example.
-3. Go to [PALS Config Generator](https://npnl.github.io/ConfigGenerator/), select all the options that apply and download the config file. This step will download a file named `config.json`. __Do not rename this file.__
-4. Store the config file in a separate directory. Here, we have moved our config file to our `/settings` directory
-
-#### Running PALS <a name=docker-running></a>
-A walkthrough of the PALS installation using docker is [available on YouTube](https://youtu.be/_fVoZSyoErs).
-
-1. Make sure that your Docker process is already running. You can do this by executing the following command on the terminal.
-    ```
-    docker run hello-world
-    ```
-    If you see the following kind of output, then you have a running instance of docker on your machine and you are good to go.
-    
-    ```
-    Unable to find image 'hello-world:latest' locally
-    latest: Pulling from library/hello-world
-    1b930d010525: Pull complete
-    Digest: sha256:2557e3c07ed1e38f26e389462d03ed943586f744621577a99efb77324b0fe535
-    Status: Downloaded newer image for hello-world:latest
-
-    Hello from Docker!
-    This message shows that your installation appears to be working correctly.
-    ... Few more lines...
-    ```
-2. To run PALS, simply run the following command, __making sure to replace filepaths with your own filepaths__.
-    ```
-    docker run -it -v <absolute_path_to_directory_containing_input_subjects>:/input/ -v <absolute_path_to_the output_directory>:/output/ -v <absolute_path_to_directory_containing_config_file>:/config/ laharimuthyala/npnl-pals:v1 -d
-    ```
-    
-    For example, with the configuration file created in the [Preparation](#preparing-your-directories) step, the command to run PALS would be given as follows.
-    
-    ```
-    docker run -it -v /subjects:/input/ -v /results:/output/ -v /settings:/config/ laharimuthyala/npnl-pals:v1 -d
-    ```
-    
-    Note: Make sure you do not change the `:/input/` or `:/output/` or `:/config/` parts in the command!
-  
-  3. That's it! You can find the outputs from PALS in the output directory you specified in [Preparation](#preparing-your-directories) step #2!
-
----
-
-## Inputs Definitions <a name=inputs></a>
-
-### Main Modules
-
-#### Reorient to radiological convention
-
-This module will check that all subject inputs are in the same orientation, flag subjects that have mismatched input orientations, and convert all remaining inputs to radiological convention. This is recommended for all datasets, and especially for multi-site data.
-
-##### Orientation
-
-Orientation to standardize to. Options: L/R (left/right), A/P (anterior/posterior), I/S (inferior/superior). Default is LAS.
-
-#### Registration
-
-This module will perform registration to a common template.
-
-##### Registration method
-
-Registration method. Example: FLIRT (default) or leave blank (no registration).
-
-#### Brain Extraction
-
-This module will perform brain extraction. Options: true, false.
-
-##### Brain Extraction Method
-
-Method to use for brain extraction. Options: BET (default) or leave blank (no brain extraction).
-
-#### White Matter Segmentation
-
-This module will perform white matter segmentation. Options: true, false. If false, and you want to perform LesionCorrection, LesionLoadCalculation, or Lesionheatmap, you must place file in same location as the input files in the BIDS structure.
-
-#### Lesion Correction
-
-This module will perform lesion correction. Options: true, false. If true, requires white matter segmentation file.
-
-#### Lesion Load Calculation
-
-This module will compute lesion load. Options: true, false. If true, requires white matter segmentation file.
-
-#### LesionHeatMap
-
-This module will combine the lesions into a heatmap. Options: true, false. If true, requires white matter segmentation file.
-
-### Inputs 
-
-#### BIDS Root Directory
-
-Directory path to the BIDS root directory for the raw data.
-
-#### Subject
-
-ID of the subject to run. Runs all subjects if left blank. Ex: r001s001
-
-#### Session
-
-ID of the session to run. Runs all sessions if left blank. Ex: 1
-
-#### Lesion Root
-
-Path to the BIDS root directory for the lesion masks.
-
-#### White Matter Segmentation Directory
-
-Path to the BIDS root directory for the white matter segmentation files.
-
-#### ROIs Directory
-
-Path to the directory containing ROI image files.
-
-#### Multiprocessing
-
-Number of threads to use for multiprocessing. Has no effect unless more than 1 subject is being processed.
-
-#### Lesion Mask Identifier
-
-##### Space
-
-Provide the space for your lesion file. For example, put 'MNIEx2009aEx' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii
-
-##### Label
-
-Provide the label for your lesion file. For example, put 'L' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii
-
-##### Suffix
-
-Provide the suffix for your lesion file. For example, put 'mask' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_label-L_desc-T1lesion_mask.nii
-
-#### T1 Anatomical Image Identifier
-
-##### Space
-
-Provide the space for your T1 file. For example, put 'MNIEx2009aEx' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_desc-T1FinalResampledNorm.nii
-
-##### Desc
-
-Provide the desc for your T1 file. For example, put 'T1FinalResampledNorm' if your file is sub-r044s001_ses-1_space-MNIEx2009aEx_desc-T1FinalResampledNorm.nii
-
-### Output
-
-#### Root Directory
-
-Path to directory where to place the output.
-
-#### Start Registration Space
-
-Value to use for 'space' entity in BIDS output filename.
-
-#### Output Registration Space
-
-Reserved for future use.
-
-#### Registration Transform
-
-Path for saving registration transform.
-
-#### Reorient
-
-Path for saving reoriented volume.
-
-#### BrainExtraction
-
-Path for saving the brain extracted volume.
-
-#### LesionCorrected
-
-Path for saving the white matter-corrected lesions.
-
-### Registration
-
-#### Cost Function
-
-Cost function for registration
-
-#### Reference
-
-Path to reference file
-
-### Lesion Correction
-
-#### Image Norm Min
-
-Minimum value for image.
-
-#### Image Norm Max
-
-Maximum value for image
-
-#### White Matter Spread
-
-The deviation of the white matter intensity as a fraction of the mean white matter intensity.
-
-### Heatmap
-
-#### Reference
-
-Overlays the heatmap on this image and creates NIFTI file with overlay and NITFI file with the mask only. Also produces 4 PNGS: 9 slices of the lesions from sagittal, axial, and coronal orientations (3 images) and an image with a cross-section of each orientation. If your images are pre-registered, you MUST use your own reference image used for their registration.
-
-#### Transparency
-
-Transparency to use when mixing the reference image and the heatmap. Smaller values darker reference and lighter heatmap.
-
-## Outputs <a name=outputs></a>
-
-The precise output will depend on the flags you set, but here is a list of the output files you would typically expect:
-
-- `graph.png`, `graph_detailed.png`
-  - Visual representation of the pipeline used to generate the data.
-- `sub-X_ses-Y_desc-LAS_T1w.nii.gz`
-  - The input data reoriented to LAS. "LAS" will change to match your requested orientation.
-- `sub-X_ses-Y_desc-LesionLoad.csv`
-  - A .csv file containing the lesion load in each of the requested regions of interest. Units are in voxels.
-  - `UncorrectedVolume` column contains the total number voxels. `CorrectedVolume` subtracts the white matter voxels (if `LesionCorrection` is set to `true` in the config file) from `UncorrectedVolume`.
-- `sub-X_ses-Y_space-SPACE_desc-CorrectedLesion_mask.nii.gz`
-  - The lesion mask after white matter correction; note that the quality of the mask depends on the quality of the white matter segmentation.
-- `sub-X_ses-Y_space-SPACE_desc-transform.mat`
-  - Affine matrix for the transformation used to register the subject images.
-- `sub-X_ses-Y_space-SPACE_desc_WhiteMatter_mask.nii.gz`
-  - White matter mask generated by the white matter segmentation.
-
-Placeholder values:
-
-- X: subject ID
-- Y: session ID
-- SPACE: String indicating the space the image is in (e.g. MNI152NLin2009aSym)
-
+```{json}
+{
+    "session_id" : "",
+    "im_path" : "",
+    "les_path" : "",
+    "out_dir" : "",
+    "run" : "all",
+    "space" : "orig",
+    "ants_path" : "",
+    "fsl_path" : "",
+    "rois_path" : "",
+    "template_directory" : "",
+    "out_format" : "csv",
+    "reg_method" : "fsl",
+    "reg_costfn" : "corratio",
+    "reg_partmask" : false,
+    "reg_nomask" : false,
+    "bet_g" : -0.25,
+    "gif_duration" : 0.5
+}
+```
+
+2. Activate the [PALS virtual environment](#venv). Navigate to the PALS repository. To run PALS, type the following (replacing the values in square brackets with your actual values):
+
+    `python run_pals.py -c [PATH_TO_CONFIG]`
+
+3. Once PALS is run, the outputs will be saved. Information about the outputs can be found in the [outputs section](#outputs).
+
+### Running Multiple Configuration Files<a name=multiple-configs></a>
+
+The PALS script can be set to run multiple config files in serial. There are two ways to do this: 
+
+1. Input multiple config file paths after the `-c` flag. The command would then be:
+
+    `python run_pals.py -c [PATH_TO_CONFIG_1] [PATH_TO_CONFIG_2] ... [PATH_TO_CONFIG_N]`
+
+2. Input the path to a text file that has each config path on its own line. The command would then be:
+
+    `python run_pals.py -f [PATH_TO_TXT_FILE]`
+
+## Configuration Options<a name=config></a>
+
+PALS offers flexibility to run the pipeline to your specification using the config (short for *configuration*) file. The config options are described below:
+
+- `session_id`: The identifier for the scan. We recommend following the BIDS format of `sub-[SUBJECT]_ses-[SESSION]`.
+- `im_path`: The path to the image file corresponding to the T1 weighted MRI. Note that it must be in nifti format.
+- `les_path`: The path to the lesion segmentation mask file. Note that it must be in nifti format.
+- `out_dir`: The path to the output directory to save the PALS outputs. Note that a folder called `PALS` will be generated within this output directory. See the [output section](#output) for more details.
+- `run`: Specifies which processing steps to execute. QC images are generated in all cases. For options other than `all`, the process will skip any steps that have already been completed, and begin at the specified step.
+    - `all`: Runs all steps, overwriting any previous outputs and results.
+    - `bet`: Starts from the brain extraction step, overwriting all subsequent outputs and results.
+    - `mnireg`: Starts from the registration to the MNI template step, overwriting all subsequent outputs and results.
+    - `coreg`: Starts from the lesion coregistration step, overwriting all subsequent outputs and results.
+    - `pals`: Starts from the lesion load calculation step, overwriting all subsequent outputs and results.
+    - `skipdone`: Starts from the first step that has not yet been completed, skipping any steps that are already finished.
+- `space`: The space the image and mask are in. Default should be `orig` for images that are unprocessed and/or are in native space. If images are already registered to MNI template, `mni` is an acceptable option to skip all image processing steps and only obtain PALS output. 
+- `ants_path`: The path to the ANTs binaries folder. See [Before First Use](#before-first-use) section for more information.
+- `fsl_path` : The path to the FSL binaries folder. See [Before First Use](#before-first-use) section for more information.
+- `rois_path` : The path to the ROIs folder to obtain lesion loads. See [Before First Use](#before-first-use) section for more information.
+- `template_directory`: The path to the MNI template directory. See [Before First Use](#before-first-use) section for more information.
+- `out_format`: The format to save the lesion load information. Default is `csv` although `json` is another acceptable option.
+- `reg_method`: The registration method. Currently PALS only supports FSL's flirt, although future development may include other options. Thus the default option is `fsl`.
+- `reg_costfn`: The cost function to register the T1 image to MNI template. The default option is `corratio`. Other flirt cost function ratios may be used as long as they are valid option (for more information, please see the [FLIRT User Guide](https://web.mit.edu/fsl_v5.0.10/fsl/doc/wiki/FLIRT(2f)UserGuide.html))
+- `reg_partmask`: Flag to use a partial weighting mask to register the images. This should be used as the first backup if registration QC fails. By default, PALS uses the brain only to register the image to the MNI template. This allows non-brain features to exert a minor influence the registration, in hopes of finding a better registration.
+- `reg_nomask`: Flag to use a no weighting mask (i.e. full scan information) to register the images. This should be used as the second backup if registration QC fails. By default, PALS uses the brain only to register the image to the MNI template. This allows non-brain features to exert the influence as brain features on the registration, in hopes of finding a better registration.
+- `bet_g`: Flag to specify the brain extraction vertical gradient. If the brain extraction QC fails, this value can be changed to influence the starting seed for brain extraction. Through trial and error, we have found a `g` value of `-0.25` to be most robust for MPRAGE images given how much neck and spinal cord is included in the field of view. However, this value can differ for every acquisition. For more information, please see the [BET User Guide](https://web.mit.edu/fsl_v5.0.10/fsl/doc/wiki/BET(2f)UserGuide.html)
+- `gif_duration`: Flag to specify the number of seconds between each picture in a GIF. By default, we use `0.5` seconds. However, this can be altered to your preference.
+
+## Outputs<a name=outputs></a>
+
+The PALS output directory looks as follows:
+
+```{text}
+[OUTPUT_DIRECTORY]/
+└── PALS/
+    └── [SESSION_ID]/
+        ├── results/
+        ├── config/
+        ├── log/
+        ├── qc/
+        └── proc/
+            ├── 1_fsl_reorient2std/
+            ├── 2_ants_N4BiasFieldCorrection/
+            ├── 3_fsl_bet/
+            └── 4_mni_registration/
+
+```
+
+- The `PALS/` directory is generated inside the specified `out_dir` file in your config or command line input.
+- Within the `PALS/` directory a separate folder for each `SESSION_ID` is generated. 
+- Within the `SESSION_ID/` directory, the following folders are generated:
+    - `results/` : The PALS lesion load analysis files are saved here.
+    - `config/` : For each PALS run, a JSON file is generated with the date/time of when the pipeline was run with all the input paths, input options, and output paths saved. If desired, these config files can be used to re-run PALS with the same options.
+    - `log/` : For each PALS run, a log TXT file is generated with date/times of each step of the pipeline.
+    - `qc/` : PALS generates QC images for key steps of the pipeline. More information can be found in the [QC section](#qc)
+    - `proc/` : All PALS intermediary processing files are saved here.
+
+The lesion load analysis, which can be saved as either a CSV or a JSON file, includes the following information:
+
+- `SESSION_ID`: The scan identifier as specified in the config
+- `DATE_GENERATED`: The date/time when this PALS output was generated
+- `LesionVolume`: The lesion volume as calculated in MNI template space
+- `roi_[ROI_NAME]`: The volume overlap between the lesion and each ROI. The ROI_NAME is derived from the nifti file within the ROI folder.
+- `roi_[ROI_NAME]_pct`: The percent overlap between the lesion and each ROI. The ROI_NAME is derived from the nifti file within the ROI folder. Percent overlap is calculated as Volume(Overlap) / Volume(ROI). 
+
+Additional outputs of interest are the following (labeled according to the output config json):
+
+- `im_std`: `../proc/1_fsl_reorient2std/[SESSION_ID]_space-orig_desc-std_T1w.nii.gz`
+    - The T1 image in standard orientation. This ensures the image and lesion mask are aligned (as sometimes lesion tracing software can alter this).
+- `les_std`: `../proc/1_fsl_reorient2std/[SESSION_ID]_space-orig_desc-stdT1lesion_mask.nii.gz`
+    - The lesion image in standard orientation. This ensures the image and lesion mask are aligned (as sometimes lesion tracing software can alter this).
+- `n4_path`: `../proc/2_ants_N4BiasFieldCorrection/[SESSION_ID]_space-orig_desc-N4_T1w.nii.gz`
+    - The T1 image after intensity inhomogeneity correction.
+- `im_brain_path`: `../proc/3_fsl_bet/[SESSION_ID]_space-orig_desc-N4T1ext.nii.gz`
+    - The brain-extracted T1 image. This zeros out any non-brain structures following BET.
+- `im_skull_path`: `../proc/3_fsl_bet/[SESSION_ID]_space-orig_desc-N4T1ext_skull.nii.gz`
+    - The skull mask produced by BET.
+- `im_brain_mask`: `../proc/3_fsl_bet/[SESSION_ID]_space-orig_desc-N4T1ext_mask.nii.gz`
+    - The brain mask produced by BET.
+- `im_mni`: `../proc/4_mni_registration/output/[SESSION_ID]_space-MNI152NLin2009aSym_desc-N4_T1w.nii.gz`
+    - The T1 image in MNI template space.
+- `les_mni`: `../proc/4_mni_registration/output/[SESSION_ID]_space-MNI152NLin2009aSym_desc-N4T1lesion_mask.nii.gz`
+    - The lesion mask in MNI template space.
+- `im_to_mni_xfm`: `../proc/4_mni_registration/output/[SESSION_ID]_orig_to_MNI152NLin2009aSym.mat`
+    - The registration transformation matrix moving from T1 native space to MNI template space.
+- `PALS_results`: `../results/[SESSION_ID]_desc-lesionload_results.csv`
+    - The lesion load analysis file
+
+## Planned Developments
+
+- Previously, PALS had a feature to correct lesion masks using the white matter segmentation. Due to development challenges, we have temporarily removed this function from PALS, but hope to include it in future versions. 
+- Previously, PALS had a GUI to run PALS. Due to development challenges, we have temporarily removed this function from PALS, but hope to include it in future versions.
+- Previously, PALS had a heatmap feature to create a heatmap image of all lesions in a directory. We hope to reincorporate this in future versions.
 
 ## Citing PALS<a name=citation></a>
 

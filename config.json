@@ -1,0 +1,19 @@
+{
+    "session_id" : "",
+    "im_path" : "",
+    "les_path" : "",
+    "out_dir" : "",
+    "run" : "all",
+    "space" : "orig",
+    "ants_path" : "",
+    "fsl_path" : "",
+    "rois_path" : "",
+    "template_directory" : "",
+    "out_format" : "csv",
+    "reg_method" : "fsl",
+    "reg_costfn" : "corratio",
+    "reg_partmask" : false,
+    "reg_nomask" : false,
+    "bet_g" : -0.25,
+    "gif_duration" : 0.5
+}

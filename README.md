@@ -121,7 +121,7 @@ The required inputs are: (1) the scan identifier (we refer to this as `SESSION_I
 
 Running PALS with a config (short for *configuration*) JSON file offers greater flexibility in processing data. It allows you to customize the pipeline to suit your preferences and enables programmatic generation of JSON files, reducing the need for manual input.
 
-1. Using a text editor or other means, generate a config file and save as a json file. A sample is provided in the PALS repository and below for your reference, with default values prefilled. Information about the config options can be found in the [config section](#config).
+1. Using a text editor or other means, generate a config file and save as a json file. A sample is provided in the PALS repository (called config.json) and below for your reference, with default values prefilled. Information about the config options can be found in the [config section](#config).
 
 ```{json}
 {

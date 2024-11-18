@@ -7,7 +7,7 @@
 1. [What is PALS?](#intro)
     1. [Pipeline Overview](#pipeline-overview)
 2. [Installation](#installation)
-    1. [Dependences](#dependences)
+    1. [Dependencies](#dependencies)
     2. [PALS Installation](#pals-installation)
 3. [Expected Data Structure](#datastructure)
 4. [Usage](#usage)  
@@ -17,6 +17,7 @@
     4. [Running Multiple Configurations Files](#multiple-configs)
 5. [Configuration Options](#config)
 6. [Outputs](#outputs)
+7. [Quality Checking Data](#qc)
 7. [Planned Developments](#planned-developments)
 8. [Citing PALS](#citation)
 
@@ -251,8 +252,13 @@ Additional outputs of interest are the following (labeled according to the outpu
 - `PALS_results`: `../results/[SESSION_ID]_desc-lesionload_results.csv`
     - The lesion load analysis file
 
+## Quality Checking Data<a name=qc></a>
+
+*This section will be written soon*
+
 ## Planned Developments
 
+- Updating [QC](#qc) section with examples
 - Previously, PALS had a feature to correct lesion masks using the white matter segmentation. Due to development challenges, we have temporarily removed this function from PALS, but hope to include it in future versions. 
 - Previously, PALS had a GUI to run PALS. Due to development challenges, we have temporarily removed this function from PALS, but hope to include it in future versions.
 - Previously, PALS had a heatmap feature to create a heatmap image of all lesions in a directory. We hope to reincorporate this in future versions.

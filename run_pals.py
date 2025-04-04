@@ -123,7 +123,7 @@ class Workflow:
 
         self.run = config_info['run']
         if config_info['run'] not in ['all','bet','mnireg','coreg','pals','skipdone']:
-            generate_error(IOError, f'Invalid input provided for run flag, please try again using a valid flag [all,bet,halfreg,mnireg,coreg,skipdone]')
+            self.generate_error(IOError, f'Invalid input provided for run flag, please try again using a valid flag [all,bet,halfreg,mnireg,coreg,skipdone]')
         elif config_info['run'] == 'all':
             self.script = [True, True, True, True, True, True]
         elif config_info['run'] == 'bet':
@@ -144,14 +144,14 @@ class Workflow:
         
         self.reg_method = config_info['reg_method']
         if self.reg_method not in ['fsl']:
-            generate_error(IOError, f'{self.reg_method} is not in acceptable registration pipelines, please ensure it is "fsl" and try again.')
+            self.generate_error(IOError, f'{self.reg_method} is not in acceptable registration pipelines, please ensure it is "fsl" and try again.')
         self.reg_costfn = config_info['reg_costfn']
         self.reg_partmask = config_info['reg_partmask']
         self.reg_nomask = config_info['reg_nomask']
         self.bet_g = str(config_info['bet_g'])
         self.space = config_info['space']
         if self.space not in ['orig','mni']:
-            generate_error(IOError, f'{self.space} is not in acceptable options, please ensure it is either "orig" or "mni" and try again.')
+            self.generate_error(IOError, f'{self.space} is not in acceptable options, please ensure it is either "orig" or "mni" and try again.')
         self.out_format = config_info['out_format']
         self.gif_duration = config_info['gif_duration']
 
@@ -183,7 +183,7 @@ class Workflow:
             IOError: If the file path does not exist.
         """
         if not os.path.exists(path):
-            generate_error(IOError, f'{path} was not found')
+            self.generate_error(IOError, f'{path} was not found')
         else:
             return path
 
@@ -230,9 +230,9 @@ class Workflow:
             FileNotFoundError: If the T1 image or lesion mask does not exist at the specified paths.
         """
         if not os.path.exists(self.im_path):
-            generate_error(FileNotFoundError, f'Could not find T1 image for {self.session_id}, please ensure this path is correct')
+            self.generate_error(FileNotFoundError, f'Could not find T1 image for {self.session_id}, please ensure this path is correct')
         if not os.path.exists(self.les_path):
-            generate_error(FileNotFoundError, f'Could not find lesion mask for {self.session_id}, please ensure this path is correct')
+            self.generate_error(FileNotFoundError, f'Could not find lesion mask for {self.session_id}, please ensure this path is correct')
 
         if self.space == 'mni':
             self.im_mni = self.im_path
@@ -256,7 +256,7 @@ class Workflow:
         processing_order = ['fsl_reorient2std','ants_N4BiasFieldCorrection','fsl_bet','mni_registration']
 
         if processing_folder not in processing_order:
-            generate_error(IOError, f'{processing_folder} not in acceptable folder options')
+            self.generate_error(IOError, f'{processing_folder} not in acceptable folder options')
 
         step = processing_order.index(processing_folder) + 1
         
